@@ -1,0 +1,8 @@
+{
+  "__comment": "Used to team up Blue Jay and Raccoon (1.20 glow berries)",
+  "replace": false,
+  "values": [
+    "minecraft:glowstone_dust",
+    "minecraft:golden_carrot"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "distance=0,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=1,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=2,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=3,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=4,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=5,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=6,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=7,persistent=false": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=0,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=1,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=2,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=3,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=4,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=5,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=6,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" },
+    "distance=7,persistent=true": { "model": "alexsmobs:crystalized_banana_slug_mucus" }
+  }
+}

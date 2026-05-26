@@ -1,0 +1,7 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "alexsmobs:items/straddleboard",
+        "layer1": "alexsmobs:items/straddleboard_overlay"
+    }
+}

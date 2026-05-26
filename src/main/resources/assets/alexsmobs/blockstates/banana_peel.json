@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "normal": [
+      { "model": "alexsmobs:banana_peel" },
+      { "model": "alexsmobs:banana_peel", "y" : 90 },
+      { "model": "alexsmobs:banana_peel", "y" : 180 },
+      { "model": "alexsmobs:banana_peel", "y" : 270 }
+    ]
+  }
+}

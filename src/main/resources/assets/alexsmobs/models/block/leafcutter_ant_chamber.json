@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "alexsmobs:blocks/leafcutter_ant_chamber"
+  }
+}

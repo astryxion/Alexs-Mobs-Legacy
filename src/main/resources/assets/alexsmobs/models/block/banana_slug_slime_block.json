@@ -1,0 +1,8 @@
+{
+  "parent": "block/cube_bottom_top",
+  "textures": {
+    "top": "alexsmobs:blocks/banana_slug_slime_block_top",
+    "bottom": "alexsmobs:blocks/banana_slug_slime_block_top",
+    "side": "alexsmobs:blocks/banana_slug_slime_block"
+  }
+}

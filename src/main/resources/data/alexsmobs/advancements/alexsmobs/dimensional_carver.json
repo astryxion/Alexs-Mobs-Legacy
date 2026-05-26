@@ -1,0 +1,27 @@
+{
+    "display": {
+        "icon": {
+            "item": "citadel:fancy_item",
+            "nbt": "{DisplayItem:\"alexsmobs:dimensional_carver\", DisplayBob:0, DisplayZoom:1, DisplayScale:1, DisplaySpin:0, DisplayShake:0}"
+        },
+        "title": {
+            "translate": "advancements.alexsmobs.dimensional_carver.title"
+        },
+        "description": {
+            "translate": "advancements.alexsmobs.dimensional_carver.desc"
+        }
+    },
+    "parent": "alexsmobs:alexsmobs/void_worm_kill",
+    "criteria": {
+        "rat_upgrade_basic": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "alexsmobs:dimensional_carver"
+                    }
+                ]
+            }
+        }
+    }
+}

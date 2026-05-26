@@ -1,0 +1,11 @@
+{
+  "parent": "alexsmobs:item/falconry_glove_inventory",
+  "overrides": [
+    {
+      "predicate": {
+        "in_hand": 1
+      },
+      "model": "alexsmobs:item/falconry_glove_hand"
+    }
+  ]
+}

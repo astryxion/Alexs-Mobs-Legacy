@@ -1,0 +1,4 @@
+rootProject.name = 'alexsmobs'
+
+include 'citadel'
+project(':citadel').projectDir = new File(settingsDir, 'Citadel 1.12.2')

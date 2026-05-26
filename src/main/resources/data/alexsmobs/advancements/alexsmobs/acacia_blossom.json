@@ -1,0 +1,27 @@
+{
+    "display": {
+        "icon": {
+            "item": "alexsmobs:acacia_blossom"
+        },
+        "title": {
+            "translate": "advancements.alexsmobs.acacia_blossom.title"
+        },
+        "description": {
+            "translate": "advancements.alexsmobs.acacia_blossom.desc"
+        },
+        "frame": "challenge"
+    },
+    "parent": "alexsmobs:alexsmobs/root",
+    "criteria": {
+        "rat_upgrade_basic": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "alexsmobs:acacia_blossom"
+                    }
+                ]
+            }
+        }
+    }
+}

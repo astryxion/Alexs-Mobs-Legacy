@@ -1,0 +1,6 @@
+{
+  "parent": "alexsmobs:item/stink_ray_hand_base",
+  "textures": {
+    "texture": "alexsmobs:items/stink_ray_model"
+  }
+}

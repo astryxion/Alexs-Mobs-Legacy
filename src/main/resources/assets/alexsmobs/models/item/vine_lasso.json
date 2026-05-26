@@ -1,0 +1,11 @@
+{
+  "parent": "alexsmobs:item/vine_lasso_inventory",
+  "overrides": [
+    {
+      "predicate": {
+        "in_hand": 1
+      },
+      "model": "alexsmobs:item/vine_lasso_hand"
+    }
+  ]
+}

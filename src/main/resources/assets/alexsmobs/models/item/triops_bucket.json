@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "alexsmobs:items/lower_bucket",
+    "layer1": "alexsmobs:items/bucket_content/triops"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "alternatives",
+          "children": [
+            {
+              "type": "item",
+              "conditions": [
+                {
+                  "condition": "match_tool",
+                  "predicate": {
+                    "enchantments": [
+                      {
+                        "enchantment": "silk_touch",
+                        "levels": {
+                          "min": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "name": "alexsmobs:crystalized_banana_slug_mucus"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

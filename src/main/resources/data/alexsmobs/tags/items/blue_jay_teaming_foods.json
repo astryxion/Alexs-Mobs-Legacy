@@ -1,0 +1,8 @@
+{
+  "__comment": "1.20 glow berries — 1.12.2 uses glowstone dust or golden carrot (see en_us.lang)",
+  "replace": false,
+  "values": [
+    "minecraft:glowstone_dust",
+    "minecraft:golden_carrot"
+  ]
+}

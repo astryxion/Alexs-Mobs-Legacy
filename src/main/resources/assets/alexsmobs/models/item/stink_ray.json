@@ -1,0 +1,24 @@
+{
+  "parent": "alexsmobs:item/stink_ray_inventory",
+  "overrides": [
+    {
+      "predicate": {
+        "empty": 1,
+        "in_hand": 1
+      },
+      "model": "alexsmobs:item/stink_ray_empty_hand"
+    },
+    {
+      "predicate": {
+        "empty": 1
+      },
+      "model": "alexsmobs:item/stink_ray_empty_inventory"
+    },
+    {
+      "predicate": {
+        "in_hand": 1
+      },
+      "model": "alexsmobs:item/stink_ray_hand"
+    }
+  ]
+}

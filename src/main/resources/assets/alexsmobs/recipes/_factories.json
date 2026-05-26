@@ -1,0 +1,8 @@
+{
+  "ingredients": {
+    "tag": "com.github.alexthe666.alexsmobs.misc.AMTagIngredientFactory"
+  },
+  "recipes": {
+    "mimicream_repair_recipe": "com.github.alexthe666.alexsmobs.misc.RecipeMimicreamRepair$Factory"
+  }
+}

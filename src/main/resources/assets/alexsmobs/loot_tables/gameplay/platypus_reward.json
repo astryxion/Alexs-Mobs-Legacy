@@ -1,0 +1,23 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "weight": 20,
+          "functions": [
+          ],
+          "name": "minecraft:clay_ball"
+        },
+        {
+          "type": "item",
+          "weight": 7,
+          "functions": [
+          ],
+          "name": "alexsmobs:maggot"
+        }
+      ]
+    }
+  ]
+}

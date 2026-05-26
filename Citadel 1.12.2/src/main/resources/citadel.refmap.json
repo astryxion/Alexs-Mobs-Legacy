@@ -1,0 +1,26 @@
+{
+  "mappings": {
+    "com/github/alexthe666/citadel/mixin/LivingEntityMixin": {
+      "Lnet/minecraft/entity/LivingEntity;registerData()V": "Lnet/minecraft/entity/LivingEntity;func_70088_a()V",
+      "Lnet/minecraft/entity/LivingEntity;writeAdditional(Lnet/minecraft/nbt/CompoundNBT;)V": "Lnet/minecraft/entity/LivingEntity;func_213281_b(Lnet/minecraft/nbt/CompoundNBT;)V",
+      "Lnet/minecraft/entity/LivingEntity;readAdditional(Lnet/minecraft/nbt/CompoundNBT;)V": "Lnet/minecraft/entity/LivingEntity;func_70037_a(Lnet/minecraft/nbt/CompoundNBT;)V"
+    },
+    "com/github/alexthe666/citadel/mixin/client/WorldRendererMixin": {
+      "Lnet/minecraft/client/renderer/WorldRenderer;updateCameraAndRender(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/util/math/vector/Matrix4f;)V": "Lnet/minecraft/client/renderer/WorldRenderer;func_228426_a_(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/util/math/vector/Matrix4f;)V",
+      "Lnet/minecraft/entity/Entity;getTeamColor()I": "Lnet/minecraft/entity/Entity;func_226263_P_()I"
+    }
+  },
+  "data": {
+    "searge": {
+      "com/github/alexthe666/citadel/mixin/LivingEntityMixin": {
+        "Lnet/minecraft/entity/LivingEntity;registerData()V": "Lnet/minecraft/entity/LivingEntity;func_70088_a()V",
+        "Lnet/minecraft/entity/LivingEntity;writeAdditional(Lnet/minecraft/nbt/CompoundNBT;)V": "Lnet/minecraft/entity/LivingEntity;func_213281_b(Lnet/minecraft/nbt/CompoundNBT;)V",
+        "Lnet/minecraft/entity/LivingEntity;readAdditional(Lnet/minecraft/nbt/CompoundNBT;)V": "Lnet/minecraft/entity/LivingEntity;func_70037_a(Lnet/minecraft/nbt/CompoundNBT;)V"
+      },
+      "com/github/alexthe666/citadel/mixin/client/WorldRendererMixin": {
+        "Lnet/minecraft/client/renderer/WorldRenderer;updateCameraAndRender(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/util/math/vector/Matrix4f;)V": "Lnet/minecraft/client/renderer/WorldRenderer;func_228426_a_(Lcom/mojang/blaze3d/matrix/MatrixStack;FJZLnet/minecraft/client/renderer/ActiveRenderInfo;Lnet/minecraft/client/renderer/GameRenderer;Lnet/minecraft/client/renderer/LightTexture;Lnet/minecraft/util/math/vector/Matrix4f;)V",
+        "Lnet/minecraft/entity/Entity;getTeamColor()I": "Lnet/minecraft/entity/Entity;func_226263_P_()I"
+      }
+    }
+  }
+}

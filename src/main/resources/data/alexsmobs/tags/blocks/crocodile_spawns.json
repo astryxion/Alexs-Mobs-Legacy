@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#minecraft:sand",
+    "#forge:gravel",
+    "#forge:dirt",
+    "minecraft:hay_block"
+  ]
+}

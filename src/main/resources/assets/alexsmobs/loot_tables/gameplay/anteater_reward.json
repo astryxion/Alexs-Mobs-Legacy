@@ -1,0 +1,58 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "weight": 20,
+          "functions": [
+          ],
+          "name": "minecraft:dirt"
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "functions": [
+          ],
+          "name": "minecraft:gravel"
+        },
+        {
+          "type": "item",
+          "weight": 5,
+          "functions": [
+          ],
+          "name": "alexsmobs:leafcutter_ant_pupa"
+        },
+        {
+          "type": "item",
+          "weight": 5,
+          "functions": [
+          ],
+          "name": "minecraft:vine"
+        },
+        {
+          "type": "item",
+          "weight": 2,
+          "functions": [
+          ],
+          "name": "alexsmobs:maggot"
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "functions": [
+          ],
+          "name": "minecraft:beetroot"
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "functions": [
+          ],
+          "name": "minecraft:potato"
+        }
+      ]
+    }
+  ]
+}

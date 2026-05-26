@@ -1,0 +1,94 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "loot_table",
+          "weight": 4,
+          "name": "minecraft:gameplay/fishing/junk"
+        },
+        {
+          "type": "item",
+          "weight": 19,
+          "name": "minecraft:ink_sac"
+        },
+        {
+          "type": "item",
+          "weight": 21,
+          "name": "alexsmobs:shark_tooth"
+        },
+        {
+          "type": "item",
+          "weight": 8,
+          "name": "alexsmobs:serrated_shark_tooth"
+        },
+        {
+          "type": "item",
+          "weight": 60,
+          "name": "minecraft:sand",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": { "min": 1, "max": 10 }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 8,
+          "name": "minecraft:prismarine_shard",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": { "min": 2, "max": 5 }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 20,
+          "name": "minecraft:clay_ball",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": { "min": 1, "max": 4 }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 4,
+          "name": "minecraft:prismarine_crystals"
+        },
+        {
+          "type": "item",
+          "weight": 2,
+          "name": "minecraft:dye",
+          "functions": [
+            {
+              "function": "set_data",
+              "data": 4
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 15,
+          "name": "minecraft:fish",
+          "functions": [
+            {
+              "function": "set_data",
+              "data": 0
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "name": "minecraft:rotten_flesh"
+        }
+      ]
+    }
+  ]
+}

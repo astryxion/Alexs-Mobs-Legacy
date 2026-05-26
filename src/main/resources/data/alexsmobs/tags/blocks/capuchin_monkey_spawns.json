@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:leaves",
+    "minecraft:leaves2",
+    "minecraft:log",
+    "minecraft:log2",
+    "minecraft:grass"
+  ]
+}

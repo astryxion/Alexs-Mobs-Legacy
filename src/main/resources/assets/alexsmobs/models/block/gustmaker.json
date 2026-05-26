@@ -1,0 +1,8 @@
+{
+  "parent": "alexsmobs:block/orientable_with_top",
+  "textures": {
+    "front": "alexsmobs:blocks/gustmaker_front_off",
+    "top": "alexsmobs:blocks/gustmaker_top",
+    "side": "alexsmobs:blocks/gustmaker_side"
+  }
+}

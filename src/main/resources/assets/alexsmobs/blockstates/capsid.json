@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "alexsmobs:capsid"
+    },
+    "facing=south": {
+      "model": "alexsmobs:capsid",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "alexsmobs:capsid",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "alexsmobs:capsid",
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: Citadel_1_16_2
+MixinConfigs: citadel.mixins.json
+Implementation-Version: 1.8.1-1.16.5
+Specification-Vendor: examplemodsareus
+Specification-Title: citadel
+Implementation-Timestamp: 2021-08-27T10:58:19-0700
+Specification-Version: 1
+Implementation-Vendor: examplemodsareus
+

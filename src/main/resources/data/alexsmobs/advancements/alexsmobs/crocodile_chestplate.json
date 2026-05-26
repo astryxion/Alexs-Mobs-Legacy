@@ -1,0 +1,28 @@
+{
+    "display": {
+        "icon": {
+            "item": "alexsmobs:crocodile_chestplate"
+        },
+        "title": {
+            "translate": "advancements.alexsmobs.crocodile_chestplate.title"
+        },
+        "description": {
+            "translate": "advancements.alexsmobs.crocodile_chestplate.desc"
+        },
+        "frame": "challenge"
+
+    },
+    "parent": "alexsmobs:alexsmobs/breed_crocodile",
+    "criteria": {
+        "rat_upgrade_basic": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "item": "alexsmobs:crocodile_chestplate"
+                    }
+                ]
+            }
+        }
+    }
+}

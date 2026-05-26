@@ -1,0 +1,37 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 1.0,
+                "max": 2.0,
+                }
+            }
+          ],
+          "name": "minecraft:clay_ball"
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "functions": [
+          ],
+          "name": "alexsmobs:maggot"
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "functions": [
+          ],
+          "name": "alexsmobs:fedora"
+        }
+      ]
+    }
+  ]
+}

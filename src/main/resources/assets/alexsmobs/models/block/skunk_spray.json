@@ -1,0 +1,17 @@
+{
+    "ambientocclusion": false,
+    "textures": {
+        "particle": "alexsmobs:blocks/skunk_spray",
+        "spray": "alexsmobs:blocks/skunk_spray"
+    },
+    "elements": [
+        {
+            "from": [ 0, 0, 0.1 ],
+            "to": [ 16, 16, 0.1 ],
+            "faces": {
+                "north": { "uv": [ 16, 0, 0, 16 ], "texture": "#spray" },
+                "south": { "uv": [ 0, 0, 16, 16 ], "texture": "#spray" }
+            }
+        }
+    ]
+}

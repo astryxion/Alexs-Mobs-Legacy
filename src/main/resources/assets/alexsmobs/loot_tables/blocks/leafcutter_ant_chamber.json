@@ -1,0 +1,63 @@
+{
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "alternatives",
+          "children": [
+            {
+              "type": "item",
+              "conditions": [
+                {
+                  "condition": "match_tool",
+                  "predicate": {
+                    "enchantments": [
+                      {
+                        "enchantment": "silk_touch",
+                        "levels": {
+                          "min": 1
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "name": "alexsmobs:leafcutter_ant_chamber"
+            },
+            {
+              "type": "alternatives",
+              "conditions": [
+                {
+                  "condition": "survives_explosion"
+                }
+              ],
+              "children": [
+                {
+                  "type": "item",
+                  "conditions": [
+                    {
+                      "condition": "table_bonus",
+                      "enchantment": "fortune",
+                      "chances": [
+                        0.1,
+                        0.14285715,
+                        0.25,
+                        1.0
+                      ]
+                    }
+                  ],
+                  "name": "alexsmobs:leafcutter_ant_pupa"
+                },
+                {
+                  "type": "item",
+                  "name": "alexsmobs:leafcutter_ant_chamber"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
