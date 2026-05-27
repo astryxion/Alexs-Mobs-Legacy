@@ -10,7 +10,8 @@
       "item": "alexsmobs:serrated_shark_tooth"
     },
     "P": {
-      "item": "minecraft:prismarine_bricks"
+      "item": "minecraft:prismarine",
+      "data": 1
     },
     "H": {
       "item": "minecraft:prismarine_crystals"

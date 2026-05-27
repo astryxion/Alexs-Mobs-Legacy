@@ -40,7 +40,9 @@ minecraft {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+    // Keep Forge version aligned with the root project (1.12.2-14.23.5.2859).
+    // JEI has had compatibility issues when loaded against mismatched Forge builds.
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2859'
 }
 
 configurations.all {

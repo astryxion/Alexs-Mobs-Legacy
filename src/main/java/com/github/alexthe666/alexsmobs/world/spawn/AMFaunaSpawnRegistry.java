@@ -197,7 +197,7 @@ public final class AMFaunaSpawnRegistry {
             entry("triops", EntityTriops.class, AMNativeSpawnBiomes::triops, AMFaunaSpawnProfile.WATER_TRIOPS, () -> AMConfig.triopsSpawnWeight),
             entry("flying_fish", EntityFlyingFish.class, AMNativeSpawnBiomes::flyingFish, AMFaunaSpawnProfile.WATER_DRAGONFLY, () -> AMConfig.flyingFishSpawnWeight),
             entry("comb_jelly", EntityCombJelly.class, AMNativeSpawnBiomes::combJelly, AMFaunaSpawnProfile.WATER_SNAIL, () -> AMConfig.combJellySpawnWeight),
-            entry("cosmic_cod", EntityCosmicCod.class, AMNativeSpawnBiomes::cosmicCod, AMFaunaSpawnProfile.WATER_SNAIL, () -> AMConfig.cosmicCodSpawnWeight),
+            entry("cosmic_cod", EntityCosmicCod.class, AMNativeSpawnBiomes::cosmicCod, AMFaunaSpawnProfile.AMBIENT_DRAGONFLY, () -> AMConfig.cosmicCodSpawnWeight),
             entry("devils_hole_pupfish", EntityDevilsHolePupfish.class, AMNativeSpawnBiomes::devilsHolePupfish, AMFaunaSpawnProfile.WATER_PIXIE, () -> AMConfig.pupfishSpawnWeight),
             entry("catfish", EntityCatfish.class, AMNativeSpawnBiomes::catfish, AMFaunaSpawnProfile.WATER_DRAGONFLY, () -> AMConfig.catfishSpawnWeight),
             entry("terrapin", EntityTerrapin.class, AMNativeSpawnBiomes::terrapin, AMFaunaSpawnProfile.WATER_DRAGONFLY, () -> AMConfig.terrapinSpawnWeight),

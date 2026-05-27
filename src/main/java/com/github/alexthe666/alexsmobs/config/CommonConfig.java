@@ -150,8 +150,8 @@ public class CommonConfig {
     public final ConfigHolder.FCInt terrapinSpawnRolls = i("S", "terrapinSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt combJellySpawnWeight = i("S", "combJellySpawnWeight", 4, 0, 1000, "Spawn enable gate for Comb Jelly. 0 = disable spawn");
     public final ConfigHolder.FCInt combJellySpawnRolls = i("S", "combJellySpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
-    public final ConfigHolder.FCInt cosmicCodSpawnWeight = i("S", "cosmicCodSpawnWeight", 6, 0, 1000, "Spawn enable gate for Cosmic Cod. 0 = disable spawn");
-    public final ConfigHolder.FCInt cosmicCodSpawnRolls = i("S", "cosmicCodSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
+    public final ConfigHolder.FCInt cosmicCodSpawnWeight = i("S", "cosmicCodSpawnWeight", 5, 0, 1000, "Spawn enable gate for Cosmic Cod. 0 = disable spawn");
+    public final ConfigHolder.FCInt cosmicCodSpawnRolls = i("S", "cosmicCodSpawnRolls", 6, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt pupfishSpawnWeight = i("S", "pupfishSpawnWeight", 3, 0, 1000, "Spawn enable gate for Devil's Hole Pupfish. 0 = disable spawn");
     public final ConfigHolder.FCInt pupfishSpawnRolls = i("S", "pupfishSpawnRolls", 2, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt rainFrogSpawnWeight = i("S", "rainFrogSpawnWeight", 8, 0, 1000, "Spawn enable gate for Rain Frog. 0 = disable spawn");

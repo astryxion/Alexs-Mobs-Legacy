@@ -316,6 +316,11 @@ public class AMTagRegistry {
         if (ITEM_TAG_SETS.containsKey(tagId)) {
             return;
         }
+        reloadItemTagSetFor(tagId);
+    }
+
+    /** Rebuilds a tag after the item registry is populated (tags are first loaded in preInit). */
+    public static void reloadItemTagSetFor(ResourceLocation tagId) {
         String path = "/data/" + tagId.getResourceDomain() + "/tags/items/" + tagId.getResourcePath() + ".json";
         Set<Item> into = Sets.newHashSet();
         loadItemTagJson(path, into, Sets.newHashSet(tagId));
@@ -458,6 +463,14 @@ public class AMTagRegistry {
                     out.add(stack.getItem());
                 }
             }
+            return;
+        }
+        if (name.startsWith("#forge:crops/")) {
+            addOreDictionaryItems(out, "crop" + capitalize(name.substring("#forge:crops/".length())));
+            return;
+        }
+        if (name.startsWith("#forge:fruits/")) {
+            addOreDictionaryItems(out, "fruit" + capitalize(name.substring("#forge:fruits/".length())));
             return;
         }
         if ("#minecraft:fishes".equals(name)) {
@@ -668,6 +681,21 @@ public class AMTagRegistry {
                 out.add(block);
             }
         }
+    }
+
+    private static void addOreDictionaryItems(Set<Item> out, String oreName) {
+        for (ItemStack stack : OreDictionary.getOres(oreName)) {
+            if (!stack.isEmpty()) {
+                out.add(stack.getItem());
+            }
+        }
+    }
+
+    private static String capitalize(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
+        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
     private static void addOreDictionaryBlocks(Set<Block> out, String oreName) {

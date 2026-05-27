@@ -1,6 +1,7 @@
 package com.github.alexthe666.alexsmobs.entity;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
+import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIRideParent;
 import com.github.alexthe666.alexsmobs.entity.ai.CreatureAITargetItems;
 import com.github.alexthe666.alexsmobs.entity.ai.GorillaAIChargeLooker;
@@ -101,7 +102,7 @@ public class EntityGorilla extends EntityTameable implements IAnimatedEntity, IT
     }
 
     public static boolean isBanana(ItemStack stack) {
-        return isTameableFood(stack);
+        return !stack.isEmpty() && (stack.getItem() == AMItemRegistry.BANANA || isTameableFood(stack));
     }
 
     @Override

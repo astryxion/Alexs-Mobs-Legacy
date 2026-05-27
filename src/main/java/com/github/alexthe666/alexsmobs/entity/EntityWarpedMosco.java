@@ -54,6 +54,9 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
     public static final Animation ANIMATION_SLAM = Animation.create(35);
     public static final Animation ANIMATION_SUCK = Animation.create(60);
     public static final Animation ANIMATION_SPIT = Animation.create(60);
+    private static final Animation[] ANIMATIONS = {
+            ANIMATION_PUNCH_L, ANIMATION_PUNCH_R, ANIMATION_SLAM, ANIMATION_SUCK, ANIMATION_SPIT
+    };
     private static final DataParameter<Boolean> FLYING = EntityDataManager.createKey(EntityWarpedMosco.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> HAND_SIDE = EntityDataManager.createKey(EntityWarpedMosco.class, DataSerializers.BOOLEAN);
     public float flyLeftProgress;
@@ -240,7 +243,7 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
         }
 
         EntityLivingBase target = this.getAttackTarget();
-        if (target != null && this.isEntityAlive()) {
+        if (!this.world.isRemote && target != null && this.isEntityAlive()) {
             if (this.getAnimation() == ANIMATION_SUCK && this.getAnimationTick() == 3 && this.getDistance(target) < 4.7F) {
                 target.startRiding(this, true);
             }
@@ -309,7 +312,10 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
 
     @Override
     public void setAnimation(Animation animation) {
-        currentAnimation = animation;
+        if (this.currentAnimation != animation) {
+            this.currentAnimation = animation;
+            this.animationTick = 0;
+        }
     }
 
     @Override
@@ -324,7 +330,7 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
 
     @Override
     public Animation[] getAnimations() {
-        return new Animation[]{ANIMATION_PUNCH_L, ANIMATION_PUNCH_R, ANIMATION_SLAM, ANIMATION_SUCK, ANIMATION_SPIT};
+        return ANIMATIONS;
     }
 
     private BlockPos getMoscoGround(BlockPos in) {
@@ -595,7 +601,15 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
                 EntityLivingBase target = EntityWarpedMosco.this.getAttackTarget();
                 ranged = EntityWarpedMosco.this.shouldRangeAttack(target);
                 Vec3d targetVec = new Vec3d(target.posX, target.posY + target.height * 0.6F, target.posZ);
-                if (EntityWarpedMosco.this.isFlying() || ranged || EntityWarpedMosco.this.getDistance(target) > 12 && !EntityWarpedMosco.this.isTargetBlocked(targetVec)) {
+                float dist = EntityWarpedMosco.this.getDistance(target);
+                boolean useFlyMode = ranged || (dist > 12F && !EntityWarpedMosco.this.isTargetBlocked(targetVec));
+                if (!ranged && dist < 4.5F && EntityWarpedMosco.this.getAnimation() == IAnimatedEntity.NO_ANIMATION) {
+                    useFlyMode = false;
+                    EntityWarpedMosco.this.setFlying(false);
+                } else if (useFlyMode || EntityWarpedMosco.this.isFlying()) {
+                    useFlyMode = true;
+                }
+                if (useFlyMode) {
                     float speedRush = 5F;
                     upTicks++;
                     EntityWarpedMosco.this.setFlying(true);
@@ -606,7 +620,9 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
                         if (farTarget != null) {
                             EntityWarpedMosco.this.getMoveHelper().setMoveTo(farTarget.getX(), farTarget.getY() + target.getEyeHeight() * 0.6F, farTarget.getZ(), 3D);
                         }
-                        EntityWarpedMosco.this.setAnimation(ANIMATION_SPIT);
+                        if (EntityWarpedMosco.this.getAnimation() == IAnimatedEntity.NO_ANIMATION) {
+                            EntityWarpedMosco.this.setAnimation(ANIMATION_SPIT);
+                        }
                         if (upTicks % 30 == 0) {
                             EntityWarpedMosco.this.heal(1.0F);
                         }
@@ -678,6 +694,6 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
         if (this.getHealth() < Math.floor(this.getMaxHealth() * 0.25F)) {
             return true;
         }
-        return this.getHealth() < this.getHealth() * 0.5F && this.getDistance(target) > 10;
+        return this.getHealth() < this.getMaxHealth() * 0.5F && this.getDistance(target) > 10;
     }
 }

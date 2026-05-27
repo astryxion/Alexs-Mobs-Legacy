@@ -65,6 +65,7 @@ import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
@@ -136,48 +137,13 @@ public class ServerEvents {
                 }
             }
             teleportPlayers.clear();
-            processVoidWormSummons(serverWorld);
         }
     }
 
-    private static void processVoidWormSummons(WorldServer world) {
-        if (!AMConfig.voidWormSummonable) {
-            return;
-        }
-        int dim = world.provider.getDimension();
-        if (!AMConfig.voidWormSpawnDimensions.contains(String.valueOf(dim))) {
-            return;
-        }
-        List<EntityItem> items = world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(
-                Double.NEGATIVE_INFINITY, -64, Double.NEGATIVE_INFINITY,
-                Double.POSITIVE_INFINITY, 0, Double.POSITIVE_INFINITY));
-        for (EntityItem item : items) {
-            if (item.posY >= -10 || item.getItem().getItem() != AMItemRegistry.MYSTERIOUS_WORM) {
-                continue;
-            }
-            NBTTagCompound tag = item.getItem().getTagCompound();
-            if (tag != null && tag.getBoolean("AMVoidWormSummoned")) {
-                continue;
-            }
-            if (tag == null) {
-                tag = new NBTTagCompound();
-                item.getItem().setTagCompound(tag);
-            }
-            tag.setBoolean("AMVoidWormSummoned", true);
-            EntityVoidWorm worm = (EntityVoidWorm) AMEntityRegistry.VOID_WORM.newInstance(world);
-            worm.setPosition(item.posX, 0, item.posZ);
-            worm.setSegmentCount(25 + new Random().nextInt(15));
-            worm.rotationPitch = -90.0F;
-            worm.updatePostSummon = true;
-            if (item.getThrower() != null) {
-                EntityPlayer throwerPlayer = world.getPlayerEntityByName(item.getThrower());
-                if (throwerPlayer instanceof EntityPlayerMP) {
-                    EntityPlayerMP thrower = (EntityPlayerMP) throwerPlayer;
-                    AMAdvancementTriggerRegistry.VOID_WORM_SUMMON.trigger(thrower);
-                }
-            }
-            world.spawnEntity(worm);
-            item.setDead();
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+        if (event.getWorld() instanceof WorldServer) {
+            BEACHED_CACHALOT_WHALE_SPAWNER_MAP.remove(event.getWorld());
         }
     }
 

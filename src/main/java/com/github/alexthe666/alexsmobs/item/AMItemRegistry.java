@@ -4,6 +4,8 @@ import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.block.AMBlockRegistry;
 import com.github.alexthe666.alexsmobs.entity.*;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
+import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 import com.github.alexthe666.citadel.server.item.CustomArmorMaterial;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDispenser;
@@ -159,16 +161,7 @@ public class AMItemRegistry {
     public static final Item FALCONRY_HOOD = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:falconry_hood");
     public static final Item TARANTULA_HAWK_WING_FRAGMENT = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:tarantula_hawk_wing_fragment");
     public static final Item TARANTULA_HAWK_WING = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:tarantula_hawk_wing");
-    public static final Item MYSTERIOUS_WORM = AlexsMobs.PROXY.setupISTER(new Item() {
-        {
-            setCreativeTab(AlexsMobs.TAB);
-        }
-
-        @Override
-        public net.minecraft.item.EnumRarity getRarity(ItemStack stack) {
-            return net.minecraft.item.EnumRarity.RARE;
-        }
-    }).setRegistryName("alexsmobs:mysterious_worm");
+    public static final Item MYSTERIOUS_WORM = AlexsMobs.PROXY.setupISTER(new ItemMysteriousWorm()).setRegistryName("alexsmobs:mysterious_worm");
     public static final Item VOID_WORM_MANDIBLE = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:void_worm_mandible");
     public static final Item VOID_WORM_EYE = new Item() {
         @Override
@@ -211,8 +204,8 @@ public class AMItemRegistry {
     }
 
     private static void registerItem(RegistryEvent.Register<Item> event, Item item) {
-        AlexsMobs.applyUnlocalizedNameFromRegistry(item);
         event.getRegistry().register(item);
+        AlexsMobs.applyUnlocalizedNameFromRegistry(item);
     }
 
     @SubscribeEvent
@@ -309,6 +302,12 @@ public class AMItemRegistry {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        OreDictionary.registerOre("cropBanana", BANANA);
+        OreDictionary.registerOre("fruitBanana", BANANA);
+        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.BANANAS);
+        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_TAMEABLES);
+        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_BREEDABLES);
+        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_FOODSTUFFS);
         try {
             for (Field f : AMBlockRegistry.class.getDeclaredFields()) {
                 Object obj = f.get(null);

@@ -393,7 +393,9 @@ public class ModelWarpedMosco extends AdvancedEntityModel<EntityWarpedMosco> {
     }
 
     public void setRotationAngles(EntityWarpedMosco entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        this.resetToDefaultPose();
         animate(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        boolean attackAnim = entity.getAnimation() != null && entity.getAnimation() != IAnimatedEntity.NO_ANIMATION;
         float flySpeed = 0.5F;
         float flyDegree = 0.5F;
         float walkSpeed = 0.5F;
@@ -403,52 +405,54 @@ public class ModelWarpedMosco extends AdvancedEntityModel<EntityWarpedMosco> {
         float partialTicks = ageInTicks - entity.ticksExisted;
         float flyLeftProgress = entity.prevLeftFlyProgress + (entity.flyLeftProgress - entity.prevLeftFlyProgress) * partialTicks;
         float flyRightProgress = entity.prevFlyRightProgress + (entity.flyRightProgress - entity.prevFlyRightProgress) * partialTicks;
-        float flyProgress = Math.max(flyLeftProgress, flyRightProgress);
-        float walkProgress = (5F - flyProgress) * limbSwingAmount;
+        float flyProgress = attackAnim ? 0F : Math.max(flyLeftProgress, flyRightProgress);
+        float walkProgress = attackAnim ? 0F : (5F - flyProgress) * limbSwingAmount;
 
         this.walk(antenna_left, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
         this.walk(antenna_right, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
-        this.walk(shoulder_left, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
-        this.walk(shoulder_right, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
-        this.flap(shoulder_left, idleSpeed, idleDegree * 0.5F, false, 0, -0.1F, ageInTicks, 1);
-        this.flap(shoulder_right, idleSpeed, idleDegree * 0.5F, true, 0, -0.1F, ageInTicks, 1);
-        this.walk(hand_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        this.walk(hand_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        this.walk(head, idleSpeed, idleDegree * 0.25F, false, -1, 0.05F, ageInTicks, 1);
-        this.walk(chest, idleSpeed, idleDegree * 0.15F, false, -2, 0.05F, ageInTicks, 1);
-        this.bob(body, idleSpeed, idleDegree * 5, false, ageInTicks, 1);
-        this.walk(legfront_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        this.walk(kneefront_right, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
-        this.walk(legfront_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        this.walk(kneefront_left, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
-        this.walk(legback_right, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
-        this.walk(kneeback_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        this.walk(legback_left, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
-        this.walk(kneeback_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
-        progressRotationPrev(chest, walkProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(wingbottom_left, walkProgress, 0, (float) Math.toRadians(-50), 0, 5F);
-        progressRotationPrev(wingbottom_right, walkProgress, 0, (float) Math.toRadians(50), 0, 5F);
-        progressRotationPrev(wingtop_left, walkProgress, 0, (float) Math.toRadians(-50), 0, 5F);
-        progressRotationPrev(wingtop_right, walkProgress, 0, (float) Math.toRadians(50), 0, 5F);
-        progressRotationPrev(head, walkProgress, (float) Math.toRadians(-20), 0, 0, 5F);
-        progressRotationPrev(back, walkProgress, (float) Math.toRadians(10), 0, 0, 5F);
-        progressRotationPrev(head, flyProgress, (float) Math.toRadians(-20), 0, 0, 5F);
-        progressRotationPrev(body, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(legback_left, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(legback_right, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(legfront_left, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(legfront_right, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
-        progressRotationPrev(chest, flyLeftProgress, 0, (float) Math.toRadians(30), 0, 5F);
-        progressRotationPrev(head, flyLeftProgress, 0, (float) Math.toRadians(-30), 0, 5F);
-        progressRotationPrev(shoulder_left, flyLeftProgress, (float) Math.toRadians(-30), (float) Math.toRadians(-30), 0, 5F);
-        progressRotationPrev(arm_left, flyLeftProgress, (float) Math.toRadians(-40), (float) Math.toRadians(10), 0, 5F);
-        progressRotationPrev(hand_left, flyLeftProgress, (float) Math.toRadians(-30), (float) Math.toRadians(60),  (float) Math.toRadians(20), 5F);
-        progressRotationPrev(chest, flyRightProgress, 0, (float) Math.toRadians(-30), 0, 5F);
-        progressRotationPrev(head, flyRightProgress, 0, (float) Math.toRadians(30), 0, 5F);
-        progressRotationPrev(shoulder_right, flyRightProgress, (float) Math.toRadians(-30), (float) Math.toRadians(30), 0, 5F);
-        progressRotationPrev(arm_right, flyRightProgress, (float) Math.toRadians(-40), (float) Math.toRadians(-10), 0, 5F);
-        progressRotationPrev(hand_right, flyRightProgress, (float) Math.toRadians(-30), (float) Math.toRadians(-60),  (float) Math.toRadians(-20), 5F);
-        if (flyProgress <= 0F) {
+        if (!attackAnim) {
+            this.walk(shoulder_left, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
+            this.walk(shoulder_right, idleSpeed, idleDegree, false, 0, -0.1F, ageInTicks, 1);
+            this.flap(shoulder_left, idleSpeed, idleDegree * 0.5F, false, 0, -0.1F, ageInTicks, 1);
+            this.flap(shoulder_right, idleSpeed, idleDegree * 0.5F, true, 0, -0.1F, ageInTicks, 1);
+            this.walk(hand_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            this.walk(hand_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            this.walk(head, idleSpeed, idleDegree * 0.25F, false, -1, 0.05F, ageInTicks, 1);
+            this.walk(chest, idleSpeed, idleDegree * 0.15F, false, -2, 0.05F, ageInTicks, 1);
+            this.bob(body, idleSpeed, idleDegree * 5, false, ageInTicks, 1);
+            this.walk(legfront_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            this.walk(kneefront_right, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
+            this.walk(legfront_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            this.walk(kneefront_left, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
+            this.walk(legback_right, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
+            this.walk(kneeback_right, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            this.walk(legback_left, idleSpeed, idleDegree, true, 1, -0.1F, ageInTicks, 1);
+            this.walk(kneeback_left, idleSpeed, idleDegree, false, 1, -0.1F, ageInTicks, 1);
+            progressRotationPrev(chest, walkProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(wingbottom_left, walkProgress, 0, (float) Math.toRadians(-50), 0, 5F);
+            progressRotationPrev(wingbottom_right, walkProgress, 0, (float) Math.toRadians(50), 0, 5F);
+            progressRotationPrev(wingtop_left, walkProgress, 0, (float) Math.toRadians(-50), 0, 5F);
+            progressRotationPrev(wingtop_right, walkProgress, 0, (float) Math.toRadians(50), 0, 5F);
+            progressRotationPrev(head, walkProgress, (float) Math.toRadians(-20), 0, 0, 5F);
+            progressRotationPrev(back, walkProgress, (float) Math.toRadians(10), 0, 0, 5F);
+            progressRotationPrev(head, flyProgress, (float) Math.toRadians(-20), 0, 0, 5F);
+            progressRotationPrev(body, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(legback_left, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(legback_right, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(legfront_left, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(legfront_right, flyProgress, (float) Math.toRadians(20), 0, 0, 5F);
+            progressRotationPrev(chest, flyLeftProgress, 0, (float) Math.toRadians(30), 0, 5F);
+            progressRotationPrev(head, flyLeftProgress, 0, (float) Math.toRadians(-30), 0, 5F);
+            progressRotationPrev(shoulder_left, flyLeftProgress, (float) Math.toRadians(-30), (float) Math.toRadians(-30), 0, 5F);
+            progressRotationPrev(arm_left, flyLeftProgress, (float) Math.toRadians(-40), (float) Math.toRadians(10), 0, 5F);
+            progressRotationPrev(hand_left, flyLeftProgress, (float) Math.toRadians(-30), (float) Math.toRadians(60), (float) Math.toRadians(20), 5F);
+            progressRotationPrev(chest, flyRightProgress, 0, (float) Math.toRadians(-30), 0, 5F);
+            progressRotationPrev(head, flyRightProgress, 0, (float) Math.toRadians(30), 0, 5F);
+            progressRotationPrev(shoulder_right, flyRightProgress, (float) Math.toRadians(-30), (float) Math.toRadians(30), 0, 5F);
+            progressRotationPrev(arm_right, flyRightProgress, (float) Math.toRadians(-40), (float) Math.toRadians(-10), 0, 5F);
+            progressRotationPrev(hand_right, flyRightProgress, (float) Math.toRadians(-30), (float) Math.toRadians(-60), (float) Math.toRadians(-20), 5F);
+        }
+        if (!attackAnim && flyProgress <= 0F) {
             this.walk(kneefront_left, walkSpeed, walkDegree * 0.4F, true, 0, -0.1F, limbSwing, limbSwingAmount);
             this.walk(legfront_left, walkSpeed, walkDegree * 0.8F, false, 2.0F, -0.3F, limbSwing, limbSwingAmount);
             this.walk(kneefront_right, walkSpeed, walkDegree * 0.4F, false, 0, 0.1F, limbSwing, limbSwingAmount);
@@ -469,7 +473,7 @@ public class ModelWarpedMosco extends AdvancedEntityModel<EntityWarpedMosco> {
             this.swing(legback_left, walkSpeed, walkDegree * 0.4F, true, 1F, 0F, limbSwing, limbSwingAmount);
             this.swing(legback_right, walkSpeed, walkDegree * 0.4F, false, 1F, 0F, limbSwing, limbSwingAmount);
             this.bob(body, walkSpeed, walkDegree * 5, false, limbSwing, limbSwingAmount);
-        } else {
+        } else if (!attackAnim) {
             this.swing(wingbottom_left, flySpeed * 3.3F, flyDegree, true, 0, 0.2F, ageInTicks, 1);
             this.swing(wingbottom_right, flySpeed * 3.3F, flyDegree, false, 0, 0.2F, ageInTicks, 1);
             this.swing(wingtop_left, flySpeed * 3.3F, flyDegree * 1.3F, true, 1, 0.5F, ageInTicks, 1);

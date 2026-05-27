@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.0.0'
+version = '1.12.2-1.1.0'
 group = 'com.github.alexthe666'
 archivesBaseName = 'alexsmobs'
 
@@ -53,6 +53,9 @@ minecraft {
 
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
+
+            // JEI dev: load TextureMap access fix coremod before game classes initialize
+            property 'fml.coreMods.load', 'com.github.alexthe666.alexsmobs.asm.AMLoadingPlugin'
         }
 
         server {
@@ -79,10 +82,11 @@ dependencies {
     // Citadel 1.12.2 — composite subproject (see settings.gradle)
     compile project(':citadel')
 
-    // Optional at runtime; used only to hide internal items from JEI (not bundled in the mod jar).
-    compileOnly('mezz.jei:jei_1.12.2:4.16.1.301:api') {
+    // JEI in dev only (not bundled in the release jar).
+    compileOnly(fg.deobf('mezz.jei:jei_1.12.2:4.16.1.301:api')) {
         transitive = false
     }
+    runtimeOnly(fg.deobf('mezz.jei:jei_1.12.2:4.16.1.301'))
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -121,9 +125,20 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+    exclude 'META-INF/services/net.minecraftforge.fml.relauncher.IFMLLoadingPlugin'
 }
 
-// Example configuration to allow publishing using the maven-publish task
+// Release needs both jars in mods/: alexsmobs + citadel (see :citadel:build).
+task copyReleaseJars(type: Copy, dependsOn: ['build', ':citadel:build']) {
+    from('build/libs') {
+        include "alexsmobs-${version}.jar"
+    }
+    from(project(':citadel').file('build/libs')) {
+        include 'citadel-*.jar'
+    }
+    into 'build/release'
+}
+
 // This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar') 
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing

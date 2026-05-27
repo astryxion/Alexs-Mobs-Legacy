@@ -13,7 +13,8 @@
       "item": "minecraft:leather_boots"
     },
     "S": {
-      "item": "minecraft:chiseled_sandstone"
+      "item": "minecraft:sandstone",
+      "data": 1
     }
   },
   "result": {

@@ -87,6 +87,9 @@ public abstract class GuiBasicBook extends GuiScreen {
    private Map<String, ResourceLocation> textureMap = new HashMap();
    private Map<Integer, LinkData> linkButtonMap = new HashMap();
    private Map<Integer, EntityLinkData> entityLinkButtonMap = new HashMap();
+   private static final Map<ResourceLocation, BookPage> PAGE_CACHE = new HashMap();
+   private ResourceLocation loadedPageJson = null;
+   private ResourceLocation laidOutTextFile = null;
    private String writtenTitle = "";
    private int preservedPageIndex = 0;
    private String entityTooltip;
@@ -224,9 +227,11 @@ public abstract class GuiBasicBook extends GuiScreen {
          this.currentPageJSON = new ResourceLocation(this.getTextFileDirectory() + this.internalPage.getParent());
          this.currentPageCounter = this.preservedPageIndex;
          this.preservedPageIndex = 0;
+         this.loadBookEntry();
+         return;
       }
 
-      this.refreshSpacing();
+      this.updatePageNavigation();
    }
 
    protected void func_146284_a(GuiButton button) throws IOException {
@@ -246,8 +251,7 @@ public abstract class GuiBasicBook extends GuiScreen {
          this.currentPageJSON = new ResourceLocation(this.getTextFileDirectory() + linkData.getLinkedPage());
          this.preservedPageIndex = this.currentPageCounter;
          this.currentPageCounter = 0;
-         this.addNextPreviousButtons();
-         this.refreshSpacing();
+         this.loadBookEntry();
          return;
       }
 
@@ -257,8 +261,7 @@ public abstract class GuiBasicBook extends GuiScreen {
          this.currentPageJSON = new ResourceLocation(this.getTextFileDirectory() + entityLinkData.getLinkedPage());
          this.preservedPageIndex = this.currentPageCounter;
          this.currentPageCounter = 0;
-         this.addNextPreviousButtons();
-         this.refreshSpacing();
+         this.loadBookEntry();
       }
    }
 
@@ -275,11 +278,8 @@ public abstract class GuiBasicBook extends GuiScreen {
       this.mc.getTextureManager().bindTexture(this.getBookBindingTexture());
       BookBlit.setRGB(r, g, b, 255);
       BookBlit.func_238463_a_(k, l, 0.0F, 0.0F, this.xSize, this.ySize, this.xSize, this.ySize);
-      if (this.internalPage == null || this.currentPageJSON != this.prevPageJSON || this.prevPageJSON == null) {
-         this.internalPage = this.generatePage(this.currentPageJSON);
-         if (this.internalPage != null) {
-            this.refreshSpacing();
-         }
+      if (this.internalPage == null || this.loadedPageJson == null || !this.currentPageJSON.equals(this.loadedPageJson)) {
+         this.loadBookEntry();
       }
 
       if (this.internalPage != null) {
@@ -296,26 +296,50 @@ public abstract class GuiBasicBook extends GuiScreen {
 
    }
 
-   private void refreshSpacing() {
-      if (this.internalPage != null) {
-         String lang = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().toLowerCase();
-         this.currentPageText = new ResourceLocation(this.getTextFileDirectory() + lang + "/" + this.internalPage.getTextFileToReadFrom());
-         boolean invalid = false;
-
-         try {
-            IResource var3 = Minecraft.getMinecraft().getResourceManager().getResource(this.currentPageText);
-         } catch (Exception var4) {
-            invalid = true;
-            Citadel.LOGGER.warn("Could not find language file for translation, defaulting to english");
-            this.currentPageText = new ResourceLocation(this.getTextFileDirectory() + "en_us/" + this.internalPage.getTextFileToReadFrom());
-         }
-
-         this.readInPageWidgets(this.internalPage);
-         this.addWidgetSpacing();
-         this.addLinkButtons();
-         this.readInPageText(this.currentPageText);
+   private void loadBookEntry() {
+      if (this.currentPageJSON == null) {
+         return;
       }
 
+      if (this.internalPage == null || this.loadedPageJson == null || !this.currentPageJSON.equals(this.loadedPageJson)) {
+         this.internalPage = this.generatePage(this.currentPageJSON);
+         this.loadedPageJson = this.currentPageJSON;
+         this.laidOutTextFile = null;
+      }
+
+      if (this.internalPage == null) {
+         return;
+      }
+
+      ResourceLocation textFile = this.resolvePageTextFile(this.internalPage);
+      this.readInPageWidgets(this.internalPage);
+      this.addWidgetSpacing();
+      if (!textFile.equals(this.laidOutTextFile)) {
+         this.currentPageText = textFile;
+         this.readInPageText(textFile);
+         this.laidOutTextFile = textFile;
+      }
+
+      this.updatePageNavigation();
+   }
+
+   private void updatePageNavigation() {
+      if (this.internalPage != null) {
+         this.addLinkButtons();
+      }
+   }
+
+   private ResourceLocation resolvePageTextFile(BookPage page) {
+      String lang = Minecraft.getMinecraft().getLanguageManager().getCurrentLanguage().getLanguageCode().toLowerCase();
+      ResourceLocation localized = new ResourceLocation(this.getTextFileDirectory() + lang + "/" + page.getTextFileToReadFrom());
+
+      try {
+         Minecraft.getMinecraft().getResourceManager().getResource(localized);
+         return localized;
+      } catch (Exception var4) {
+         Citadel.LOGGER.warn("Could not find language file for translation, defaulting to english");
+         return new ResourceLocation(this.getTextFileDirectory() + "en_us/" + page.getTextFileToReadFrom());
+      }
    }
 
    private Item getItemByRegistryName(String registryName) {
@@ -476,7 +500,13 @@ public abstract class GuiBasicBook extends GuiScreen {
             Entity model = null;
             ResourceLocation entityId = new ResourceLocation(data.getEntity());
             if (EntityList.isRegistered(entityId)) {
-               model = (Entity)this.renderedEntites.putIfAbsent(data.getEntity(), EntityList.createEntityByIDFromName(entityId, Minecraft.getMinecraft().world));
+               model = this.renderedEntites.get(data.getEntity());
+               if (model == null) {
+                  model = EntityList.createEntityByIDFromName(entityId, Minecraft.getMinecraft().world);
+                  if (model != null) {
+                     this.renderedEntites.put(data.getEntity(), model);
+                  }
+               }
             }
 
             if (model != null) {
@@ -585,25 +615,28 @@ public abstract class GuiBasicBook extends GuiScreen {
 
    @Nullable
    protected BookPage generatePage(ResourceLocation res) {
-      IResource resource = null;
-      BookPage page = null;
+      BookPage cached = PAGE_CACHE.get(res);
+      if (cached != null) {
+         return cached;
+      }
 
       try {
-         resource = Minecraft.getMinecraft().getResourceManager().getResource(res);
-
-         try {
-            resource = Minecraft.getMinecraft().getResourceManager().getResource(res);
-            InputStream inputstream = resource.getInputStream();
-            Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
-            page = BookPage.deserialize(reader);
+         IResource resource = Minecraft.getMinecraft().getResourceManager().getResource(res);
+         try (InputStream inputstream = resource.getInputStream();
+              Reader reader = new BufferedReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8))) {
+            BookPage page = BookPage.deserialize(reader);
+            if (page != null) {
+               PAGE_CACHE.put(res, page);
+            }
+            return page;
          } catch (IOException e1) {
             e1.printStackTrace();
          }
-
-         return page;
       } catch (IOException var7) {
          return null;
       }
+
+      return null;
    }
 
    protected void readInPageWidgets(BookPage page) {

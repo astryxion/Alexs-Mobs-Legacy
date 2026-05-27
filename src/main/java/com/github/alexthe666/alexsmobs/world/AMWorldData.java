@@ -53,9 +53,9 @@ public class AMWorldData extends WorldSavedData {
         if (data == null) {
             data = new AMWorldData();
             storage.setData(IDENTIFIER, data);
+            data.markDirty();
         }
         data.world = world;
-        data.markDirty();
         return data;
     }
 

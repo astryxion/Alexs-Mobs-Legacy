@@ -31,8 +31,8 @@ public class AMBlockRegistry {
                 Object obj = f.get(null);
                 if (obj instanceof Block) {
                     Block block = (Block) obj;
-                    AlexsMobs.applyUnlocalizedNameFromRegistry(block);
                     event.getRegistry().register(block);
+                    AlexsMobs.applyUnlocalizedNameFromRegistry(block);
                 }
             }
         } catch (IllegalAccessException e) {

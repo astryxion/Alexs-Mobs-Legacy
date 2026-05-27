@@ -3,7 +3,6 @@ package com.github.alexthe666.alexsmobs.compat.jei;
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.item.ItemAMInternal;
-import com.github.alexthe666.alexsmobs.item.ItemAMSpawnEgg;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.ingredients.IIngredientBlacklist;
@@ -38,7 +37,7 @@ public class AMJEIPlugin implements IModPlugin {
             }
             String domain = name.getResourceDomain();
             if (AlexsMobs.MODID.equals(domain)) {
-                if (item instanceof ItemAMInternal || item instanceof ItemAMSpawnEgg) {
+                if (item instanceof ItemAMInternal) {
                     blacklist.addIngredientToBlacklist(new ItemStack(item));
                 }
             }

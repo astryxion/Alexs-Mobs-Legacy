@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "alexsmobs:banana",
     "#forge:crops/banana",
     "#forge:fruits/banana"
   ]

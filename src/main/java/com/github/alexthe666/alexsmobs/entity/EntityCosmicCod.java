@@ -50,15 +50,52 @@ public class EntityCosmicCod extends EntityCreature {
     private EntityCosmicCod groupLeader;
     private int groupSize = 1;
 
+    /** Max cod within this radius of a candidate spawn — prevents void-wide baitballs. */
+    private static final double LOCAL_SPAWN_CAP_RADIUS = 32.0D;
+    private static final int LOCAL_SPAWN_CAP = 14;
+
     public EntityCosmicCod(World world) {
         super(world);
         this.moveHelper = new FlightMoveController(this, 1F, false, true);
         this.setNoGravity(true);
     }
 
+    /**
+     * 1.20 spawns in End void air under islands only; 1.12 port must not treat the whole dimension as valid air.
+     */
+    public static boolean canSpawnAt(World world, BlockPos pos) {
+        if (world == null || world.provider.getDimension() != 1) {
+            return false;
+        }
+        if (!world.isAirBlock(pos)) {
+            return false;
+        }
+        if (pos.getY() < 8 || pos.getY() > 220) {
+            return false;
+        }
+        if (world.isBlockNormalCube(pos.down(), false)) {
+            return false;
+        }
+        boolean islandAbove = false;
+        for (int dy = 4; dy <= 72; dy++) {
+            if (world.isBlockNormalCube(pos.up(dy), false)) {
+                islandAbove = true;
+                break;
+            }
+        }
+        if (!islandAbove) {
+            return false;
+        }
+        List<EntityCosmicCod> nearby = world.getEntitiesWithinAABB(
+                EntityCosmicCod.class,
+                new AxisAlignedBB(pos).grow(LOCAL_SPAWN_CAP_RADIUS));
+        return nearby.size() < LOCAL_SPAWN_CAP;
+    }
+
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.cosmicCodSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+        return AMEntityRegistry.rollSpawn(AMConfig.cosmicCodSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && canSpawnAt(this.world, this.getPosition());
     }
 
     @Override

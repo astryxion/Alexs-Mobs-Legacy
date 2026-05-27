@@ -225,10 +225,6 @@ public class EntityHummingbird extends EntityAnimal {
         return super.onInitialSpawn(difficulty, livingdata);
     }
 
-    private List<BlockPos> getNearbyFeeders(BlockPos blockpos, World world, int range) {
-        return AMPointOfInterestRegistry.findAll(world, blockpos, range, AMPointOfInterestRegistry::matchesHummingbirdFeeder);
-    }
-
     public boolean isFlying() {
         return this.dataManager.get(FLYING);
     }
@@ -371,15 +367,7 @@ public class EntityHummingbird extends EntityAnimal {
                     localFeeder = feedPos;
                     return true;
                 } else {
-                    List<BlockPos> beacons = getNearbyFeeders(EntityHummingbird.this.getPosition(), world, 64);
-                    BlockPos closest = null;
-                    for (BlockPos pos : beacons) {
-                        if (closest == null || EntityHummingbird.this.getDistanceSq(closest) > EntityHummingbird.this.getDistanceSq(pos)) {
-                            if (isValidFeeder(world.getBlockState(pos))) {
-                                closest = pos;
-                            }
-                        }
-                    }
+                    BlockPos closest = AMPointOfInterestRegistry.findClosest(world, EntityHummingbird.this.getPosition(), 64, AMPointOfInterestRegistry::matchesHummingbirdFeeder);
                     if (closest != null && isValidFeeder(world.getBlockState(closest))) {
                         localFeeder = closest;
                         return true;

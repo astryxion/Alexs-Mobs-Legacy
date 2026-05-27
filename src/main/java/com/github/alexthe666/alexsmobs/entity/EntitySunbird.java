@@ -47,6 +47,7 @@ public class EntitySunbird extends EntityAnimal {
     private int beaconSearchCooldown = 50;
     private BlockPos beaconPos = null;
     private boolean orbitClockwise = false;
+    private float beaconOrbitAngle = 0.0F;
 
     public EntitySunbird(World worldIn) {
         super(worldIn);
@@ -146,21 +147,11 @@ public class EntitySunbird extends EntityAnimal {
             this.motionY *= 0.5D;
             this.motionZ *= 0.5D;
         } else {
-            BlockPos ground = new BlockPos(this.posX, this.getEntityBoundingBox().minY - 1.0D, this.posZ);
-            float f = 0.91F;
-            if (this.onGround) {
-                f = this.world.getBlockState(ground).getBlock().slipperiness * 0.91F;
-            }
-            f = 0.91F;
-            if (this.onGround) {
-                f = this.world.getBlockState(ground).getBlock().slipperiness * 0.91F;
-            }
             this.updateLimbSwing(true);
-            this.moveRelative(0.2F, strafe, forward, f);
             this.move(MoverType.SELF, this.motionX, this.motionY, this.motionZ);
-            this.motionX *= f;
-            this.motionY *= f;
-            this.motionZ *= f;
+            this.motionX *= 0.91D;
+            this.motionY *= 0.91D;
+            this.motionZ *= 0.91D;
         }
         this.updateLimbSwing(false);
     }
@@ -183,6 +174,13 @@ public class EntitySunbird extends EntityAnimal {
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.setNoGravity(true);
+        if (!this.world.isRemote && this.getAttackTarget() == null) {
+            double horizontalMotion = this.motionX * this.motionX + this.motionZ * this.motionZ;
+            if (horizontalMotion > 1.0E-4D) {
+                this.rotationYaw = -((float) MathHelper.atan2(this.motionX, this.motionZ)) * (180F / (float) Math.PI);
+                this.renderYawOffset = this.rotationYaw;
+            }
+        }
         this.prevBirdPitch = this.birdPitch;
         float f2 = (float) -((float) this.motionY * (double) (180F / (float) Math.PI));
         this.birdPitch = f2;
@@ -218,15 +216,7 @@ public class EntitySunbird extends EntityAnimal {
             }
             if (beaconSearchCooldown <= 0) {
                 beaconSearchCooldown = 100 + rand.nextInt(200);
-                List<BlockPos> beacons = this.getNearbyBeacons(this.getPosition(), 64);
-                BlockPos closest = null;
-                for (BlockPos pos : beacons) {
-                    if (closest == null || this.getDistanceSq(closest.getX(), closest.getY(), closest.getZ()) > this.getDistanceSq(pos.getX(), pos.getY(), pos.getZ())) {
-                        if (isValidBeacon(pos)) {
-                            closest = pos;
-                        }
-                    }
-                }
+                BlockPos closest = AMPointOfInterestRegistry.findClosest(world, this.getPosition(), 64, AMPointOfInterestRegistry::matchesBeacon);
                 if (closest != null && isValidBeacon(closest)) {
                     beaconPos = closest;
                 }
@@ -282,10 +272,6 @@ public class EntitySunbird extends EntityAnimal {
         return id != null && id.toLowerCase().contains("phantom");
     }
 
-    private List<BlockPos> getNearbyBeacons(BlockPos blockpos, int range) {
-        return AMPointOfInterestRegistry.findAll(world, blockpos, range, AMPointOfInterestRegistry::matchesBeacon);
-    }
-
     private boolean isValidBeacon(BlockPos pos) {
         TileEntity te = world.getTileEntity(pos);
         return te instanceof TileEntityBeacon && ((TileEntityBeacon) te).getLevels() > 0;
@@ -305,23 +291,19 @@ public class EntitySunbird extends EntityAnimal {
                 double d0 = this.posX - parentEntity.posX;
                 double d1 = this.posY - parentEntity.posY;
                 double d2 = this.posZ - parentEntity.posZ;
-                double len = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                AxisAlignedBB bb = parentEntity.getEntityBoundingBox();
-                double avgEdge = (bb.maxX - bb.minX + bb.maxY - bb.minY + bb.maxZ - bb.minZ) / 3.0D;
-                if (len < avgEdge) {
+                double lenSq = d0 * d0 + d1 * d1 + d2 * d2;
+                if (lenSq < 0.09D) {
                     this.action = Action.WAIT;
                     parentEntity.motionX *= 0.5D;
                     parentEntity.motionY *= 0.5D;
                     parentEntity.motionZ *= 0.5D;
                 } else {
+                    double len = Math.sqrt(lenSq);
                     double scale = this.speed * 0.05D / len;
                     parentEntity.motionX += d0 * scale;
                     parentEntity.motionY += d1 * scale;
                     parentEntity.motionZ += d2 * scale;
-                    if (parentEntity.getAttackTarget() == null) {
-                        parentEntity.rotationYaw = -((float) MathHelper.atan2(parentEntity.motionX, parentEntity.motionZ)) * (180F / (float) Math.PI);
-                        parentEntity.renderYawOffset = parentEntity.rotationYaw;
-                    } else {
+                    if (parentEntity.getAttackTarget() != null) {
                         EntityLivingBase target = parentEntity.getAttackTarget();
                         double d2t = target.posX - parentEntity.posX;
                         double d1t = target.posZ - parentEntity.posZ;
@@ -353,8 +335,8 @@ public class EntitySunbird extends EntityAnimal {
                 }
                 if (target != null) {
                     this.parentEntity.getMoveHelper().setMoveTo(target.getX() + 0.5D, target.getY() + 0.5D, target.getZ() + 0.5D, parentEntity.beaconPos != null ? 0.8D : 1.0D);
+                    return true;
                 }
-                return true;
             }
             return false;
         }
@@ -362,7 +344,7 @@ public class EntitySunbird extends EntityAnimal {
         @Override
         public boolean shouldContinueExecuting() {
             return target != null && parentEntity.getDistanceSq(target.getX() + 0.5D, target.getY() + 0.5D, target.getZ() + 0.5D) > 2.4D
-                    && parentEntity.getMoveHelper().isUpdating() && !parentEntity.collidedHorizontally;
+                    && !parentEntity.collidedHorizontally;
         }
 
         @Override
@@ -391,12 +373,13 @@ public class EntitySunbird extends EntityAnimal {
         }
 
         private BlockPos getBlockInViewBeacon(BlockPos orbitPos, float gatheringCircleDist) {
-            float angle = (0.01745329251F * (float) 9 * (parentEntity.orbitClockwise ? -parentEntity.ticksExisted : parentEntity.ticksExisted));
+            float angle = parentEntity.beaconOrbitAngle * 0.01745329251F;
             double extraX = gatheringCircleDist * MathHelper.sin(angle);
             double extraZ = gatheringCircleDist * MathHelper.cos(angle);
             if (orbitPos != null) {
                 BlockPos pos = new BlockPos(orbitPos.getX() + extraX, orbitPos.getY() + parentEntity.rand.nextInt(2) + 2, orbitPos.getZ() + extraZ);
                 if (parentEntity.world.isAirBlock(pos)) {
+                    parentEntity.beaconOrbitAngle += parentEntity.orbitClockwise ? -9.0F : 9.0F;
                     return pos;
                 }
             }
@@ -411,8 +394,7 @@ public class EntitySunbird extends EntityAnimal {
             double extraX = radius * MathHelper.sin((float) (Math.PI + angle));
             double extraZ = radius * MathHelper.cos(angle);
             BlockPos radialPos = new BlockPos(parentEntity.posX + extraX, 0, parentEntity.posZ + extraZ);
-            int groundY = parentEntity.world.getHeight(radialPos).getY();
-            BlockPos ground = new BlockPos(radialPos.getX(), groundY, radialPos.getZ());
+            BlockPos ground = parentEntity.world.getTopSolidOrLiquidBlock(radialPos);
             int distFromGround = (int) parentEntity.posY - ground.getY();
             int flightHeight = Math.max(ground.getY(), 230 + parentEntity.getRNG().nextInt(40)) - ground.getY();
             BlockPos newPos = radialPos.up(distFromGround > 16 ? flightHeight : (int) parentEntity.posY + parentEntity.getRNG().nextInt(16) + 1);

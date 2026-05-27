@@ -2,6 +2,8 @@ package com.github.alexthe666.alexsmobs.config;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.google.common.collect.Lists;
+import net.minecraft.world.World;
+
 import java.util.List;
 
 public class AMConfig {
@@ -139,8 +141,8 @@ public class AMConfig {
     public static int terrapinSpawnRolls = 0;
     public static int combJellySpawnWeight = 4;
     public static int combJellySpawnRolls = 0;
-    public static int cosmicCodSpawnWeight = 6;
-    public static int cosmicCodSpawnRolls = 0;
+    public static int cosmicCodSpawnWeight = 5;
+    public static int cosmicCodSpawnRolls = 6;
     public static int pupfishSpawnWeight = 3;
     public static int pupfishSpawnRolls = 2;
     public static int rainFrogSpawnWeight = 8;
@@ -428,6 +430,26 @@ public class AMConfig {
             AlexsMobs.LOGGER.warn("An exception was caused trying to load the config for Alex's Mobs.");
             e.printStackTrace();
         }
+    }
+
+    /** Matches config entries like {@code minecraft:the_end} and legacy numeric dimension ids ({@code -1}). */
+    public static boolean isVoidWormDimension(World world) {
+        int dimId = world.provider.getDimension();
+        for (String entry : voidWormSpawnDimensions) {
+            if (entry.equals(String.valueOf(dimId))) {
+                return true;
+            }
+            if ("minecraft:the_end".equals(entry) && dimId == -1) {
+                return true;
+            }
+            if ("minecraft:overworld".equals(entry) && dimId == 0) {
+                return true;
+            }
+            if ("minecraft:the_nether".equals(entry) && dimId == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

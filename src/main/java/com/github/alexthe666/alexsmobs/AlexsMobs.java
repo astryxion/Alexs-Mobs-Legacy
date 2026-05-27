@@ -31,8 +31,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
@@ -45,7 +48,7 @@ public class AlexsMobs {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "alexsmobs";
-    public static final String VERSION = "1.12.2-1.0.0";
+    public static final String VERSION = "1.12.2-1.1.0";
 
     @Mod.Instance(MODID)
     public static AlexsMobs instance;
@@ -60,7 +63,8 @@ public class AlexsMobs {
 
     /**
      * 1.12.2 {@link Item#setRegistryName} / {@link Block#setRegistryName} do not set {@code unlocalizedName};
-     * without this, display keys resolve to {@code item.null.name} / {@code tile.null.name}.
+     * Forge may overwrite names during {@code register()}, so this must run after registration (and again at
+     * {@link EventPriority#LOWEST} on the registry event).
      */
     public static void applyUnlocalizedNameFromRegistry(IForgeRegistryEntry<?> entry) {
         ResourceLocation rl = entry.getRegistryName();
@@ -70,6 +74,23 @@ public class AlexsMobs {
                 ((Item) entry).setUnlocalizedName(key);
             } else if (entry instanceof Block) {
                 ((Block) entry).setUnlocalizedName(key);
+            }
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = MODID)
+    public static class RegistryNamingFix {
+        @SubscribeEvent(priority = EventPriority.LOWEST)
+        public static void onItemsRegistered(RegistryEvent.Register<Item> event) {
+            for (Item item : ForgeRegistries.ITEMS.getValuesCollection()) {
+                applyUnlocalizedNameFromRegistry(item);
+            }
+        }
+
+        @SubscribeEvent(priority = EventPriority.LOWEST)
+        public static void onBlocksRegistered(RegistryEvent.Register<Block> event) {
+            for (Block block : ForgeRegistries.BLOCKS.getValuesCollection()) {
+                applyUnlocalizedNameFromRegistry(block);
             }
         }
     }

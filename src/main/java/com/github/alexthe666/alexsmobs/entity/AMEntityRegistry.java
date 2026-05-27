@@ -929,7 +929,7 @@ public class AMEntityRegistry {
         private static BiPredicate<IBlockAccess, BlockPos> cosmicCod() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                return w != null && w.provider.getDimension() == 1 && w.isAirBlock(pos);
+                return w != null && EntityCosmicCod.canSpawnAt(w, pos);
             };
         }
 
