@@ -5,8 +5,8 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import java.util.Map;
 
 /**
- * Ensures {@link net.minecraft.client.renderer.texture.TextureMap#initMissingImage()} is accessible to JEI in
- * ForgeGradle 3 dev runs, where dependency access transformers are not always applied at runtime.
+ * Applies HEI/JEI access wideners at runtime in ForgeGradle 3 dev, where dependency ATs are not
+ * always applied to the deobfuscated game jar before HEI loads {@code TextureMap#initMissingImage}.
  */
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.Name("AlexsMobsJeiCompat")

@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Implementation-Title: citadel
-Implementation-Version: 1.12.2-1.0.0
+Implementation-Version: 1.12.2-1.1.0
 Specification-Vendor: examplemodsareus
 Specification-Title: examplemod
-Implementation-Timestamp: 2026-05-26T21:32:19-0400
+Implementation-Timestamp: 2026-05-27T15:38:55-0400
 Specification-Version: 1
 Implementation-Vendor: examplemodsareus
 

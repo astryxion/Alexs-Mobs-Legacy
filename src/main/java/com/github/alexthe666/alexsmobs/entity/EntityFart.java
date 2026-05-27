@@ -48,6 +48,11 @@ public class EntityFart extends Entity {
     }
 
     @Override
+    public boolean hasNoGravity() {
+        return true;
+    }
+
+    @Override
     public void onEntityUpdate() {
         if (!this.leftOwner) {
             this.leftOwner = this.updateLeftOwner();
@@ -55,7 +60,7 @@ public class EntityFart extends Entity {
         super.onEntityUpdate();
 
         Vec3d motion = new Vec3d(this.motionX, this.motionY, this.motionZ);
-        RayTraceResult trace = this.traceMotion(new Vec3d(this.posX, this.posY, this.posZ), motion);
+        RayTraceResult trace = this.leftOwner ? this.traceMotion(new Vec3d(this.posX, this.posY, this.posZ), motion) : null;
         if (trace != null && trace.typeOfHit != RayTraceResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, trace)) {
             this.onImpact(trace);
         }
@@ -87,16 +92,8 @@ public class EntityFart extends Entity {
     protected void onEntityHit(RayTraceResult result) {
         if (result.entityHit instanceof EntityLivingBase) {
             EntityLivingBase living = (EntityLivingBase) result.entityHit;
-            living.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300));
-            if (this.world.isRemote) {
-                for (int i = 0; i < 10 + this.rand.nextInt(6); i++) {
-                    AMParticleRegistry.spawnParticle(this.world, AMParticleRegistry.SMELLY,
-                            living.posX + (living.getRNG().nextDouble() - 0.5D) * living.width,
-                            living.posY + living.getRNG().nextDouble() * living.height,
-                            living.posZ + (living.getRNG().nextDouble() - 0.5D) * living.width,
-                            0, 0, 0);
-                }
-            } else {
+            if (!this.world.isRemote) {
+                living.addPotionEffect(new PotionEffect(MobEffects.NAUSEA, 300));
                 for (EntityMob nearby : this.world.getEntitiesWithinAABB(EntityMob.class, living.getEntityBoundingBox().grow(15))) {
                     if (nearby == living || nearby.getEntityId() == living.getEntityId()
                             || nearby.isOnSameTeam(living) || living.isOnSameTeam(nearby)
@@ -107,6 +104,14 @@ public class EntityFart extends Entity {
                     if (nearby instanceof EntityCreature) {
                         ((EntityCreature) nearby).setAttackTarget(living);
                     }
+                }
+            } else {
+                for (int i = 0; i < 10 + this.rand.nextInt(6); i++) {
+                    AMParticleRegistry.spawnParticle(this.world, AMParticleRegistry.SMELLY,
+                            living.posX + (living.getRNG().nextDouble() - 0.5D) * living.width,
+                            living.posY + living.getRNG().nextDouble() * living.height,
+                            living.posZ + (living.getRNG().nextDouble() - 0.5D) * living.width,
+                            0, 0, 0);
                 }
             }
         }
@@ -238,8 +243,11 @@ public class EntityFart extends Entity {
         if (!hit.isEntityAlive() || !hit.canBeCollidedWith()) {
             return false;
         }
-        Entity entity = this.getShooter();
-        return entity == null || this.leftOwner || !entity.isRidingSameEntity(hit);
+        Entity shooter = this.getShooter();
+        if (shooter != null && hit == shooter) {
+            return false;
+        }
+        return shooter == null || this.leftOwner || !shooter.isRidingSameEntity(hit);
     }
 
     @SideOnly(Side.CLIENT)

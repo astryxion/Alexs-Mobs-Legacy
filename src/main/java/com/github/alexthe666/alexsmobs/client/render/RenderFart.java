@@ -28,10 +28,16 @@ public class RenderFart extends Render<EntityFart> {
         GlStateManager.rotate((entityIn.prevRotationPitch + (entityIn.rotationPitch - entityIn.prevRotationPitch) * partialTicks), 1.0F, 0.0F, 0.0F);
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.depthMask(false);
         GlStateManager.color(1.0F, 1.0F, 1.0F, alpha);
         this.bindEntityTexture(entityIn);
         MODEL.setRotationAngles(0, 0, partialTicks, 0, 0, 0.0625F, entityIn);
         MODEL.render(entityIn, 0, 0, partialTicks, 0, 0, 0.0625F);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableCull();
+        GlStateManager.enableLighting();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GlStateManager.disableBlend();
         GlStateManager.popMatrix();

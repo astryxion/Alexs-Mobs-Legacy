@@ -3,7 +3,7 @@
   "modid": "citadel",
   "name": "Citadel (Legacy)",
   "description": "Citadel Library backport to 1.12.2",
-  "version": "1.12.2-1.0.0",
+  "version": "1.12.2-1.1.0",
   "mcversion": "1.12.2",
   "authorList": ["Astryxion"],
   "credits": "Astryxion, AlexThe666"

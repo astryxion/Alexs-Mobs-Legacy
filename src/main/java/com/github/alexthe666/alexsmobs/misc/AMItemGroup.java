@@ -31,7 +31,7 @@ public class AMItemGroup extends CreativeTabs {
     @Override
     @SideOnly(Side.CLIENT)
     public void displayAllRelevantItems(NonNullList<ItemStack> items) {
-        super.displayAllRelevantItems(items);
+        AMCreativeTabOrder.fillCreativeTab(items);
         try {
             for (Field f : AMEffectRegistry.class.getDeclaredFields()) {
                 Object obj = f.get(null);

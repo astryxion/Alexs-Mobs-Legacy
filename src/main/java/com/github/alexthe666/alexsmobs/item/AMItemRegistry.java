@@ -305,6 +305,8 @@ public class AMItemRegistry {
         OreDictionary.registerOre("cropBanana", BANANA);
         OreDictionary.registerOre("fruitBanana", BANANA);
         AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.BANANAS);
+        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.CAPUCHIN_MONKEY_TAMEABLES);
+        AMTagRegistry.reloadItemTagSetFor(new net.minecraft.util.ResourceLocation("alexsmobs", "animal_dictionary_ingredient"));
         AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_TAMEABLES);
         AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_BREEDABLES);
         AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_FOODSTUFFS);

@@ -13,6 +13,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -116,7 +117,7 @@ public class EntitySandShot extends Entity {
 
         this.updateRotationFromMotion(motion);
 
-        if (this.world.collidesWithAnyBlock(this.getEntityBoundingBox())) {
+        if (isEncasedInSolidBlock()) {
             this.setDead();
         } else if (this.isInWater()) {
             this.setDead();
@@ -288,6 +289,18 @@ public class EntitySandShot extends Entity {
             this.prevRotationYaw = this.rotationYaw;
             this.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
         }
+    }
+
+    private boolean isEncasedInSolidBlock() {
+        AxisAlignedBB bb = this.getEntityBoundingBox();
+        BlockPos min = new BlockPos(bb.minX + 0.001D, bb.minY + 0.001D, bb.minZ + 0.001D);
+        BlockPos max = new BlockPos(bb.maxX - 0.001D, bb.maxY - 0.001D, bb.maxZ - 0.001D);
+        for (BlockPos pos : BlockPos.getAllInBox(min, max)) {
+            if (this.world.isAirBlock(pos)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean canHitEntity(Entity p) {

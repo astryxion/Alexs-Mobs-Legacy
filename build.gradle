@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.1.0'
+version = '1.12.2-1.2.0'
 group = 'com.github.alexthe666'
 archivesBaseName = 'alexsmobs'
 
@@ -54,7 +54,7 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            // JEI dev: load TextureMap access fix coremod before game classes initialize
+            // HEI/JEI needs widened TextureMap access in FG3 dev (see AMLoadingPlugin)
             property 'fml.coreMods.load', 'com.github.alexthe666.alexsmobs.asm.AMLoadingPlugin'
         }
 
@@ -70,7 +70,7 @@ minecraft {
 }
 
 repositories {
-    maven { url = 'https://dvs1.progwml6.com/files/maven/' }
+    maven { url = 'https://maven.cleanroommc.com' }
 }
 
 dependencies {
@@ -82,11 +82,11 @@ dependencies {
     // Citadel 1.12.2 — composite subproject (see settings.gradle)
     compile project(':citadel')
 
-    // JEI in dev only (not bundled in the release jar).
-    compileOnly(fg.deobf('mezz.jei:jei_1.12.2:4.16.1.301:api')) {
+    // Had Enough Items (JEI fork) in dev only — https://www.curseforge.com/minecraft/mc-mods/had-enough-items
+    compileOnly(fg.deobf('mezz:jei:4.31.2:dev')) {
         transitive = false
     }
-    runtimeOnly(fg.deobf('mezz.jei:jei_1.12.2:4.16.1.301'))
+    runtimeOnly(fg.deobf('mezz:jei:4.31.2'))
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -134,9 +134,9 @@ task copyReleaseJars(type: Copy, dependsOn: ['build', ':citadel:build']) {
         include "alexsmobs-${version}.jar"
     }
     from(project(':citadel').file('build/libs')) {
-        include 'citadel-*.jar'
+        include "citadel-${project(':citadel').version}.jar"
     }
-    into 'build/release'
+    into 'Production Jars'
 }
 
 // This is the preferred method to reobfuscate your jar file

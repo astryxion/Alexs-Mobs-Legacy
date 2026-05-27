@@ -98,7 +98,7 @@ public class AMParticleRegistry {
         TextureMap map = event.getMap();
         GENERIC_0_7 = registerVanillaSprites(map, "generic", 0, 7);
         SPLASH_0_3 = registerVanillaSprites(map, "splash", 0, 3);
-        HEMOLYMPH_SPRITE = map.getAtlasSprite("minecraft:blocks/water_still");
+        HEMOLYMPH_SPRITE = map.registerSprite(new ResourceLocation(AlexsMobs.MODID, "entity/hemolymph"));
         DNA_SPRITES = registerAlexSprites(map, "dna_0", "dna_1", "dna_2", "dna_3", "dna_4");
         PLATYPUS_SENSE_SPRITES = registerAlexSprites(map, "platypus_sense_0", "platypus_sense_1", "platypus_sense_2");
         SHOCKED_SPRITE = map.registerSprite(new ResourceLocation(AlexsMobs.MODID, "particle/shocked"));

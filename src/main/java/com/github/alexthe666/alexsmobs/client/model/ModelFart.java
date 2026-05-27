@@ -24,13 +24,13 @@ public class ModelFart extends AdvancedEntityModel<EntityFart> {
         cube_r1.setRotationPoint(0.0F, 0.0F, 0.5F);
         main.addChild(cube_r1);
         setRotationAngle(cube_r1, 0.0F, 0.0F, -0.7854F);
-        cube_r1.setTextureOffset(0, 20).func_228303_a_(0.0F, -4.0F, -2.5F, 0.0F, 8.0F, 11.0F, 0.0F, true);
+        cube_r1.setTextureOffset(0, 20).func_228303_a_(0.0F, -4.0F, -2.5F, 0.01F, 8.0F, 11.0F, 0.0F, true);
 
         cube_r2 = new AdvancedModelBox(this, "cube_r2");
         cube_r2.setRotationPoint(0.0F, 0.0F, 0.5F);
         main.addChild(cube_r2);
         setRotationAngle(cube_r2, 0.0F, 0.0F, 0.7854F);
-        cube_r2.setTextureOffset(0, 20).func_228303_a_(0.0F, -4.0F, -2.5F, 0.0F, 8.0F, 11.0F, 0.0F, false);
+        cube_r2.setTextureOffset(0, 20).func_228303_a_(0.0F, -4.0F, -2.5F, 0.01F, 8.0F, 11.0F, 0.0F, false);
         this.updateDefaultPose();
     }
 

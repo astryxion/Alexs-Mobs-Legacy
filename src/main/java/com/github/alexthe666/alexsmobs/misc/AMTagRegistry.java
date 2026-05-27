@@ -395,8 +395,10 @@ public class AMTagRegistry {
             JsonArray values = root.getAsJsonArray("values");
             Set<ResourceLocation> out = Sets.newHashSet();
             for (int i = 0; i < values.size(); i++) {
-                String name = values.get(i).getAsString();
-                out.add(new ResourceLocation(name));
+                ResourceLocation resolved = resolveEntityTypeId(values.get(i).getAsString());
+                if (resolved != null) {
+                    out.add(resolved);
+                }
             }
             ENTITY_TYPE_TAGS.put(tagId, out);
         } catch (Exception e) {
@@ -710,21 +712,76 @@ public class AMTagRegistry {
     }
 
     /**
-     * 1.16 item ids that have no 1.12 registry entry; map to the closest 1.12 equivalent where behavior depends on the item type.
+     * Maps 1.13+ entity type ids from tag JSON to 1.12.2 registry names (or {@code null} when there is no equivalent).
+     */
+    private static ResourceLocation resolveEntityTypeId(String name) {
+        switch (name) {
+            case "minecraft:drowned":
+                return new ResourceLocation("minecraft", "zombie");
+            case "minecraft:cod":
+            case "minecraft:salmon":
+            case "minecraft:tropical_fish":
+            case "minecraft:dolphin":
+                return new ResourceLocation("minecraft", "squid");
+            case "minecraft:trader_llama":
+                return new ResourceLocation("minecraft", "llama");
+            case "minecraft:fox":
+            case "minecraft:panda":
+            case "minecraft:strider":
+            case "minecraft:wandering_trader":
+            case "minecraft:phantom":
+            case "minecraft:frog":
+            case "minecraft:turtle":
+                return null;
+            default:
+                break;
+        }
+        ResourceLocation id = new ResourceLocation(name);
+        return ForgeRegistries.ENTITIES.containsKey(id) ? id : null;
+    }
+
+    /**
+     * Maps 1.13+ item ids from tag JSON to 1.12.2 items. Tags compare {@link Item} only (not stack metadata), so fish
+     * variants map to {@link Items#FISH} / {@link Items#COOKED_FISH} as a whole.
      */
     private static Item resolveItemId(String name) {
         switch (name) {
+            case "minecraft:cod":
+            case "minecraft:salmon":
+            case "minecraft:tropical_fish":
             case "minecraft:pufferfish":
                 return Items.FISH;
+            case "minecraft:cooked_cod":
+            case "minecraft:cooked_salmon":
+                return Items.COOKED_FISH;
             case "minecraft:pufferfish_bucket":
                 return Items.FISH;
             case "minecraft:creeper_head":
                 return Items.SKULL;
             case "minecraft:sugar_cane":
-                return Items.REEDS;
             case "minecraft:bamboo":
+                return Items.REEDS;
             case "minecraft:sweet_berries":
-                return null;
+                return Items.APPLE;
+            case "minecraft:melon_slice":
+                return Items.MELON;
+            case "minecraft:honeycomb":
+            case "minecraft:honey_bottle":
+                return Items.GOLDEN_APPLE;
+            case "minecraft:honey_block":
+                return Item.getItemFromBlock(Blocks.MELON_BLOCK);
+            case "minecraft:honeycomb_block":
+                return Item.getItemFromBlock(Blocks.HAY_BLOCK);
+            case "minecraft:turtle_egg":
+                return Items.EGG;
+            case "minecraft:seagrass":
+                return Item.getItemFromBlock(Blocks.WATERLILY);
+            case "minecraft:bee_nest":
+                return Item.getItemFromBlock(Blocks.PUMPKIN);
+            case "minecraft:yellow_flower":
+                return Item.getItemFromBlock(Blocks.YELLOW_FLOWER);
+            case "minecraft:grass":
+                return Item.getItemFromBlock(Blocks.TALLGRASS);
             default:
                 break;
         }
@@ -745,7 +802,24 @@ public class AMTagRegistry {
             case "minecraft:lily_pad":
                 return Blocks.WATERLILY;
             case "minecraft:grass_block":
+            case "minecraft:grass":
                 return Blocks.GRASS;
+            case "minecraft:tall_grass":
+                return Blocks.TALLGRASS;
+            case "minecraft:large_fern":
+                return Blocks.DOUBLE_PLANT;
+            case "minecraft:vine":
+            case "minecraft:glow_lichen":
+                return Blocks.VINE;
+            case "minecraft:bamboo":
+                return Blocks.REEDS;
+            case "minecraft:bee_nest":
+                return Blocks.PUMPKIN;
+            case "minecraft:warped_wart_block":
+                return Blocks.NETHER_WART_BLOCK;
+            case "minecraft:crimson_nylium":
+            case "minecraft:warped_nylium":
+                return Blocks.NETHERRACK;
             case "minecraft:snow_block":
                 return Blocks.SNOW;
             case "minecraft:podzol":
@@ -778,11 +852,11 @@ public class AMTagRegistry {
     }
 
     private static boolean isIgnoredMissingItem(String name) {
-        return "minecraft:bamboo".equals(name) || "minecraft:sweet_berries".equals(name) || "minecraft:pufferfish_bucket".equals(name);
+        return false;
     }
 
     private static boolean isIgnoredMissingBlock(String name) {
-        return "minecraft:sweet_berry_bush".equals(name);
+        return "minecraft:sweet_berry_bush".equals(name) || "minecraft:water".equals(name);
     }
 
 }

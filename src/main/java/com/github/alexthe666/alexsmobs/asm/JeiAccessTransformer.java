@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Applies JEI {@code jei_at.cfg} access wideners at runtime for ForgeGradle 3 dev, where dependency ATs are not applied.
+ * Applies HEI/JEI {@code jei_at.cfg} access wideners at runtime for ForgeGradle 3 dev.
  */
 public class JeiAccessTransformer implements IClassTransformer {
 

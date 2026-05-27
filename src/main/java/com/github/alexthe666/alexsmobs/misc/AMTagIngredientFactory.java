@@ -59,9 +59,8 @@ public class AMTagIngredientFactory implements IIngredientFactory {
         }
         if (tag.startsWith("alexsmobs:")) {
             ResourceLocation tagId = new ResourceLocation(tag);
-            if (!AMTagRegistry.ITEM_TAG_SETS.containsKey(tagId)) {
-                AMTagRegistry.loadItemTagSetFor(tagId);
-            }
+            // Tags are first loaded in preInit before the item registry; always rebuild for recipes.
+            AMTagRegistry.reloadItemTagSetFor(tagId);
             for (Item item : AMTagRegistry.ITEM_TAG_SETS.getOrDefault(tagId, java.util.Collections.emptySet())) {
                 stacks.add(new ItemStack(item));
             }

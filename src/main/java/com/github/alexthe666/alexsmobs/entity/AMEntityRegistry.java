@@ -97,7 +97,7 @@ public class AMEntityRegistry {
     public static final EntityEntry SUNBIRD = reg(EntitySunbird.class, "sunbird", 160, 1, true);
     public static final EntityEntry GORILLA = reg(EntityGorilla.class, "gorilla");
     public static final EntityEntry CRIMSON_MOSQUITO = reg(EntityCrimsonMosquito.class, "crimson_mosquito");
-    public static final EntityEntry MOSQUITO_SPIT = reg(EntityMosquitoSpit.class, "mosquito_spit");
+    public static final EntityEntry MOSQUITO_SPIT = reg(EntityMosquitoSpit.class, "mosquito_spit", 64, 2, true);
     public static final EntityEntry RATTLESNAKE = reg(EntityRattlesnake.class, "rattlesnake");
     public static final EntityEntry ENDERGRADE = reg(EntityEndergrade.class, "endergrade");
     public static final EntityEntry HAMMERHEAD_SHARK = reg(EntityHammerheadShark.class, "hammerhead_shark");
@@ -105,7 +105,7 @@ public class AMEntityRegistry {
     public static final EntityEntry LOBSTER = reg(EntityLobster.class, "lobster");
     public static final EntityEntry KOMODO_DRAGON = reg(EntityKomodoDragon.class, "komodo_dragon");
     public static final EntityEntry CAPUCHIN_MONKEY = reg(EntityCapuchinMonkey.class, "capuchin_monkey");
-    public static final EntityEntry TOSSED_ITEM = reg(EntityTossedItem.class, "tossed_item");
+    public static final EntityEntry TOSSED_ITEM = reg(EntityTossedItem.class, "tossed_item", 64, 2, true);
     public static final EntityEntry CENTIPEDE_HEAD = reg(EntityCentipedeHead.class, "centipede_head");
     public static final EntityEntry CENTIPEDE_BODY = reg(EntityCentipedeBody.class, "centipede_body");
     public static final EntityEntry CENTIPEDE_TAIL = reg(EntityCentipedeTail.class, "centipede_tail");
@@ -127,10 +127,10 @@ public class AMEntityRegistry {
     public static final EntityEntry MUNGUS = reg(EntityMungus.class, "mungus");
     public static final EntityEntry MANTIS_SHRIMP = reg(EntityMantisShrimp.class, "mantis_shrimp");
     public static final EntityEntry GUSTER = reg(EntityGuster.class, "guster");
-    public static final EntityEntry SAND_SHOT = reg(EntitySandShot.class, "sand_shot");
+    public static final EntityEntry SAND_SHOT = reg(EntitySandShot.class, "sand_shot", 64, 2, true);
     public static final EntityEntry GUST = reg(EntityGust.class, "gust");
     public static final EntityEntry WARPED_MOSCO = reg(EntityWarpedMosco.class, "warped_mosco");
-    public static final EntityEntry HEMOLYMPH = reg(EntityHemolymph.class, "hemolymph");
+    public static final EntityEntry HEMOLYMPH = reg(EntityHemolymph.class, "hemolymph", 64, 2, true);
     public static final EntityEntry STRADDLER = reg(EntityStraddler.class, "straddler");
     public static final EntityEntry STRADPOLE = reg(EntityStradpole.class, "stradpole");
     public static final EntityEntry STRADDLEBOARD = reg(EntityStraddleboard.class, "straddleboard");
@@ -171,7 +171,7 @@ public class AMEntityRegistry {
     public static final EntityEntry GIANT_SQUID = reg(EntityGiantSquid.class, "giant_squid");
     public static final EntityEntry GIANT_SQUID_PART = reg(EntityGiantSquidPart.class, "giant_squid_part", 80, 1, true);
     public static final EntityEntry SQUID_GRAPPLE = reg(EntitySquidGrapple.class, "squid_grapple");
-    public static final EntityEntry FART = reg(EntityFart.class, "fart");
+    public static final EntityEntry FART = reg(EntityFart.class, "fart", 64, 2, true);
     public static final EntityEntry JERBOA = reg(EntityJerboa.class, "jerboa");
     public static final EntityEntry RAIN_FROG = reg(EntityRainFrog.class, "rain_frog");
     public static final EntityEntry TRIOPS = reg(EntityTriops.class, "triops");

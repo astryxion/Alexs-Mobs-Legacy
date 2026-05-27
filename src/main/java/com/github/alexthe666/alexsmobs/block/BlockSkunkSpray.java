@@ -155,7 +155,13 @@ public class BlockSkunkSpray extends BlockContainer {
     public static IBlockState getStateForPlacement(IBlockState existing, World world, BlockPos pos, EnumFacing face) {
         IBlockState here = world.getBlockState(pos);
         if (here.getBlock() == AMBlockRegistry.SKUNK_SPRAY) {
-            IBlockState actual = existing.getBlock() == AMBlockRegistry.SKUNK_SPRAY ? existing : here;
+            IBlockState actual = here;
+            TileEntitySkunkSpray te = getTile(world, pos);
+            if (te != null) {
+                actual = te.toBlockState(here);
+            } else if (existing.getBlock() == AMBlockRegistry.SKUNK_SPRAY) {
+                actual = existing;
+            }
             return actual.withProperty(getFaceProperty(face), true);
         }
         if (here.getBlock().isAir(here, world, pos) || here.getBlock().isReplaceable(world, pos)) {
@@ -175,7 +181,13 @@ public class BlockSkunkSpray extends BlockContainer {
         }
         TileEntitySkunkSpray te = getOrCreateTile(world, pos);
         if (te != null) {
-            te.readFromBlockState(sprayState);
+            for (EnumFacing facing : EnumFacing.values()) {
+                if (hasFace(sprayState, facing)) {
+                    te.setFace(facing, true);
+                }
+            }
+            te.setAge(sprayState.getValue(AGE));
+            te.setWaterlogged(sprayState.getValue(WATERLOGGED));
             world.notifyBlockUpdate(pos, here, world.getBlockState(pos), 3);
         }
     }

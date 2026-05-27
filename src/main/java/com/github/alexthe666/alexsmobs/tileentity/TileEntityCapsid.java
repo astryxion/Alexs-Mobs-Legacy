@@ -348,7 +348,7 @@ public class TileEntityCapsid extends TileEntity implements ITickable, ISidedInv
 
     @Override
     public ITextComponent getDisplayName() {
-        return new TextComponentTranslation("block.alexsmobs.capsid");
+        return new TextComponentTranslation("tile.alexsmobs.capsid.name");
     }
 
     @Override

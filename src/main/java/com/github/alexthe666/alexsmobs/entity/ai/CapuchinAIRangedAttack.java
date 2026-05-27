@@ -112,7 +112,9 @@ public class CapuchinAIRangedAttack extends EntityAIBase {
             }
 
             if (flag) {
-                this.entity.setAnimation(EntityCapuchinMonkey.ANIMATION_THROW);
+                if (this.entity.getAnimation() != EntityCapuchinMonkey.ANIMATION_THROW) {
+                    this.entity.setAnimation(EntityCapuchinMonkey.ANIMATION_THROW);
+                }
                 this.attackTime = this.attackCooldown;
             }
         }

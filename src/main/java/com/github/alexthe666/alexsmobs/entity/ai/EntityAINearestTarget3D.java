@@ -24,6 +24,6 @@ public class EntityAINearestTarget3D extends EntityAINearestAttackableTarget {
 
     @Override
     protected AxisAlignedBB getTargetableArea(double targetDistance) {
-        return this.taskOwner.getEntityBoundingBox().expand(0.5D, 2.0D, 0.5D);
+        return this.taskOwner.getEntityBoundingBox().grow(targetDistance, targetDistance, targetDistance);
     }
 }

@@ -75,6 +75,7 @@ public class EntityCrimsonMosquito extends EntityMob {
     private boolean prevFlying = false;
     private int loopSoundTick = 0;
     int drinkTime = 0;
+    private int drinkDamageCooldown = 0;
     public float prevMosquitoScale = 1F;
 
     public EntityCrimsonMosquito(World worldIn) {
@@ -193,6 +194,15 @@ public class EntityCrimsonMosquito extends EntityMob {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (!this.world.isRemote && this.isRiding() && source.getTrueSource() != null) {
+            Entity mount = this.getRidingEntity();
+            if (mount == source.getTrueSource()) {
+                this.dismountRidingEntity();
+                AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), mount.getEntityId()));
+                this.setFlying(true);
+                this.flightTicks = 0;
+            }
+        }
         if (source.getTrueSource() != null && this.getLowestRidingEntity() == source.getTrueSource().getLowestRidingEntity()) {
             return super.attackEntityFrom(source, amount * 0.333F);
         }
@@ -202,67 +212,90 @@ public class EntityCrimsonMosquito extends EntityMob {
         return super.attackEntityFrom(source, amount);
     }
 
+    /**
+     * 1.16 {@code updateRidden} attachment — applied after the mount's passenger update so we follow knockback.
+     */
+    public void repositionOnMount(EntityLivingBase mount) {
+        float radius = 1.0F;
+        float angle = (0.01745329251F * mount.renderYawOffset);
+        double extraX = radius * MathHelper.sin((float) (Math.PI + angle));
+        double extraZ = radius * MathHelper.cos(angle);
+        double px = mount.posX + extraX;
+        double py = Math.max(mount.posY + mount.getEyeHeight() * 0.25D, mount.posY);
+        double pz = mount.posZ + extraZ;
+        this.setPosition(px, py, pz);
+        this.motionX = mount.motionX;
+        this.motionY = mount.motionY;
+        this.motionZ = mount.motionZ;
+        this.renderYawOffset = mount.renderYawOffset;
+        this.rotationYaw = mount.rotationYaw;
+        this.rotationYawHead = mount.rotationYawHead;
+        this.prevRotationYaw = mount.rotationYawHead;
+        this.prevRotationYawHead = mount.rotationYawHead;
+    }
+
+    private void tickDrinkingOnMount(EntityLivingBase livingMount) {
+        if (!livingMount.isEntityAlive() || livingMount instanceof EntityPlayer && ((EntityPlayer) livingMount).capabilities.isCreativeMode) {
+            this.dismountRidingEntity();
+            return;
+        }
+        this.drinkDamageCooldown++;
+        if (this.drinkDamageCooldown < 20) {
+            return;
+        }
+        this.drinkDamageCooldown = 0;
+        boolean mungus = AMConfig.warpedMoscoTransformation && livingMount instanceof EntityMungus && ((EntityMungus) livingMount).isWarpedMoscoReady();
+        boolean sick = this.isNonMungusWarpedTrigger(livingMount);
+        float damage = mungus ? 7F : 2.0F;
+        if (livingMount.attackEntityFrom(DamageSource.causeMobDamage(this), damage)) {
+            if (mungus) {
+                ((EntityMungus) livingMount).disableExplosion();
+            }
+            if (sick || mungus) {
+                if (!this.isSick()) {
+                    for (EntityPlayerMP playerMp : this.world.getEntitiesWithinAABB(EntityPlayerMP.class, this.getEntityBoundingBox().grow(40.0D, 25.0D, 40.0D))) {
+                        AMAdvancementTriggerRegistry.MOSQUITO_SICK.trigger(playerMp);
+                    }
+                }
+                this.setSick(true);
+                this.setFlying(false);
+                flightTicks = -150 - rand.nextInt(200);
+            }
+            this.playSound(SoundEvents.ENTITY_GENERIC_DRINK, this.getSoundVolume(), this.getSoundPitch());
+            this.setBloodLevel(this.getBloodLevel() + 1);
+            if (this.getBloodLevel() > 3) {
+                this.dismountRidingEntity();
+                AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), livingMount.getEntityId()));
+                this.setFlying(false);
+                this.flightTicks = -15;
+            }
+        }
+        if (drinkTime > 81) {
+            drinkTime = -20 - rand.nextInt(20);
+            this.dismountRidingEntity();
+            AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), livingMount.getEntityId()));
+            this.setFlying(false);
+            this.flightTicks = -15;
+        }
+    }
+
     @Override
     public void updateRidden() {
         Entity entity = this.getRidingEntity();
         if (this.isRiding() && !entity.isEntityAlive()) {
             this.dismountRidingEntity();
-        } else {
-            this.motionX = 0.0D;
-            this.motionY = 0.0D;
-            this.motionZ = 0.0D;
-            if (this.isRiding()) {
-                Entity mount = this.getRidingEntity();
-                if (mount instanceof EntityLivingBase) {
-                    EntityLivingBase livingMount = (EntityLivingBase) mount;
-                    this.renderYawOffset = livingMount.renderYawOffset;
-                    this.rotationYaw = livingMount.rotationYaw;
-                    this.rotationYawHead = livingMount.rotationYawHead;
-                    this.prevRotationYaw = livingMount.rotationYawHead;
-                    float radius = 1F;
-                    float angle = (0.01745329251F * livingMount.renderYawOffset);
-                    double extraX = radius * MathHelper.sin((float) (Math.PI + angle));
-                    double extraZ = radius * MathHelper.cos(angle);
-                    this.setPosition(mount.posX + extraX, Math.max(mount.posY + livingMount.getEyeHeight() * 0.25F, mount.posY), mount.posZ + extraZ);
-                    if (!mount.isEntityAlive() || mount instanceof EntityPlayer && ((EntityPlayer) mount).capabilities.isCreativeMode) {
-                        this.dismountRidingEntity();
-                    }
-                    if (drinkTime % 20 == 0 && !world.isRemote && this.isEntityAlive()) {
-                        boolean mungus = AMConfig.warpedMoscoTransformation && mount instanceof EntityMungus && ((EntityMungus) mount).isWarpedMoscoReady();
-                        boolean sick = this.isNonMungusWarpedTrigger(mount);
-                        if (mount.attackEntityFrom(DamageSource.causeMobDamage(this), mungus ? 7F : 2.0F)) {
-                            if (mungus) {
-                                ((EntityMungus) mount).disableExplosion();
-                            }
-                            if (sick || mungus) {
-                                if (!this.isSick() && !world.isRemote) {
-                                    for (EntityPlayerMP playerMp : this.world.getEntitiesWithinAABB(EntityPlayerMP.class, this.getEntityBoundingBox().grow(40.0D, 25.0D, 40.0D))) {
-                                        AMAdvancementTriggerRegistry.MOSQUITO_SICK.trigger(playerMp);
-                                    }
-                                }
-                                this.setSick(true);
-                                this.setFlying(false);
-                                flightTicks = -150 - rand.nextInt(200);
-                            }
-                            this.playSound(SoundEvents.ENTITY_GENERIC_DRINK, this.getSoundVolume(), this.getSoundPitch());
-                            this.setBloodLevel(this.getBloodLevel() + 1);
-                            if (this.getBloodLevel() > 3) {
-                                this.dismountRidingEntity();
-                                AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), mount.getEntityId()));
-                                this.setFlying(false);
-                                this.flightTicks = -15;
-                            }
-                        }
-                    }
-                    if (drinkTime > 81 && !world.isRemote) {
-                        drinkTime = -20 - rand.nextInt(20);
-                        this.dismountRidingEntity();
-                        AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), mount.getEntityId()));
-                        this.setFlying(false);
-                        this.flightTicks = -15;
-                    }
-                }
-            }
+            return;
+        }
+        this.motionX = 0.0D;
+        this.motionY = 0.0D;
+        this.motionZ = 0.0D;
+        if (!this.isRiding() || !(entity instanceof EntityLivingBase)) {
+            return;
+        }
+        EntityLivingBase livingMount = (EntityLivingBase) entity;
+        this.repositionOnMount(livingMount);
+        if (!this.world.isRemote && this.isEntityAlive()) {
+            this.tickDrinkingOnMount(livingMount);
         }
     }
 
@@ -449,6 +482,8 @@ public class EntityCrimsonMosquito extends EntityMob {
                 drinkTime = 0;
             }
             drinkTime++;
+        } else {
+            this.drinkDamageCooldown = 0;
         }
         prevFlyProgress = flyProgress;
         prevShootProgress = shootProgress;
@@ -724,8 +759,10 @@ public class EntityCrimsonMosquito extends EntityMob {
             if (parentEntity.getAttackTarget() != null) {
                 EntityLivingBase target = parentEntity.getAttackTarget();
                 parentEntity.getMoveHelper().setMoveTo(target.posX, target.posY, target.posZ, 1.0D);
-                if (parentEntity.getEntityBoundingBox().grow(0.3F, 0.3F, 0.3F).intersects(target.getEntityBoundingBox()) && !isBittenByMosquito(target) && parentEntity.drinkTime == 0) {
+                if ((parentEntity.getDistance(target) < 1.5F || parentEntity.getEntityBoundingBox().grow(0.5F, 0.5F, 0.5F).intersects(target.getEntityBoundingBox()))
+                        && !isBittenByMosquito(target) && parentEntity.drinkTime == 0) {
                     parentEntity.startRiding(target, true);
+                    parentEntity.drinkDamageCooldown = 0;
                     if (!parentEntity.world.isRemote) {
                         AlexsMobs.sendMSGToAll(new MessageMosquitoMountPlayer(parentEntity.getEntityId(), target.getEntityId()));
                     }

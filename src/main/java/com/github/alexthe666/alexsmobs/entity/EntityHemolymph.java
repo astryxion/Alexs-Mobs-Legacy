@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
@@ -79,13 +80,10 @@ public class EntityHemolymph extends Entity {
             this.leftOwner = this.updateLeftOwner();
         }
         if (this.world.isRemote) {
-            for (int i = 0; i < 2; ++i) {
-                float spread = 0.15F;
-                float px = (this.rand.nextFloat() - 0.5F) * spread;
-                float py = (this.rand.nextFloat() - 0.5F) * spread;
-                float pz = (this.rand.nextFloat() - 0.5F) * spread;
-                AMParticleRegistry.spawnParticle(this.world, AMParticleRegistry.HEMOLYMPH, this.posX + px, this.posY + py, this.posZ + pz, this.motionX * 0.05D + px * 0.1D, this.motionY * 0.05D + py * 0.1D, this.motionZ * 0.05D + pz * 0.1D);
-            }
+            float r1 = (this.rand.nextFloat() - 0.5F) * 0.5F;
+            float r2 = (this.rand.nextFloat() - 0.5F) * 0.5F;
+            float r3 = (this.rand.nextFloat() - 0.5F) * 0.5F;
+            AMParticleRegistry.spawnParticle(this.world, AMParticleRegistry.HEMOLYMPH, this.posX + r1, this.posY + r2, this.posZ + r3, r1 * 0.1D, r2 * 0.1D, r3 * 0.1D);
         }
         super.onEntityUpdate();
 
@@ -102,7 +100,7 @@ public class EntityHemolymph extends Entity {
 
         this.updateRotationFromMotion(motion);
 
-        if (this.world.collidesWithAnyBlock(this.getEntityBoundingBox())) {
+        if (isEncasedInSolidBlock()) {
             this.setDead();
         } else if (this.isInWater()) {
             this.setDead();
@@ -270,6 +268,18 @@ public class EntityHemolymph extends Entity {
             this.prevRotationYaw = this.rotationYaw;
             this.setLocationAndAngles(this.posX, this.posY, this.posZ, this.rotationYaw, this.rotationPitch);
         }
+    }
+
+    private boolean isEncasedInSolidBlock() {
+        AxisAlignedBB bb = this.getEntityBoundingBox();
+        BlockPos min = new BlockPos(bb.minX + 0.001D, bb.minY + 0.001D, bb.minZ + 0.001D);
+        BlockPos max = new BlockPos(bb.maxX - 0.001D, bb.maxY - 0.001D, bb.maxZ - 0.001D);
+        for (BlockPos pos : BlockPos.getAllInBox(min, max)) {
+            if (this.world.isAirBlock(pos)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean canHitEntity(Entity p) {

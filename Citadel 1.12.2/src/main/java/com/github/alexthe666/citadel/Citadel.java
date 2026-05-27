@@ -71,7 +71,7 @@ public class Citadel {
    }
 
    public static <MSG extends IMessage> void sendNonLocal(MSG msg, EntityPlayerMP player) {
-      if (player.getServer() != null && (player.getServer().isDedicatedServer() || !player.getName().equals(player.getServer().getServerOwner()))) {
+      if (player.getServer() != null && (player.getServer().isDedicatedServer() || player.getServer().isSinglePlayer() || !player.getName().equals(player.getServer().getServerOwner()))) {
          NETWORK_WRAPPER.sendTo(msg, player);
       }
 

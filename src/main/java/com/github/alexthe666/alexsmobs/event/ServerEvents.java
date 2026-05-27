@@ -77,6 +77,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.items.ItemHandlerHelper;
@@ -454,6 +455,23 @@ public class ServerEvents {
                 if (event.getTarget().isPotionActive(AMEffectRegistry.BUG_PHEROMONES) && event.getEntityLiving().getRevengeTarget() != event.getTarget()) {
                     ((EntityMob) event.getEntityLiving()).setAttackTarget(null);
                 }
+            }
+        }
+    }
+
+    /** After the player tick (and vanilla {@code updatePassenger}) so mosquitoes stay latched during knockback. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void repositionBloodDrinkingMosquitos(TickEvent.PlayerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        EntityPlayer player = event.player;
+        if (player.getPassengers().isEmpty()) {
+            return;
+        }
+        for (Entity passenger : player.getPassengers()) {
+            if (passenger instanceof EntityCrimsonMosquito) {
+                ((EntityCrimsonMosquito) passenger).repositionOnMount(player);
             }
         }
     }

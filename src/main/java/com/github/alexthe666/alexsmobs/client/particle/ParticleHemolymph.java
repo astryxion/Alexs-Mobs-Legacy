@@ -27,6 +27,11 @@ public class ParticleHemolymph extends Particle {
     }
 
     @Override
+    public int getFXLayer() {
+        return 1;
+    }
+
+    @Override
     public void onUpdate() {
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
