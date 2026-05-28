@@ -35,6 +35,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -56,6 +57,7 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
     private static final DataParameter<Boolean> SITTING = EntityDataManager.createKey(EntitySnowLeopard.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> SL_SNEAKING = EntityDataManager.createKey(EntitySnowLeopard.class, DataSerializers.BOOLEAN);
     private boolean hasSlowedDown = false;
+    private boolean pounceAttacking = false;
     private int sittingTime = 0;
     private int maxSitTime = 75;
     public float prevSleepProgress;
@@ -63,6 +65,7 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
 
     public EntitySnowLeopard(World worldIn) {
         super(worldIn);
+        this.setSize(1.2F, 1.3F);
         this.stepHeight = 2F;
     }
 
@@ -163,6 +166,14 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
         this.dataManager.set(SL_SNEAKING, bar);
     }
 
+    public boolean isPounceAttacking() {
+        return pounceAttacking;
+    }
+
+    public void setPounceAttacking(boolean pounceAttacking) {
+        this.pounceAttacking = pounceAttacking;
+    }
+
     @Nullable
     @Override
     public EntityAgeable createChild(EntityAgeable ageable) {
@@ -211,6 +222,25 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
         if (isTackling()) {
             this.renderYawOffset = this.rotationYaw;
         }
+        EntityLivingBase attackTarget = this.getAttackTarget();
+        if (attackTarget == this) {
+            this.setAttackTarget(null);
+            attackTarget = null;
+        }
+        if (attackTarget != null) {
+            if (this.getDistance(attackTarget) < attackTarget.width + this.width + 0.6F && this.canEntityBeSeen(attackTarget)) {
+                if (this.getAnimation() == ANIMATION_ATTACK_L && this.getAnimationTick() == 7) {
+                    attackTarget.attackEntityFrom(DamageSource.causeMobDamage(this), (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                    float rot = this.rotationYaw + 90.0F;
+                    attackTarget.knockBack(this, 0.5F, MathHelper.sin(rot * 0.017453292F), -MathHelper.cos(rot * 0.017453292F));
+                }
+                if (this.getAnimation() == ANIMATION_ATTACK_R && this.getAnimationTick() == 7) {
+                    attackTarget.attackEntityFrom(DamageSource.causeMobDamage(this), (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
+                    float rot = this.rotationYaw - 90.0F;
+                    attackTarget.knockBack(this, 0.5F, MathHelper.sin(rot * 0.017453292F), -MathHelper.cos(rot * 0.017453292F));
+                }
+            }
+        }
         if (!world.isRemote) {
             if (this.getAttackTarget() != null && (this.isSitting() || this.isSleeping())) {
                 this.setSitting(false);
@@ -241,13 +271,36 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
+        if (source.getTrueSource() == this || source.getImmediateSource() == this) {
+            return false;
+        }
+        if (this.pounceAttacking && (source == DamageSource.FALL || source == DamageSource.FLY_INTO_WALL || source == DamageSource.IN_WALL)) {
+            return false;
+        }
         boolean prev = super.attackEntityFrom(source, amount);
         if (prev) {
+            if (!this.world.isRemote && source.getTrueSource() instanceof EntityLivingBase && source.getTrueSource() != this) {
+                EntityLivingBase attacker = (EntityLivingBase) source.getTrueSource();
+                this.setRevengeTarget(attacker);
+                this.setAttackTarget(attacker);
+            }
             sittingTime = 0;
             this.setSleeping(false);
             this.setSitting(false);
         }
         return prev;
+    }
+
+    @Override
+    public boolean isEntityInvulnerable(DamageSource source) {
+        if (source == DamageSource.IN_WALL) {
+            return true;
+        }
+        if ((this.isTackling() || this.pounceAttacking)
+                && (source == DamageSource.IN_WALL || source == DamageSource.FLY_INTO_WALL || source == DamageSource.FALL)) {
+            return true;
+        }
+        return super.isEntityInvulnerable(source);
     }
 
     @Override

@@ -113,7 +113,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
         this.tasks.addTask(0, new BreatheAirGoal(this));
         this.tasks.addTask(1, new AIFindWater());
         this.tasks.addTask(2, new SwimWithPlayerGoal(this, 4.0D));
-        this.tasks.addTask(4, new SemiAquaticAIRandomSwimming(this, 1.0D, 10));
+        this.tasks.addTask(4, new AnimalAIRandomSwimming(this, 1.0D, 10, 10, true));
         this.tasks.addTask(4, new EntityAILookIdle(this));
         this.tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(5, new OrcaAIJump(this, 10));
@@ -159,7 +159,9 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
     @Override
     public void updateAITasks() {
         super.updateAITasks();
-        breakBlock();
+        if (!this.world.isRemote) {
+            breakBlock();
+        }
     }
 
     public void breakBlock() {
@@ -168,22 +170,22 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
             return;
         }
         boolean flag = false;
-        if (!world.isRemote && this.blockBreakCounter == 0) {
+        if (this.blockBreakCounter == 0) {
             for (int a = (int) Math.round(this.getEntityBoundingBox().minX); a <= (int) Math.round(this.getEntityBoundingBox().maxX); a++) {
                 for (int b = (int) Math.round(this.getEntityBoundingBox().minY) - 1; (b <= (int) Math.round(this.getEntityBoundingBox().maxY) + 1) && (b <= 127); b++) {
                     for (int c = (int) Math.round(this.getEntityBoundingBox().minZ); c <= (int) Math.round(this.getEntityBoundingBox().maxZ); c++) {
                         BlockPos pos = new BlockPos(a, b, c);
                         IBlockState state = world.getBlockState(pos);
                         Block block = state.getBlock();
-                        if (!state.getMaterial().isReplaceable() && AMTagRegistry.blockInTag(AMTagRegistry.ORCA_BREAKABLES, block) && world.isAirBlock(pos.up())) {
-                            if (block != Blocks.AIR) {
-                                this.motionX *= 0.6F;
-                                this.motionZ *= 0.6F;
-                                flag = true;
+                        if (block != Blocks.AIR && !state.getMaterial().isLiquid() && AMTagRegistry.blockInTag(AMTagRegistry.ORCA_BREAKABLES, block) && world.isAirBlock(pos)) {
+                            this.motionX *= 0.6F;
+                            this.motionZ *= 0.6F;
+                            flag = true;
+                            if (block == Blocks.ICE || block == Blocks.FROSTED_ICE || block == Blocks.PACKED_ICE) {
+                                world.destroyBlock(pos, false);
+                                world.setBlockState(pos, Blocks.WATER.getDefaultState());
+                            } else {
                                 world.destroyBlock(pos, true);
-                                if (block == Blocks.ICE || block == Blocks.FROSTED_ICE || block == Blocks.PACKED_ICE) {
-                                    world.setBlockState(pos, Blocks.WATER.getDefaultState());
-                                }
                             }
                         }
                     }
@@ -509,12 +511,12 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
             if (this.targetPlayer == null || this.targetPlayer.capabilities.isCreativeMode) {
                 return false;
             }
-            return this.targetPlayer.isInWater() && !this.targetPlayer.onGround && this.dolphin.getAttackTarget() != this.targetPlayer;
+            return this.targetPlayer.isInWater() && this.dolphin.getAttackTarget() != this.targetPlayer;
         }
 
         @Override
         public boolean shouldContinueExecuting() {
-            return this.targetPlayer != null && this.dolphin.getAttackTarget() != this.targetPlayer && this.targetPlayer.isInWater() && !this.targetPlayer.onGround && this.dolphin.getDistanceSq(this.targetPlayer) < 256.0D;
+            return this.targetPlayer != null && this.dolphin.getAttackTarget() != this.targetPlayer && this.targetPlayer.isInWater() && this.dolphin.getDistanceSq(this.targetPlayer) < 256.0D;
         }
 
         @Override
@@ -532,7 +534,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
                 this.dolphin.getNavigator().tryMoveToEntityLiving(this.targetPlayer, this.speed);
             }
 
-            if (this.targetPlayer.isInWater() && !this.targetPlayer.onGround && this.targetPlayer.world.rand.nextInt(6) == 0) {
+            if (this.targetPlayer.isInWater() && this.targetPlayer.world.rand.nextInt(6) == 0) {
                 this.targetPlayer.addPotionEffect(new PotionEffect(AMEffectRegistry.ORCAS_MIGHT, 1000));
             }
         }

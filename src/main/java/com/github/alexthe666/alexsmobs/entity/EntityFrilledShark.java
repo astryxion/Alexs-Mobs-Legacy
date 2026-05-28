@@ -177,6 +177,16 @@ public class EntityFrilledShark extends EntityCreature implements IAnimatedEntit
     }
 
     @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+
+    @Override
     protected PathNavigate createNavigator(World worldIn) {
         return new PathNavigateSwimmer(this, worldIn);
     }

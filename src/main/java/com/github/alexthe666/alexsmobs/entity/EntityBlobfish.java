@@ -74,6 +74,11 @@ public class EntityBlobfish extends EntityCreature implements ISemiAquatic {
         return new PathNavigateSwimmer(this, worldIn);
     }
 
+    @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
     private void updateBlobfishAir() {
         if (this.isEntityAlive() && !this.isInWater() && !this.isSlimed()) {
             this.setAir(this.getAir() - 1);

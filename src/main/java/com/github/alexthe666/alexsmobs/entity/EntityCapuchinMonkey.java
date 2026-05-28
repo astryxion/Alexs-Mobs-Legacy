@@ -57,7 +57,6 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
     private int sittingTime = 0;
     private int maxSitTime = 75;
     private int rideCooldown = 0;
-    private boolean threwThisThrowAnim;
 
     public EntityCapuchinMonkey(World worldIn) {
         super(worldIn);
@@ -126,7 +125,7 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
         this.targetTasks.addTask(1, new CreatureAITargetItems(this, false));
         this.targetTasks.addTask(2, new EntityAIOwnerHurtByTarget(this));
         this.targetTasks.addTask(3, new EntityAIOwnerHurtTarget(this));
-        this.targetTasks.addTask(4, new EntityAIHurtByTarget(this, true, EntityTossedItem.class));
+        this.targetTasks.addTask(4, new EntityAIHurtByTarget(this, true, EntityCapuchinMonkey.class, EntityTossedItem.class));
         this.targetTasks.addTask(5, new CapuchinAITargetBalloons(this, true));
     }
 
@@ -215,11 +214,8 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
                     (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue());
             this.setAttackDecision(this.getAttackTarget());
         }
-        if (!world.isRemote && this.getAnimation() != ANIMATION_THROW) {
-            threwThisThrowAnim = false;
-        }
         if (!world.isRemote && this.getDartTarget() != null && this.getDartTarget().isEntityAlive()
-                && this.getAnimation() == ANIMATION_THROW && !threwThisThrowAnim && this.getAnimationTick() >= 5) {
+                && this.getAnimation() == ANIMATION_THROW && this.getAnimationTick() == 5) {
             Entity dartTarget = this.getDartTarget();
             double d0 = dartTarget.posX + dartTarget.motionX - this.posX;
             double d1 = dartTarget.posY + dartTarget.getEyeHeight() - 1.1D - this.posY;
@@ -233,7 +229,6 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
                 this.world.playSound(null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_WITCH_THROW, this.getSoundCategory(), 1.0F, 0.8F + this.rand.nextFloat() * 0.4F);
             }
             this.world.spawnEntity(tossedItem);
-            threwThisThrowAnim = true;
             this.setAttackDecision(this.getDartTarget());
         }
         if (rideCooldown > 0) {

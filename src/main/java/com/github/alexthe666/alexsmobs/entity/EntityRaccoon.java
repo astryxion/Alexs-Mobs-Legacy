@@ -209,9 +209,13 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
         return stack.getItem() == Items.BREAD;
     }
 
-    public static boolean isFood(ItemStack stack) {
+    public static boolean isRaccoonFood(ItemStack stack) {
         Item item = stack.getItem();
         return item instanceof ItemFood || AMTagRegistry.itemInTag(AMTagRegistry.RACCOON_FOODSTUFFS, item);
+    }
+
+    public static boolean isFood(ItemStack stack) {
+        return stack.getItem() == Items.BREAD;
     }
 
     @Override
@@ -248,7 +252,7 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
             this.entityDropItem(this.getCarpetItemBeingWorn(), 0.0F);
             this.setColor(null);
             return true;
-        } else if (isTamed() && isFood(itemstack) && !isBreedingItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
+        } else if (isTamed() && isRaccoonFood(itemstack) && !isFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
             if (this.getHeldItemMainhand().isEmpty()) {
                 ItemStack copy = itemstack.copy();
                 copy.setCount(1);
@@ -424,12 +428,12 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
 
     private boolean shouldEatHeldFood() {
         ItemStack held = this.getHeldItemMainhand();
-        return !held.isEmpty() && isFood(held);
+        return canTargetItem(held);
     }
 
     private void eatHeldFood() {
         ItemStack held = this.getHeldItemMainhand();
-        if (held.isEmpty() || !isFood(held)) {
+        if (held.isEmpty() || !isRaccoonFood(held)) {
             return;
         }
         if (held.getItem().hasContainerItem()) {
@@ -578,7 +582,7 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
 
     @Override
     public boolean canTargetItem(ItemStack stack) {
-        return isFood(stack) && pickupItemCooldown == 0;
+        return isRaccoonFood(stack) && pickupItemCooldown == 0;
     }
 
     @Override
@@ -630,7 +634,7 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
 
     @Override
     public boolean shouldLootItem(ItemStack stack) {
-        return isFood(stack);
+        return isRaccoonFood(stack);
     }
 
     public BlockPos getLightPosition() {

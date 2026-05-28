@@ -480,6 +480,16 @@ public class EntityTiger extends EntityAnimal implements ICustomCollisions, IAni
     public boolean attackEntityFrom(DamageSource source, float amount) {
         boolean prev = super.attackEntityFrom(source, amount);
         if (prev) {
+            if (!this.world.isRemote && source.getTrueSource() instanceof EntityLivingBase && source.getTrueSource() != this) {
+                EntityLivingBase attacker = (EntityLivingBase) source.getTrueSource();
+                this.func_230258_H__();
+                this.setAngerTarget(attacker.getUniqueID());
+                this.setRevengeTarget(attacker);
+                this.setAttackTarget(attacker);
+            }
+            this.sittingTime = 0;
+            this.setSitting(false);
+            this.setSleeping(false);
             if (source.getTrueSource() instanceof EntityPlayer) {
                 this.lastPlayerAttackGameTime = world.getTotalWorldTime();
             }
@@ -849,7 +859,9 @@ public class EntityTiger extends EntityAnimal implements ICustomCollisions, IAni
                     tiger.setRunning(true);
                     if (tiger.dataManager.get(LAST_SCARED_MOB_ID) != target.getEntityId()) {
                         tiger.dataManager.set(LAST_SCARED_MOB_ID, target.getEntityId());
-                        target.addPotionEffect(new PotionEffect(AMEffectRegistry.FEAR, 100, 0, true, false));
+                        if (!(target instanceof EntityPlayer)) {
+                            target.addPotionEffect(new PotionEffect(AMEffectRegistry.FEAR, 100, 0, true, false));
+                        }
                     }
                 }
                 if (dist < 12 && tiger.getAnimation() == IAnimatedEntity.NO_ANIMATION && tiger.onGround && jumpAttemptCooldown == 0 && !tiger.isHolding()) {

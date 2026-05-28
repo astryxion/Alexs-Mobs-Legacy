@@ -107,6 +107,7 @@ public class SnowLeopardAIMelee extends EntityAIBase {
     public void updateTask() {
         if (stalk) {
             if (secondPartOfLeap) {
+                leopard.faceEntity(target, 180F, 10F);
                 leopard.getLookHelper().setLookPositionWithEntity(target, 180F, 10F);
                 leopard.renderYawOffset = leopard.rotationYaw;
                 if (leopard.onGround) {
@@ -122,7 +123,8 @@ public class SnowLeopardAIMelee extends EntityAIBase {
                     this.leopard.motionZ = vector3d1.z;
                 }
                 if (this.leopard.getDistance(target) < 3F && this.leopard.canEntityBeSeen(target)) {
-                    target.attackEntityFrom(DamageSource.causeMobDamage(leopard), (float) (leopard.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue() * 2.5F));
+                    target.attackEntityFrom(DamageSource.causeMobDamage(leopard),
+                            (float) (leopard.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue() * 2.5F));
                     this.stalk = false;
                     this.secondPartOfLeap = false;
                 }
@@ -181,6 +183,7 @@ public class SnowLeopardAIMelee extends EntityAIBase {
         boolean lvt_16_1_ = false;
         double lvt_17_1_ = -1.0D / 0.0;
         BlockPos lvt_19_1_ = creature.getPosition();
+        WalkNodeProcessor walkNodeProcessor = new WalkNodeProcessor();
 
         for (int lvt_20_1_ = 0; lvt_20_1_ < 10; ++lvt_20_1_) {
             BlockPos lvt_21_1_ = func_226343_a_(lvt_14_1_, xz, y, p_226339_3_, p_226339_4_, p_226339_6_);
@@ -205,13 +208,13 @@ public class SnowLeopardAIMelee extends EntityAIBase {
                 }
 
                 lvt_25_2_ = new BlockPos(MathHelper.floor((double) lvt_22_1_ + creature.posX), MathHelper.floor((double) lvt_23_1_ + creature.posY), MathHelper.floor((double) lvt_24_1_ + creature.posZ));
-                if (lvt_25_2_.getY() >= 0 && lvt_25_2_.getY() <= creature.world.getHeight() && (!lvt_15_2_ || leopard.isWithinHomeDistanceFromPosition(lvt_25_2_)) && (!p_226339_12_ || lvt_13_1_.getPathToPos(lvt_25_2_) != null)) {
+                if (lvt_25_2_.getY() >= 0 && lvt_25_2_.getY() <= creature.world.getHeight() && (!lvt_15_2_ || leopard.isWithinHomeDistanceFromPosition(lvt_25_2_)) && (!p_226339_12_ || lvt_13_1_.canEntityStandOnPos(lvt_25_2_))) {
                     if (p_226339_9_) {
                         lvt_25_2_ = func_226342_a_(lvt_25_2_, lvt_14_1_.nextInt(p_226339_10_ + 1) + p_226339_11_, creature.world.getHeight(), (p_226341_1_) -> creature.world.getBlockState(p_226341_1_).getMaterial().isSolid());
                     }
 
                     if (p_226339_5_ || creature.world.getBlockState(lvt_25_2_).getMaterial() != Material.WATER) {
-                        PathNodeType lvt_26_1_ = new WalkNodeProcessor().getPathNodeType(creature.world, lvt_25_2_.getX(), lvt_25_2_.getY(), lvt_25_2_.getZ());
+                        PathNodeType lvt_26_1_ = walkNodeProcessor.getPathNodeType(creature.world, lvt_25_2_.getX(), lvt_25_2_.getY(), lvt_25_2_.getZ());
                         if (leopard.getPathPriority(lvt_26_1_) == 0.0F) {
                             double lvt_27_1_ = p_226339_8_.applyAsDouble(lvt_25_2_);
                             if (lvt_27_1_ > lvt_17_1_) {

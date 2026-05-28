@@ -451,6 +451,7 @@ public class EntityVoidWormPart extends EntityLivingBase implements IHurtableMul
             EntityVoidWorm worm = this.getWorm();
             if (worm != null) {
                 worm.playHurtSoundWorm(source);
+                worm.alertToAttacker(source);
             }
             return true;
         }

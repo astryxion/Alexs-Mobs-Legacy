@@ -28,6 +28,7 @@ public class GorillaAIForageLeaves extends EntityAIBase {
     private int idleAtLeavesTime = 0;
     private boolean isAboveDestinationBear;
     private int timeoutCounter;
+    private static final int MAX_TIMEOUT = 600;
 
     public GorillaAIForageLeaves(EntityGorilla gorilla) {
         this.gorilla = gorilla;
@@ -60,7 +61,7 @@ public class GorillaAIForageLeaves extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return destinationBlock != null;
+        return destinationBlock != null && timeoutCounter < MAX_TIMEOUT;
     }
 
     @Override
@@ -113,7 +114,9 @@ public class GorillaAIForageLeaves extends EntityAIBase {
                 }
             }
             if (this.idleAtLeavesTime >= 20) {
-                this.breakLeaves();
+                if (!this.breakLeaves()) {
+                    resetTask();
+                }
             } else {
                 ++this.idleAtLeavesTime;
             }
@@ -124,28 +127,33 @@ public class GorillaAIForageLeaves extends EntityAIBase {
         return blockpos.distanceSq(positionVec.x, blockpos.getY(), positionVec.z) < distance * distance;
     }
 
-    private void breakLeaves() {
+    private boolean breakLeaves() {
         if (destinationBlock == null) {
-            return;
+            return false;
         }
-        if (ForgeEventFactory.getMobGriefingEvent(gorilla.world, gorilla)) {
-            IBlockState blockstate = gorilla.world.getBlockState(this.destinationBlock);
-            if (AMTagRegistry.blockInTag(AMTagRegistry.GORILLA_BREAKABLES, blockstate.getBlock())) {
-                gorilla.world.destroyBlock(destinationBlock, false);
-                Random rand = new Random();
-                ItemStack stack = new ItemStack(blockstate.getBlock());
-                EntityItem itementity = new EntityItem(gorilla.world, destinationBlock.getX() + rand.nextFloat(), destinationBlock.getY() + rand.nextFloat(), destinationBlock.getZ() + rand.nextFloat(), stack);
-                itementity.setDefaultPickupDelay();
-                gorilla.world.spawnEntity(itementity);
-                if (AMTagRegistry.BLOCKS_DROPPING_BANANAS.contains(blockstate.getBlock()) && rand.nextInt(30) == 0) {
-                    ItemStack banana = new ItemStack(AMItemRegistry.BANANA);
-                    EntityItem itementity2 = new EntityItem(gorilla.world, destinationBlock.getX() + rand.nextFloat(), destinationBlock.getY() + rand.nextFloat(), destinationBlock.getZ() + rand.nextFloat(), banana);
-                    itementity2.setDefaultPickupDelay();
-                    gorilla.world.spawnEntity(itementity2);
-                }
-                resetTask();
-            }
+        if (!ForgeEventFactory.getMobGriefingEvent(gorilla.world, gorilla)) {
+            return false;
         }
+        IBlockState blockstate = gorilla.world.getBlockState(this.destinationBlock);
+        if (!AMTagRegistry.blockInTag(AMTagRegistry.GORILLA_BREAKABLES, blockstate.getBlock())) {
+            return false;
+        }
+        gorilla.world.destroyBlock(destinationBlock, false);
+        Random rand = gorilla.getRNG();
+        ItemStack stack = new ItemStack(blockstate.getBlock());
+        EntityItem itementity = new EntityItem(gorilla.world, destinationBlock.getX() + rand.nextFloat(), destinationBlock.getY() + rand.nextFloat(), destinationBlock.getZ() + rand.nextFloat(), stack);
+        itementity.setDefaultPickupDelay();
+        itementity.setPickupDelay(60);
+        gorilla.world.spawnEntity(itementity);
+        if (AMTagRegistry.BLOCKS_DROPPING_BANANAS.contains(blockstate.getBlock()) && rand.nextInt(30) == 0) {
+            ItemStack banana = new ItemStack(AMItemRegistry.BANANA);
+            EntityItem itementity2 = new EntityItem(gorilla.world, destinationBlock.getX() + rand.nextFloat(), destinationBlock.getY() + rand.nextFloat(), destinationBlock.getZ() + rand.nextFloat(), banana);
+            itementity2.setDefaultPickupDelay();
+            itementity2.setPickupDelay(60);
+            gorilla.world.spawnEntity(itementity2);
+        }
+        resetTask();
+        return true;
     }
 
     private boolean shouldMoveTo(World worldIn, BlockPos pos) {

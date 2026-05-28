@@ -72,6 +72,16 @@ public class EntityHammerheadShark extends EntityCreature {
     }
 
     @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+
+    @Override
     protected PathNavigate createNavigator(World worldIn) {
         return new SemiAquaticPathNavigator(this, worldIn);
     }

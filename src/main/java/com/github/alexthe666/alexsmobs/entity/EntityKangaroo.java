@@ -211,6 +211,7 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         Item item = itemstack.getItem();
+        boolean type = super.processInteract(player, hand);
         if (!isTamed() && item == Items.CARROT) {
             if (!player.capabilities.isCreativeMode) {
                 itemstack.shrink(1);
@@ -233,11 +234,13 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
             this.heal(((ItemFood) item).getHealAmount(itemstack));
             return true;
         }
-        if (isTamed() && isOwner(player) && !isBreedingItem(itemstack)) {
+        if (!type && isTamed() && isOwner(player) && !isBreedingItem(itemstack)) {
             if (player.isSneaking()) {
-                this.openGUI(player);
-                this.removePassengers();
-                this.dataManager.set(POUCH_TICK, -1);
+                if (!this.isChild()) {
+                    this.openGUI(player);
+                    this.removePassengers();
+                    this.dataManager.set(POUCH_TICK, -1);
+                }
                 return true;
             } else {
                 this.setCommand(this.getCommand() + 1);
@@ -259,7 +262,7 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
             }
         }
 
-        return super.processInteract(player, hand);
+        return type;
     }
 
     @Override
@@ -319,7 +322,7 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
     }
 
     public void openGUI(EntityPlayer player) {
-        if (!this.world.isRemote && !this.isPassenger(player) && player instanceof EntityPlayerMP) {
+        if (!this.world.isRemote && !this.getPassengers().contains(player) && player instanceof EntityPlayerMP) {
             ((EntityPlayerMP) player).displayGUIChest(this.kangarooInventory);
         }
     }

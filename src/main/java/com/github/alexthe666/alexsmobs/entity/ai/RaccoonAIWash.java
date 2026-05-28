@@ -106,7 +106,7 @@ public class RaccoonAIWash extends EntityAIBase {
         if (raccoon.getHeldItemMainhand().isEmpty()) {
             return false;
         }
-        return targetPos != null && !this.raccoon.isInWater() && EntityRaccoon.isFood(this.raccoon.getHeldItemMainhand());
+        return targetPos != null && !this.raccoon.isInWater() && EntityRaccoon.isRaccoonFood(this.raccoon.getHeldItemMainhand());
     }
 
     public BlockPos generateTarget() {

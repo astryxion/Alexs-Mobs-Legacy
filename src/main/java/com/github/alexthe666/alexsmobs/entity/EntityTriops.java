@@ -148,6 +148,11 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
         return AMEntityRegistry.aquaticNoEntityCollision(this);
     }
 
+    @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
     private void updateTriopsAir() {
         if (this.isEntityAlive() && !this.isInWater()) {
             this.setAir(this.getAir() - 1);

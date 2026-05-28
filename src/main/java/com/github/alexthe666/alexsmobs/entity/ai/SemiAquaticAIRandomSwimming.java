@@ -86,11 +86,16 @@ public class SemiAquaticAIRandomSwimming extends EntityAIBase {
         for (int i = 0;
              vector3d != null
                      && this.creature.world.getBlockState(new BlockPos(vector3d)).getMaterial() != Material.LAVA
-                     && this.creature.world.getBlockState(new BlockPos(vector3d)).getMaterial() != Material.WATER
+                     && !isSwimDestination(new BlockPos(vector3d))
                      && i++ < 15;
              vector3d = RandomPositionGenerator.findRandomTarget(this.creature, 10, 7)) {
         }
         return vector3d;
+    }
+
+    private boolean isSwimDestination(BlockPos pos) {
+        Material mat = this.creature.world.getBlockState(pos).getMaterial();
+        return mat == Material.WATER && !mat.blocksMovement();
     }
 
     private boolean canJumpTo(BlockPos pos, int dx, int dz, int scale) {

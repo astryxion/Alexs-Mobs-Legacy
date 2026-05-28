@@ -76,6 +76,16 @@ public class EntityLobster extends EntityCreature implements ISemiAquatic {
     }
 
     @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+
+    @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.LOBSTER_HURT;
     }

@@ -218,6 +218,16 @@ public class EntityStradpole extends EntityCreature implements ISemiAquatic {
     }
 
     @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+
+    @Override
     protected PathNavigate createNavigator(World worldIn) {
         return new BoneSerpentPathNavigator(this, worldIn);
     }

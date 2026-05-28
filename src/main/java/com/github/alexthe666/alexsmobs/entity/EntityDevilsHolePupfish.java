@@ -297,6 +297,16 @@ public class EntityDevilsHolePupfish extends EntityCreature {
     }
 
     @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
+    @Override
+    public boolean isPushedByWater() {
+        return false;
+    }
+
+    @Override
     public void onLivingUpdate() {
         if (this.isEntityAlive() && !this.isInWater()) {
             this.setAir(this.getAir() - 1);

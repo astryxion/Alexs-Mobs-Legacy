@@ -427,7 +427,8 @@ public class EntityGorilla extends EntityTameable implements IAnimatedEntity, IT
             if (eatingTime % 5 == 0) {
                 this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
             }
-            if (eatingTime > 100) {
+            int eatDuration = isHeldItemLeaves(this.getHeldItemMainhand()) ? 40 : 100;
+            if (eatingTime > eatDuration) {
                 ItemStack stack = this.getHeldItemMainhand();
                 if (!stack.isEmpty()) {
                     this.heal(4);
@@ -448,6 +449,12 @@ public class EntityGorilla extends EntityTameable implements IAnimatedEntity, IT
                         this.entityDropItem(new ItemStack(stack.getItem().getContainerItem()), 0.0F);
                     }
                     stack.shrink(1);
+                    if (stack.isEmpty()) {
+                        this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
+                        this.setEating(false);
+                    }
+                } else {
+                    this.setEating(false);
                 }
                 eatingTime = 0;
             }

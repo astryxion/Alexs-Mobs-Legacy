@@ -176,6 +176,11 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
         this.updateFlyingFishAir();
     }
 
+    @Override
+    public boolean canBreatheUnderwater() {
+        return true;
+    }
+
     private void updateFlyingFishAir() {
         if (this.isEntityAlive() && !this.isInWater()) {
             this.setAir(this.getAir() - 1);

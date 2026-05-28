@@ -30,7 +30,7 @@ public class RaccoonAIBeg extends EntityAIBase {
         if (this.closestPlayer == null) {
             return false;
         }
-        return EntityRaccoon.isFood(this.closestPlayer.getHeldItemMainhand()) || EntityRaccoon.isFood(this.closestPlayer.getHeldItemOffhand());
+        return EntityRaccoon.isRaccoonFood(this.closestPlayer.getHeldItemMainhand()) || EntityRaccoon.isRaccoonFood(this.closestPlayer.getHeldItemOffhand());
     }
 
     @Override
@@ -55,7 +55,7 @@ public class RaccoonAIBeg extends EntityAIBase {
     @Override
     public void updateTask() {
         this.raccoon.getLookHelper().setLookPositionWithEntity(this.closestPlayer, this.raccoon.getHorizontalFaceSpeed() + 20, (float) this.raccoon.getVerticalFaceSpeed());
-        if (this.raccoon.getDistanceSq(this.closestPlayer) < 144.0D) {
+        if (this.raccoon.getDistanceSq(this.closestPlayer) < 12.0D) {
             this.raccoon.getNavigator().clearPath();
             this.raccoon.setBegging(true);
         } else {

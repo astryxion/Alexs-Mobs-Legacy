@@ -16,6 +16,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
@@ -162,6 +163,33 @@ public class EntityVoidWorm extends EntityMob {
     }
 
     @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        boolean hurt = super.attackEntityFrom(source, amount);
+        if (hurt) {
+            this.alertToAttacker(source);
+        }
+        return hurt;
+    }
+
+    /**
+     * Body segments have their own health; bow hits usually land on parts, not the head.
+     * Forward aggro to the head so combat AI engages the shooter.
+     */
+    public void alertToAttacker(DamageSource source) {
+        if (this.world.isRemote || source == null) {
+            return;
+        }
+        Entity attacker = source.getTrueSource();
+        if (attacker instanceof EntityLivingBase && attacker != this && attacker.isEntityAlive()) {
+            EntityLivingBase living = (EntityLivingBase) attacker;
+            this.setRevengeTarget(living);
+            this.setAttackTarget(living);
+            this.portalTarget = null;
+            this.makeIdlePortalCooldown = Math.max(this.makeIdlePortalCooldown, 120);
+        }
+    }
+
+    @Override
     protected boolean canDespawn() {
         return false;
     }
@@ -171,8 +199,9 @@ public class EntityVoidWorm extends EntityMob {
         this.tasks.addTask(1, new AIEnterPortal());
         this.tasks.addTask(2, new AIAttack());
         this.tasks.addTask(3, new AIFlyIdle());
-        this.targetTasks.addTask(1, new EntityAINearestTarget3D(this, EntityPlayer.class, 10, true, true, null));
-        this.targetTasks.addTask(2, new EntityAINearestTarget3D(this, EntityDragon.class, 10, true, true, null));
+        this.targetTasks.addTask(0, new EntityAIHurtByTarget(this, true));
+        this.targetTasks.addTask(1, new EntityAINearestTarget3D(this, EntityPlayer.class, 10, false, false, null));
+        this.targetTasks.addTask(2, new EntityAINearestTarget3D(this, EntityDragon.class, 10, false, true, null));
     }
 
     @Override
@@ -858,7 +887,12 @@ public class EntityVoidWorm extends EntityMob {
             if (target != null) {
                 if (this.mode == AttackMode.CIRCLE) {
                     if (this.moveTo == null || EntityVoidWorm.this.getDistanceSq(this.moveTo.x, this.moveTo.y, this.moveTo.z) < 16.0D || EntityVoidWorm.this.collidedHorizontally) {
-                        this.moveTo = EntityVoidWorm.this.getBlockInViewAway(target.getPositionVector(), 0.4F + EntityVoidWorm.this.rand.nextFloat() * 0.2F);
+                        double distSq = EntityVoidWorm.this.getDistanceSq(target);
+                        if (distSq > 256.0D && (EntityVoidWorm.this.getRevengeTarget() == target || EntityVoidWorm.this.rand.nextInt(3) == 0)) {
+                            this.moveTo = target.getPositionVector().addVector(0.0D, 3.0D + EntityVoidWorm.this.rand.nextInt(6), 0.0D);
+                        } else {
+                            this.moveTo = EntityVoidWorm.this.getBlockInViewAway(target.getPositionVector(), 0.4F + EntityVoidWorm.this.rand.nextFloat() * 0.2F);
+                        }
                     }
                     this.modeTicks++;
                     if (this.modeTicks % 50 == 0) {

@@ -48,7 +48,7 @@ public class AlexsMobs {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "alexsmobs";
-    public static final String VERSION = "1.12.2-1.2.0";
+    public static final String VERSION = "1.12.2-1.3.0";
 
     @Mod.Instance(MODID)
     public static AlexsMobs instance;
