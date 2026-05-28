@@ -94,6 +94,11 @@ public class EntityTerrapin extends EntityAnimal implements ISemiAquatic {
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 2;
+    }
+
+    @Override
     protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
         return AMSoundRegistry.TERRAPIN_HURT;
     }

@@ -2,6 +2,8 @@ package com.github.alexthe666.alexsmobs.entity;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
+import com.github.alexthe666.alexsmobs.entity.ai.RoadrunnerAIAttackMelee;
+import com.github.alexthe666.alexsmobs.entity.ai.RoadrunnerAITempt;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
@@ -9,7 +11,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
 import net.minecraft.entity.ai.EntityAIFollowParent;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
 import net.minecraft.entity.ai.EntityAILookIdle;
@@ -17,11 +18,12 @@ import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAITempt;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -58,20 +60,52 @@ public class EntityRoadrunner extends EntityAnimal {
     protected void initEntityAI() {
         this.tasks.addTask(0, new EntityAISwimming(this));
         this.tasks.addTask(1, new EntityAIPanic(this, 1.1D));
-        this.tasks.addTask(1, new EntityAIAttackMelee(this, 1.0D, false));
+        this.tasks.addTask(1, new RoadrunnerAIAttackMelee(this, 1.0D, false));
         this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
         this.tasks.addTask(4, new EntityAIFollowParent(this, 1.1D));
-        this.tasks.addTask(4, new EntityAITempt(this, 1.1D, Items.SPIDER_EYE, false) {
-            @Override
-            protected boolean isTempting(ItemStack stack) {
-                return AMTagRegistry.itemInTag(AMTagRegistry.INSECT_ITEMS, stack.getItem());
-            }
-        });
+        this.tasks.addTask(4, new RoadrunnerAITempt(this, 1.1D, false));
         this.tasks.addTask(5, new AnimalAIWanderRanged(this, 50, 1.0D, 25, 7));
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(7, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityRattlesnake.class, 55, true, false, null));
-        this.targetTasks.addTask(2, new EntityAIHurtByTarget(this, true, EntityRattlesnake.class));
+        // 1.20 HurtByTargetGoal(..., Player.class) — do not retaliate against creative/spectator players
+        this.targetTasks.addTask(2, new RoadrunnerAIHurtByTarget(this));
+    }
+
+    private static boolean isNonCombatPlayer(@Nullable EntityLivingBase target) {
+        if (!(target instanceof EntityPlayer)) {
+            return false;
+        }
+        EntityPlayer player = (EntityPlayer) target;
+        return player.capabilities.isCreativeMode || (player instanceof EntityPlayerMP && ((EntityPlayerMP) player).isSpectator());
+    }
+
+    @Override
+    public void setAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn) {
+        if (isNonCombatPlayer(entitylivingbaseIn)) {
+            super.setAttackTarget(null);
+            return;
+        }
+        super.setAttackTarget(entitylivingbaseIn);
+    }
+
+    @Override
+    public void setRevengeTarget(@Nullable EntityLivingBase entitylivingbaseIn) {
+        if (isNonCombatPlayer(entitylivingbaseIn)) {
+            return;
+        }
+        super.setRevengeTarget(entitylivingbaseIn);
+    }
+
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        boolean result = super.attackEntityFrom(source, amount);
+        Entity attacker = source.getTrueSource();
+        if (attacker instanceof EntityPlayer && isNonCombatPlayer((EntityLivingBase) attacker)) {
+            this.setRevengeTarget(null);
+            this.setAttackTarget(null);
+        }
+        return result;
     }
 
     @Override
@@ -137,6 +171,14 @@ public class EntityRoadrunner extends EntityAnimal {
 
     @Override
     public void onLivingUpdate() {
+        if (!this.world.isRemote) {
+            if (isNonCombatPlayer(this.getRevengeTarget())) {
+                this.setRevengeTarget(null);
+            }
+            if (isNonCombatPlayer(this.getAttackTarget())) {
+                this.setAttackTarget(null);
+            }
+        }
         super.onLivingUpdate();
         this.oFlap = this.wingRotation;
         this.prevAttackProgress = attackProgress;
@@ -188,5 +230,24 @@ public class EntityRoadrunner extends EntityAnimal {
     @Nullable
     public EntityAgeable createChild(EntityAgeable ageable) {
         return (EntityRoadrunner) AMEntityRegistry.ROADRUNNER.newInstance(this.world);
+    }
+
+    private class RoadrunnerAIHurtByTarget extends EntityAIHurtByTarget {
+
+        RoadrunnerAIHurtByTarget(EntityRoadrunner roadrunner) {
+            super(roadrunner, true, EntityRattlesnake.class);
+        }
+
+        @Override
+        public boolean shouldExecute() {
+            return !isNonCombatPlayer(EntityRoadrunner.this.getRevengeTarget()) && super.shouldExecute();
+        }
+
+        @Override
+        protected void setEntityAttackTarget(EntityCreature mobIn, EntityLivingBase targetIn) {
+            if (!isNonCombatPlayer(targetIn)) {
+                super.setEntityAttackTarget(mobIn, targetIn);
+            }
+        }
     }
 }

@@ -124,6 +124,14 @@ public class ClientEvents {
         }
     }
 
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onFOVUpdate(EntityViewRenderEvent.FOVModifier event) {
+        if (event.getEntity() instanceof EntityLivingBase && ((EntityLivingBase) event.getEntity()).isPotionActive(AMEffectRegistry.FEAR)) {
+            event.setFOV(1.0F);
+        }
+    }
+
     /**
      * 1.16 had {@code WanderingTraderEntity}; 1.12.2 has no such class — match registry name / class name for parity with modded backports.
      */

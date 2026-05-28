@@ -156,13 +156,13 @@ public class LayerKangarooArmor implements LayerRenderer<EntityKangaroo> {
         model.chest.postRender(scale);
     }
 
-    private void syncKangarooPose(EntityKangaroo entity, ModelKangaroo km, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        km.setRotationAngles(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
-    }
-
     private void renderChestplate(EntityKangaroo entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale, boolean glintIn, ModelBiped modelIn, float red, float green, float blue, ResourceLocation armorResource, boolean notAVanillaModel) {
         ModelKangaroo km = (ModelKangaroo) this.renderer.getMainModel();
-        syncKangarooPose(entity, km, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        km.copyModelAttributesTo(modelIn);
+        modelIn.bipedRightLeg.showModel = false;
+        modelIn.bipedLeftLeg.showModel = false;
+        modelIn.bipedHead.showModel = false;
+        modelIn.bipedHeadwear.showModel = false;
         this.renderer.bindTexture(armorResource);
         float sitProgress = entity.prevSitProgress + (entity.sitProgress - entity.prevSitProgress) * Minecraft.getMinecraft().getRenderPartialTicks();
         modelIn.bipedBody.rotateAngleX = 90.0F * 0.017453292F;
@@ -179,13 +179,14 @@ public class LayerKangarooArmor implements LayerRenderer<EntityKangaroo> {
         modelIn.bipedRightArm.rotationPointZ = km.arm_right.rotationPointZ - 0.5F;
         GlStateManager.color(red, green, blue, 1.0F);
         modelIn.bipedBody.showModel = false;
-        modelIn.render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        renderBipedPart(modelIn.bipedRightArm, scale);
+        renderBipedPart(modelIn.bipedLeftArm, scale);
         modelIn.bipedBody.showModel = true;
         modelIn.bipedRightArm.showModel = false;
         modelIn.bipedLeftArm.showModel = false;
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.1F, 1.65F, 1.1F);
-        modelIn.render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        renderBipedPart(modelIn.bipedBody, scale);
         GlStateManager.popMatrix();
         modelIn.bipedRightArm.showModel = true;
         modelIn.bipedLeftArm.showModel = true;
@@ -194,7 +195,12 @@ public class LayerKangarooArmor implements LayerRenderer<EntityKangaroo> {
 
     private void renderHelmet(EntityKangaroo entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale, boolean glintIn, ModelBiped modelIn, float red, float green, float blue, ResourceLocation armorResource, boolean notAVanillaModel) {
         ModelKangaroo km = (ModelKangaroo) this.renderer.getMainModel();
-        syncKangarooPose(entity, km, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        km.copyModelAttributesTo(modelIn);
+        modelIn.bipedBody.showModel = false;
+        modelIn.bipedRightArm.showModel = false;
+        modelIn.bipedLeftArm.showModel = false;
+        modelIn.bipedRightLeg.showModel = false;
+        modelIn.bipedLeftLeg.showModel = false;
         this.renderer.bindTexture(armorResource);
         modelIn.bipedHead.rotateAngleX = 0.0F;
         modelIn.bipedHead.rotateAngleY = 0.0F;
@@ -209,8 +215,16 @@ public class LayerKangarooArmor implements LayerRenderer<EntityKangaroo> {
         modelIn.bipedHeadwear.rotationPointY = 0.0F;
         modelIn.bipedHeadwear.rotationPointZ = 0.0F;
         GlStateManager.color(red, green, blue, 1.0F);
-        modelIn.render(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+        renderBipedPart(modelIn.bipedHead, scale);
+        renderBipedPart(modelIn.bipedHeadwear, scale);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    /** Renders a biped box without {@link ModelBiped#render(Entity, ...)} re-applying vanilla player pose. */
+    private static void renderBipedPart(ModelRenderer part, float scale) {
+        if (part != null && part.showModel) {
+            part.render(scale);
+        }
     }
 
     protected void setModelSlotVisible(ModelBiped model, EntityEquipmentSlot slotIn) {

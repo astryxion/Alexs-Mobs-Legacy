@@ -195,7 +195,8 @@ public class AMItemRegistry {
     }
 
     private static Item registerDisc(String name, SoundEvent sound) {
-        return new ItemRecord("alexsmobs:" + name, sound) {
+        // ItemRecord tooltip uses item.record.<this string>.desc (1.12), not the namespaced sound id.
+        return new ItemRecord(name, sound) {
             @Override
             public EnumRarity getRarity(ItemStack stack) {
                 return EnumRarity.RARE;

@@ -371,7 +371,7 @@ public class EntityCosmicCod extends EntityCreature {
 
     @Override
     public int getMaxSpawnedInChunk() {
-        return 7;
+        return 2;
     }
 
     public boolean isGroupLeader() {

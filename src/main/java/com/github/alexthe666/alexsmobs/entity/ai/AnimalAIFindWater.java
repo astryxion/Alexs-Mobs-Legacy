@@ -32,15 +32,22 @@ public class AnimalAIFindWater extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        if (targetPos != null) {
+        if (targetPos != null && this.creature.isInWater()) {
             this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
         }
     }
 
     @Override
     public void updateTask() {
-        if (targetPos != null) {
-            this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
+        if (targetPos == null) {
+            return;
+        }
+        if (this.creature.isInWater()) {
+            if (this.creature.getNavigator().noPath()) {
+                this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
+            }
+        } else {
+            this.creature.getNavigator().clearPath();
         }
     }
 

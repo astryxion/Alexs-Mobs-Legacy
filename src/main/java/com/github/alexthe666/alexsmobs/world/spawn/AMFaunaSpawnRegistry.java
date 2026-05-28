@@ -96,8 +96,8 @@ import java.util.function.IntSupplier;
  * <p>
  * Uses explicit biome JSON lists ({@link AMSpawnBiomeConfiguration}), FF-style weights/group sizes
  * ({@link AMFaunaSpawnProfile}), and {@link AMSpawnUtil#addSpawn} biome list mutation.
- * {@link AMConfig} spawn weights of {@code 0} disable a mob; positive values enable FF-profile registration
- * with Familiar Fauna-style weights and capped group sizes (no duplicate biome rows).
+ * {@link AMConfig} spawn weights of {@code 0} disable a mob; positive values use config weight and
+ * {@link AMSpawnReference} group sizes (1.16 parity). Aquatic per-chunk caps are enforced on entities.
  */
 public final class AMFaunaSpawnRegistry {
 
@@ -236,12 +236,13 @@ public final class AMFaunaSpawnRegistry {
                         spawn.configName, spawn.entityClass.getSimpleName(), spawn.configName);
                 continue;
             }
+            AMSpawnReference.Spec spec = AMSpawnReference.forMob(spawn.configName, spawn.profile);
             biomeRows += AMSpawnUtil.addSpawn(
                     spawn.entityClass,
-                    spawn.profile.weight,
-                    cappedMinGroup(spawn.profile),
-                    cappedMaxGroup(spawn.profile),
-                    spawn.profile.creatureType,
+                    spawn.configWeight.getAsInt(),
+                    AMSpawnReference.cappedMinGroup(spec),
+                    AMSpawnReference.cappedMaxGroup(spec),
+                    spec.creatureType,
                     biomes);
             mobsEnabled++;
         }
@@ -257,25 +258,6 @@ public final class AMFaunaSpawnRegistry {
         classes.add(EntityMimicube.class);
         classes.add(EntitySoulVulture.class);
         return classes;
-    }
-
-    /** 1.12-era caps: deer/turkey-sized herds at most 4; ambient/water/rare stay smaller. */
-    private static int cappedMaxGroup(AMFaunaSpawnProfile profile) {
-        int max = profile.maxGroup;
-        if (profile.creatureType == EnumCreatureType.AMBIENT) {
-            return Math.min(max, 4);
-        }
-        if (profile.creatureType == EnumCreatureType.WATER_CREATURE) {
-            return Math.min(max, 2);
-        }
-        if (profile.creatureType == EnumCreatureType.MONSTER) {
-            return Math.min(max, 2);
-        }
-        return Math.min(max, 4);
-    }
-
-    private static int cappedMinGroup(AMFaunaSpawnProfile profile) {
-        return Math.max(1, Math.min(profile.minGroup, cappedMaxGroup(profile)));
     }
 
     private static int registerStructureSpawns() {

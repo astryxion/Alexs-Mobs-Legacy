@@ -599,8 +599,9 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
             this.world.setEntityState(this, (byte) 93);
         } else {
             this.setHeldItem(EnumHand.MAIN_HAND, duplicate);
-            if (e.getItem().getItem() == Items.EGG) {
-                EntityPlayer eggThrower = world.getPlayerEntityByName(e.getThrower());
+            String eggThrowerName = e.getThrower();
+            if (e.getItem().getItem() == Items.EGG && eggThrowerName != null) {
+                EntityPlayer eggThrower = world.getPlayerEntityByName(eggThrowerName);
                 eggThrowerUUID = eggThrower != null ? eggThrower.getUniqueID() : null;
             } else {
                 eggThrowerUUID = null;

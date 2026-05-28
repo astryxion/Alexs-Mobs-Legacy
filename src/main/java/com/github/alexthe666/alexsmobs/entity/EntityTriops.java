@@ -100,7 +100,7 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
 
     @Override
     public int getMaxSpawnedInChunk() {
-        return 5;
+        return 3;
     }
 
     @Override

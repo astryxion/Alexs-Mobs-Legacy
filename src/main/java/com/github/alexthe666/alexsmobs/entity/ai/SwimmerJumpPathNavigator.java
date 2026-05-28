@@ -29,7 +29,7 @@ public class SwimmerJumpPathNavigator extends PathNavigateSwimmer {
 
     @Override
     protected boolean canNavigate() {
-        return true;
+        return this.entity.isInWater() || this.entity.isInLava();
     }
 
     @Override

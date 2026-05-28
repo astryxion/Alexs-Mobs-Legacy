@@ -159,7 +159,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
     @Override
     public void updateAITasks() {
         super.updateAITasks();
-        if (!this.world.isRemote) {
+        if (!this.world.isRemote && this.isInWater()) {
             breakBlock();
         }
     }
@@ -208,6 +208,9 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
         if (this.isAIDisabled()) {
             this.setAir(this.getMaxAir());
         } else {
+            if (!this.world.isRemote && !this.isInWater() && !this.isInLava()) {
+                this.getNavigator().clearPath();
+            }
             if (this.isInWater()) {
                 this.setMoistness(2400);
             } else {
@@ -400,16 +403,22 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 1;
+    }
+
+    @Override
     public boolean isNotColliding() {
         return AMEntityRegistry.aquaticNoEntityCollision(this);
     }
 
     /**
-     * 1.16 {@code FindWaterGoal} parity.
+     * 1.16 {@code FindWaterGoal} parity. On land, swim pathfinding is skipped (it can freeze the game).
      */
     private class AIFindWater extends EntityAIBase {
         private BlockPos targetPos;
         private int executionChance = 30;
+        private int runTicks;
 
         AIFindWater() {
             this.setMutexBits(3);
@@ -417,7 +426,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
 
         @Override
         public boolean shouldExecute() {
-            if (EntityOrca.this.onGround && EntityOrca.this.world.getBlockState(EntityOrca.this.getPosition()).getMaterial() != Material.WATER) {
+            if (!EntityOrca.this.isInWater() && !EntityOrca.this.isInLava()) {
                 if (EntityOrca.this.getAttackTarget() != null || EntityOrca.this.getRNG().nextInt(executionChance) == 0) {
                     targetPos = generateTarget();
                     return targetPos != null;
@@ -428,24 +437,70 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
 
         @Override
         public void startExecuting() {
-            if (targetPos != null) {
+            runTicks = 0;
+            if (targetPos != null && EntityOrca.this.isInWater()) {
                 EntityOrca.this.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
             }
         }
 
         @Override
+        public void updateTask() {
+            runTicks++;
+            if (targetPos == null) {
+                return;
+            }
+            if (EntityOrca.this.isInWater()) {
+                if (runTicks % 20 == 0 && EntityOrca.this.getNavigator().noPath()) {
+                    EntityOrca.this.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
+                }
+            } else {
+                EntityOrca.this.getNavigator().clearPath();
+                steerTowardWater();
+            }
+        }
+
+        @Override
         public boolean shouldContinueExecuting() {
-            return targetPos != null && EntityOrca.this.world.getBlockState(EntityOrca.this.getPosition()).getMaterial() != Material.WATER && EntityOrca.this.getDistanceSq(targetPos) > 2;
+            if (EntityOrca.this.isInWater() || EntityOrca.this.isInLava() || runTicks > 200) {
+                return false;
+            }
+            return targetPos != null
+                    && EntityOrca.this.world.getBlockState(EntityOrca.this.getPosition()).getMaterial() != Material.WATER;
+        }
+
+        @Override
+        public void resetTask() {
+            targetPos = null;
+            runTicks = 0;
+            EntityOrca.this.getNavigator().clearPath();
+        }
+
+        private void steerTowardWater() {
+            double dx = targetPos.getX() + 0.5D - EntityOrca.this.posX;
+            double dz = targetPos.getZ() + 0.5D - EntityOrca.this.posZ;
+            double len = Math.sqrt(dx * dx + dz * dz);
+            if (len > 0.01D) {
+                EntityOrca.this.motionX += (dx / len) * 0.08D;
+                EntityOrca.this.motionZ += (dz / len) * 0.08D;
+            }
+            if (targetPos.getY() > EntityOrca.this.posY + 0.5D) {
+                EntityOrca.this.motionY = Math.max(EntityOrca.this.motionY, 0.35D);
+            }
         }
 
         @Nullable
         private BlockPos generateTarget() {
-            BlockPos pos = EntityOrca.this.getPosition();
+            BlockPos origin = EntityOrca.this.getPosition();
             for (int i = 0; i < 15; i++) {
-                BlockPos pos1 = pos.add(
-                        EntityOrca.this.getRNG().nextInt(16) - 8, EntityOrca.this.getRNG().nextInt(8) - 4, EntityOrca.this.getRNG().nextInt(16) - 8);
-                if (EntityOrca.this.world.getBlockState(pos1).getMaterial() == Material.WATER) {
-                    return pos1;
+                BlockPos sample = origin.add(
+                        EntityOrca.this.getRNG().nextInt(16) - 8,
+                        EntityOrca.this.getRNG().nextInt(8) - 4,
+                        EntityOrca.this.getRNG().nextInt(16) - 8);
+                while (EntityOrca.this.world.isAirBlock(sample) && sample.getY() > 1) {
+                    sample = sample.down();
+                }
+                if (EntityOrca.this.world.getBlockState(sample).getMaterial() == Material.WATER) {
+                    return sample;
                 }
             }
             return null;

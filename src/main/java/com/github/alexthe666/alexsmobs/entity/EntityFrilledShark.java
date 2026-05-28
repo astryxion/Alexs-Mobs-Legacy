@@ -112,6 +112,11 @@ public class EntityFrilledShark extends EntityCreature implements IAnimatedEntit
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 2;
+    }
+
+    @Override
     public boolean isNotColliding() {
         return AMEntityRegistry.aquaticNoEntityCollision(this);
     }

@@ -110,6 +110,11 @@ public class EntityGiantSquid extends EntityCreature {
         return AMEntityRegistry.rollSpawn(AMConfig.giantSquidSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
     }
 
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 1;
+    }
+
     private void doInitialPosing(World world) {
         BlockPos down = this.getPosition();
         while (world.getBlockState(down).getMaterial() == Material.WATER && down.getY() > 1) {

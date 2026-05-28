@@ -8,6 +8,7 @@ import com.github.alexthe666.citadel.client.model.AdvancedModelBox;
 import com.github.alexthe666.citadel.client.model.ModelAnimator;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumHandSide;
@@ -369,5 +370,23 @@ public class ModelKangaroo extends AdvancedEntityModel<EntityKangaroo> {
 		AdvancedModelBox.rotateAngleX = x;
 		AdvancedModelBox.rotateAngleY = y;
 		AdvancedModelBox.rotateAngleZ = z;
+	}
+
+	/** 1.16 {@code copyModelAttributesTo} — sync biped armor model to current kangaroo pose. */
+	public void copyModelAttributesTo(ModelBiped biped) {
+		copyBoxAngles(this.head, biped.bipedHead);
+		copyBoxAngles(this.head, biped.bipedHeadwear);
+		copyBoxAngles(this.chest, biped.bipedBody);
+		copyBoxAngles(this.arm_right, biped.bipedRightArm);
+		copyBoxAngles(this.arm_left, biped.bipedLeftArm);
+	}
+
+	private static void copyBoxAngles(ModelRenderer from, ModelRenderer to) {
+		to.rotateAngleX = from.rotateAngleX;
+		to.rotateAngleY = from.rotateAngleY;
+		to.rotateAngleZ = from.rotateAngleZ;
+		to.rotationPointX = from.rotationPointX;
+		to.rotationPointY = from.rotationPointY;
+		to.rotationPointZ = from.rotationPointZ;
 	}
 }

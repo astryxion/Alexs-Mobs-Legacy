@@ -131,6 +131,11 @@ public class EntityMantisShrimp extends EntityTameable implements ISemiAquatic, 
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 2;
+    }
+
+    @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
         this.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(20.0D);

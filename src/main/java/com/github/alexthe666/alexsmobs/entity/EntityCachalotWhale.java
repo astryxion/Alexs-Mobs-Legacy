@@ -946,6 +946,11 @@ public class EntityCachalotWhale extends EntityAnimal implements ISemiAquatic {
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 1;
+    }
+
+    @Override
     public boolean isNotColliding() {
         return AMEntityRegistry.aquaticNoEntityCollision(this);
     }

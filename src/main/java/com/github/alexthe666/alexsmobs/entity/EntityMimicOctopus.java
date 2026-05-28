@@ -158,6 +158,11 @@ public class EntityMimicOctopus extends EntityTameable implements ISemiAquatic, 
         return AMEntityRegistry.rollSpawn(AMConfig.mimicOctopusSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
     }
 
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 2;
+    }
+
     @Nullable
     @Override
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficultyIn, @Nullable IEntityLivingData spawnDataIn) {

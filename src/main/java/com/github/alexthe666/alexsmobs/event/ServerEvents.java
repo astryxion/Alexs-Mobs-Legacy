@@ -64,7 +64,6 @@ import net.minecraft.world.storage.loot.LootPool;
 import net.minecraft.world.storage.loot.LootTableList;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.entity.EntityEvent;
@@ -569,13 +568,6 @@ public class ServerEvents {
             i++;
         }
         return entered;
-    }
-
-    @SubscribeEvent
-    public void onFOVUpdate(EntityViewRenderEvent.FOVModifier event) {
-        if (event.getEntity() instanceof EntityLivingBase && ((EntityLivingBase) event.getEntity()).isPotionActive(AMEffectRegistry.FEAR)) {
-            event.setFOV(1.0F);
-        }
     }
 
     @SubscribeEvent

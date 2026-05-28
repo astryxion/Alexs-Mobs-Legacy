@@ -57,7 +57,7 @@ public class EntityLobster extends EntityCreature implements ISemiAquatic {
 
     @Override
     public int getMaxSpawnedInChunk() {
-        return 7;
+        return 3;
     }
 
     @Override

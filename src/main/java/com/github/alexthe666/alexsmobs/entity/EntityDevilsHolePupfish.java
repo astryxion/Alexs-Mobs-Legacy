@@ -138,7 +138,7 @@ public class EntityDevilsHolePupfish extends EntityCreature {
 
     @Override
     public int getMaxSpawnedInChunk() {
-        return 6;
+        return 3;
     }
 
     @Override

@@ -80,7 +80,7 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
 
     @Override
     public int getMaxSpawnedInChunk() {
-        return 8;
+        return 3;
     }
 
     public boolean canSpawnMoreAnimals() {
