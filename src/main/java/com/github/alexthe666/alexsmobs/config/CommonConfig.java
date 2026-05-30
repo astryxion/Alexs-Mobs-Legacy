@@ -60,7 +60,7 @@ public class CommonConfig {
     public final ConfigHolder.FCInt bisonSpawnWeight = i("S", "bisonSpawnWeight", 9, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt bisonSpawnRolls = i("S", "bisonSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt rhinocerosSpawnWeight = i("S", "rhinocerosSpawnWeight", 24, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
-    public final ConfigHolder.FCInt rhinocerosSpawnRolls = i("S", "rhinocerosSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
+    public final ConfigHolder.FCInt rhinocerosSpawnRolls = i("S", "rhinocerosSpawnRolls", 1, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt skunkSpawnWeight = i("S", "skunkSpawnWeight", 7, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt skunkSpawnRolls = i("S", "skunkSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt tusklinSpawnWeight = i("S", "tusklinSpawnWeight", 18, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
@@ -84,7 +84,7 @@ public class CommonConfig {
     public final ConfigHolder.FCInt elephantSpawnRolls = i("S", "elephantSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt soulVultureSpawnWeight = i("S", "soulVultureSpawnWeight", 30, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt soulVultureSpawnRolls = i("S", "soulVultureSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
-    public final ConfigHolder.FCInt snowLeopardSpawnWeight = i("S", "snowLeopardSpawnWeight", 20, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
+    public final ConfigHolder.FCInt snowLeopardSpawnWeight = i("S", "snowLeopardSpawnWeight", 18, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt snowLeopardSpawnRolls = i("S", "snowLeopardSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt spectreSpawnWeight = i("S", "spectreSpawnWeight", 10, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt spectreSpawnRolls = i("S", "spectreSpawnRolls", 5, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
@@ -120,7 +120,7 @@ public class CommonConfig {
     public final ConfigHolder.FCInt enderiophageSpawnRolls = i("S", "enderiophageSpawnRolls", 2, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt baldEagleSpawnWeight = i("S", "baldEagleSpawnWeight", 15, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt baldEagleSpawnRolls = i("S", "baldEagleSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
-    public final ConfigHolder.FCInt tigerSpawnWeight = i("S", "tigerSpawnWeight", 100, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
+    public final ConfigHolder.FCInt tigerSpawnWeight = i("S", "tigerSpawnWeight", 30, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt tigerSpawnRolls = i("S", "tigerSpawnRolls", 0, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
     public final ConfigHolder.FCInt tarantulaHawkSpawnWeight = i("S", "tarantulaHawkSpawnWeight", 6, 0, 1000, "Spawn Weight, added to a pool of other mobs for each biome. Higher number = higher chance of spawning. 0 = disable spawn");
     public final ConfigHolder.FCInt tarantulaHawkSpawnRolls = i("S", "tarantulaHawkSpawnRolls", 1, 0, 2147483647, "Random roll chance to enable mob spawning. Higher number = lower chance of spawning");
@@ -211,6 +211,7 @@ public class CommonConfig {
     public final ConfigHolder.FCBool seagullStealing = b("G", "seagullStealing", true, "Whether seagulls should steal food out of players hotbar slots.");
     public final ConfigHolder.FCStringList seagullStealingBlacklist = sl("G", "seagullStealingBlacklist", new String[] {  }, "List of items that seagulls cannot take from players.");
     public final ConfigHolder.FCBool clingingFlipEffect = b("G", "clingingFlipEffect", false, "Whether the Clinging Potion effect should flip the screen. Warning: may cause nausea.");
+    public final ConfigHolder.FCDouble rainbowGlassFidelity = d("G", "rainbowGlassFidelity", 16.0, 1.0, 10000.0, "The visual zoom of the rainbow pattern on the rainbow glass block. Higher number = bigger pattern.");
 
     private static ConfigHolder.FCInt i(String catConst, String key, int def, int min, int max, String comment) {
         return new ConfigHolder.FCInt(mapCat(catConst), key, def, min, max, comment);

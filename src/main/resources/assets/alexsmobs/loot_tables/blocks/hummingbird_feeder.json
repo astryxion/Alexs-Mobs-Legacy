@@ -5,7 +5,8 @@
       "entries": [
         {
           "type": "item",
-          "name": "alexsmobs:hummingbird_feeder"
+          "name": "minecraft:bone",
+          "weight": 1
         }
       ]
     }

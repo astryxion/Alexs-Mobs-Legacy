@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -49,9 +50,6 @@ import java.util.List;
 
 public class EntityCrimsonMosquito extends EntityMob {
 
-    public static final ResourceLocation FULL_LOOT = new ResourceLocation("alexsmobs", "entities/crimson_mosquito_full");
-    public static final ResourceLocation FROM_FLY_LOOT = new ResourceLocation("alexsmobs", "entities/crimson_mosquito_fly");
-    public static final ResourceLocation FROM_FLY_FULL_LOOT = new ResourceLocation("alexsmobs", "entities/crimson_mosquito_fly_full");
     private static final float GROUND_WIDTH = 0.9F;
     private static final float GROUND_HEIGHT = 0.9F;
     private static final float FLIGHT_WIDTH = 1.2F;
@@ -119,9 +117,9 @@ public class EntityCrimsonMosquito extends EntityMob {
     @Nullable
     protected ResourceLocation getLootTable() {
         if (this.getBloodLevel() > 0) {
-            return this.isFromFly() ? FROM_FLY_FULL_LOOT : FULL_LOOT;
+            return this.isFromFly() ? AMLootTables.CRIMSON_MOSQUITO_FLY_FULL : AMLootTables.CRIMSON_MOSQUITO_FULL;
         }
-        return this.isFromFly() ? FROM_FLY_LOOT : super.getLootTable();
+        return this.isFromFly() ? AMLootTables.CRIMSON_MOSQUITO_FLY : AMLootTables.CRIMSON_MOSQUITO;
     }
 
     @Override

@@ -186,6 +186,7 @@ public class AMItemRegistry {
     public static final Item VINE_LASSO = new ItemVineLasso().setRegistryName("alexsmobs:vine_lasso");
     public static final Item LOST_TENTACLE = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:lost_tentacle");
     public static final Item SQUID_GRAPPLE = new ItemSquidGrapple().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:squid_grapple");
+    public static final Item RAINBOW_JELLY = new ItemRainbowJelly();
 
     public static final Item MUSIC_DISC_THIME = registerDisc("music_disc_thime", AMSoundRegistry.MUSIC_DISC_THIME);
     public static final Item MUSIC_DISC_DAZE = registerDisc("music_disc_daze", AMSoundRegistry.MUSIC_DISC_DAZE);

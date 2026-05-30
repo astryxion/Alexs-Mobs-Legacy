@@ -109,7 +109,9 @@ public class EntityTiger extends EntityAnimal implements ICustomCollisions, IAni
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.tigerSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return this.world.getLight(this.getPosition()) > 8
+                && AMEntityRegistry.rollSpawn(AMConfig.tigerSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && super.getCanSpawnHere();
     }
 
     @Override

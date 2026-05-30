@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "item",
-          "name": "minecraft:magma_block",
+          "name": "minecraft:magma",
           "weight": 1,
           "functions": [
             {

@@ -202,6 +202,8 @@ public final class AMCreativeTabOrder {
             "vine_lasso",
             "terrapin_bucket",
             "comb_jelly_bucket",
+            "rainbow_jelly",
+            "rainbow_glass",
             "cosmic_cod_bucket",
             "bison_fur",
             "bison_fur_block",

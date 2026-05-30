@@ -1,4 +1,7 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
+import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.StraddlerAIShoot;
@@ -62,6 +65,11 @@ public class EntityStraddler extends EntityMob implements IAnimatedEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.STRADDLER_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.STRADDLER;
     }
 
     public static boolean canStraddlerSpawn(World worldIn, BlockPos pos) {

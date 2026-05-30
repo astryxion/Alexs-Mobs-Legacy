@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -19,6 +20,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
@@ -49,6 +51,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -172,6 +175,11 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.KANGAROO_IDLE;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.KANGAROO;
     }
 
     private void initKangarooInventory() {
@@ -511,7 +519,7 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
             this.setJumping(false);
         }
         EntityLivingBase attackTarget = this.getAttackTarget();
-        if (attackTarget != null && this.canEntityBeSeen(attackTarget)) {
+        if (!world.isRemote && attackTarget != null && this.canEntityBeSeen(attackTarget)) {
             if (getDistance(attackTarget) < attackTarget.width + this.width + 1) {
                 if (this.getAnimation() == ANIMATION_KICK && this.getAnimationTick() == 8) {
                     attackTarget.knockBack(this, 1.3F, MathHelper.sin(this.rotationYaw * ((float) Math.PI / 180F)), -MathHelper.cos(this.rotationYaw * ((float) Math.PI / 180F)));
@@ -528,6 +536,8 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
                     this.attackEntityAsMob(this.getAttackTarget());
                 }
             }
+        }
+        if (attackTarget != null && this.canEntityBeSeen(attackTarget)) {
             this.getLookHelper().setLookPositionWithEntity(attackTarget, 360.0F, 360.0F);
         }
         if (this.isChild() && attackTarget != null) {
@@ -557,14 +567,22 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
         AMEntityRegistry.updateAnimations(this);
     }
 
+    @Override
     public boolean attackEntityAsMob(Entity entityIn) {
-        boolean prev = super.attackEntityAsMob(entityIn);
-        if (prev) {
-            if (!this.getHeldItemMainhand().isEmpty()) {
-                damageItem(this.getHeldItemMainhand());
+        float damage = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
+        ItemStack weapon = this.getHeldItemMainhand();
+        if (entityIn instanceof EntityLivingBase) {
+            damage += EnchantmentHelper.getModifierForCreature(weapon, ((EntityLivingBase) entityIn).getCreatureAttribute());
+        }
+        damage += (float) getDamageForItem(weapon);
+        boolean flag = entityIn.attackEntityFrom(DamageSource.causeMobDamage(this), damage);
+        if (flag) {
+            this.applyEnchantments(this, entityIn);
+            if (!weapon.isEmpty()) {
+                damageItem(weapon);
             }
         }
-        return prev;
+        return flag;
     }
 
     @Override

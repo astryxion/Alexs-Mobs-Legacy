@@ -12,6 +12,7 @@ public class AnimalAIFindWater extends EntityAIBase {
     private final EntityCreature creature;
     private BlockPos targetPos;
     private int executionChance = 30;
+    private int runTicks;
 
     public AnimalAIFindWater(EntityCreature creature) {
         this.creature = creature;
@@ -32,23 +33,14 @@ public class AnimalAIFindWater extends EntityAIBase {
 
     @Override
     public void startExecuting() {
-        if (targetPos != null && this.creature.isInWater()) {
-            this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
-        }
+        runTicks = 0;
+        moveTowardWater();
     }
 
     @Override
     public void updateTask() {
-        if (targetPos == null) {
-            return;
-        }
-        if (this.creature.isInWater()) {
-            if (this.creature.getNavigator().noPath()) {
-                this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
-            }
-        } else {
-            this.creature.getNavigator().clearPath();
-        }
+        runTicks++;
+        moveTowardWater();
     }
 
     @Override
@@ -57,7 +49,31 @@ public class AnimalAIFindWater extends EntityAIBase {
             this.creature.getNavigator().clearPath();
             return false;
         }
-        return !this.creature.getNavigator().noPath() && targetPos != null && !isWaterAt(this.creature.getPosition());
+        if (runTicks > 200 || isWaterAt(this.creature.getPosition())) {
+            return false;
+        }
+        return targetPos != null;
+    }
+
+    @Override
+    public void resetTask() {
+        targetPos = null;
+        runTicks = 0;
+        this.creature.getNavigator().clearPath();
+    }
+
+    private void moveTowardWater() {
+        if (targetPos == null) {
+            return;
+        }
+        if (this.creature.isInWater() || this.creature.isInLava()) {
+            this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D);
+            return;
+        }
+        this.creature.getNavigator().clearPath();
+        if (!this.creature.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1D)) {
+            FindWaterSteering.steerToward(this.creature, targetPos);
+        }
     }
 
     public BlockPos generateTarget() {

@@ -262,7 +262,7 @@ public class ModelCrocodile extends AdvancedEntityModel<EntityCrocodile> {
         return ImmutableList.of(root, body, neck, head, snout, TeethLTop, TeethRTop, jaw, jaw2, TeethLBottom, TeethRBottom, LLegFront, RLegFront, LLegBack, RLegBack, Tail1, Tail2, Tail3);
     }
 
-        @Override
+    @Override
     public void render(net.minecraft.entity.Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         if (this.isChild) {
             float headScale = 1.5F;

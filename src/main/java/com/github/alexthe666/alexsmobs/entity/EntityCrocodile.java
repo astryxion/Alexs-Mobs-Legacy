@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -37,6 +38,7 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 public class EntityCrocodile extends EntityTameable implements IAnimatedEntity, ISemiAquatic {
 
@@ -65,7 +67,7 @@ public class EntityCrocodile extends EntityTameable implements IAnimatedEntity, 
     private boolean hasSpedUp = false;
     private int animationTick;
     private Animation currentAnimation;
-    /** 1.16 {@code setInLove(int)} after egg lay — blocks re-breeding until ticks elapse. */
+    /** 1.16 {@code setInLove(int)} after egg lay â€” blocks re-breeding until ticks elapse. */
     private int loveCooldownTicks = 0;
 
     public EntityCrocodile(World worldIn) {
@@ -146,6 +148,11 @@ public class EntityCrocodile extends EntityTameable implements IAnimatedEntity, 
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.CROCODILE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.CROCODILE;
     }
 
     @Override

@@ -12,7 +12,8 @@
               "count": 1
             }
           ],
-          "name": "alexsmobs:void_worm_eye"
+          "name": "alexsmobs:void_worm_eye",
+          "weight": 1
         }
       ]
     },
@@ -28,7 +29,8 @@
               "count": 2
             }
           ],
-          "name": "alexsmobs:void_worm_mandible"
+          "name": "alexsmobs:void_worm_mandible",
+          "weight": 1
         }
       ]
     }

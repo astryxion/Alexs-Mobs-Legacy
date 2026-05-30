@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
@@ -156,6 +157,11 @@ public class EntityBananaSlug extends EntityAnimal {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.BANANA_SLUG_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.BANANA_SLUG;
     }
 
     @Override

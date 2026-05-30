@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIHurtByTargetNotBaby;
@@ -118,6 +119,11 @@ public class EntityBison extends EntityAnimal implements IAnimatedEntity, IShear
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.BISON_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.BISON;
     }
 
     @Override

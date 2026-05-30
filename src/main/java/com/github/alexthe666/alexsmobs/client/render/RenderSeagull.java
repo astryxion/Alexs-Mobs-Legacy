@@ -40,6 +40,9 @@ public class RenderSeagull extends RenderLiving<EntitySeagull> {
         @Override
         public void doRenderLayer(EntitySeagull entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
             ItemStack itemstack = entitylivingbaseIn.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
+            if (itemstack.isEmpty()) {
+                return;
+            }
             GlStateManager.pushMatrix();
             if (entitylivingbaseIn.isChild()) {
                 GlStateManager.scale(0.5F, 0.5F, 0.5F);

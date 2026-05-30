@@ -74,7 +74,8 @@ public class EntitySnowLeopard extends EntityAnimal implements IAnimatedEntity, 
         BlockPos down = new BlockPos(this.posX, this.posY - 1, this.posZ);
         IBlockState blockstate = this.world.getBlockState(down);
         Block block = blockstate.getBlock();
-        boolean validGround = block == Blocks.STONE || block == Blocks.DIRT || block == Blocks.GRASS;
+        boolean validGround = block == Blocks.STONE || block == Blocks.DIRT || block == Blocks.GRASS
+                || block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
         return validGround && this.world.getLight(down) > 8
                 && AMEntityRegistry.rollSpawn(AMConfig.snowLeopardSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
                 && super.getCanSpawnHere();

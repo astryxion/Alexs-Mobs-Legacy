@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -36,6 +37,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 public class EntityCaiman extends EntityTameable implements ISemiAquatic, IFollower {
 
@@ -175,6 +177,11 @@ public class EntityCaiman extends EntityTameable implements ISemiAquatic, IFollo
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.CAIMAN_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.CAIMAN;
     }
 
     @Override

@@ -20,9 +20,10 @@ public class RenderCrocodile extends RenderLiving<EntityCrocodile> {
 
     @Override
     protected void preRenderCallback(EntityCrocodile entity, float partialTickTime) {
+        this.shadowSize = entity.isChild() ? 0.24F : 0.8F;
         if (entity.isChild()) {
-            GlStateManager.scale(0.3F, 0.3F, 0.3F);
-            GlStateManager.translate(0.0F, 7.0F, 0.125F);
+            // Half of adult 0.9 scale — matches EntityAgeable 0.5 hitbox so feet sit on ground (see RenderCaiman).
+            GlStateManager.scale(0.45F, 0.45F, 0.45F);
         } else {
             GlStateManager.scale(0.9F, 0.9F, 0.9F);
         }

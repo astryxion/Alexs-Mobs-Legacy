@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 
 
@@ -72,6 +73,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import com.google.common.base.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -96,13 +98,15 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
     private boolean isLandNavigator;
     private int timeFlying = 0;
     @Nullable
-    private String seedThrowerName;
+    private UUID seedThrowerUUID;
     private int heldItemTime = 0;
     private int checkPerchCooldown = 0;
+    public int rideCooldown = 0;
     private boolean gatheringClockwise = false;
 
     public EntityCrow(World worldIn) {
         super(worldIn);
+        this.setSize(0.45F, 0.45F);
         this.setPathPriority(PathNodeType.DANGER_FIRE, -1.0F);
         this.setPathPriority(PathNodeType.WATER, -1.0F);
         this.setPathPriority(PathNodeType.WATER, 16.0F);
@@ -122,7 +126,8 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
     @Override
     protected void initEntityAI() {
         this.tasks.addTask(0, new EntityAISwimming(this));
-        this.tasks.addTask(1, new EntityAISit(this));
+        this.aiSit = new EntityAISit(this);
+        this.tasks.addTask(1, this.aiSit);
         this.tasks.addTask(2, new CrowAIMelee(this));
         this.tasks.addTask(3, new CrowAIFollowOwner(this, 1.0D, 4.0F, 2.0F, true));
         this.tasks.addTask(4, new AIDepositChests());
@@ -231,6 +236,7 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                 this.setPosition(riding.posX + extraX, riding.posY + extraY, riding.posZ + extraZ);
                 if (!riding.isEntityAlive() || rideCooldown == 0 && riding.isSneaking() || ((EntityPlayer) riding).isElytraFlying() || this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive()) {
                     this.dismountRidingEntity();
+                    this.rideCooldown = 20;
                     if (!world.isRemote) {
                         AlexsMobs.sendMSGToAll(new MessageCrowDismount(this.getEntityId(), riding.getEntityId()));
                     }
@@ -259,6 +265,16 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
+        if (!this.isTamed() && itemstack.getItem() == Items.PUMPKIN_SEEDS && this.getHeldItemMainhand().isEmpty()) {
+            ItemStack cop = itemstack.copy();
+            cop.setCount(1);
+            this.setHeldItem(EnumHand.MAIN_HAND, cop);
+            this.seedThrowerUUID = player.getUniqueID();
+            if (!player.capabilities.isCreativeMode) {
+                itemstack.shrink(1);
+            }
+            return true;
+        }
         if (super.processInteract(player, hand)) {
             return true;
         }
@@ -286,10 +302,14 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                 player.sendStatusMessage(new TextComponentTranslation("entity.alexsmobs.all.command_" + this.getCommand(), this.getName()), true);
             }
             boolean sit = this.getCommand() == 2;
-            if (sit) {
-                this.setSitting(true);
-            } else {
-                this.setSitting(false);
+            this.setSitting(sit);
+            if (!sit) {
+                this.setFlying(false);
+                this.getNavigator().clearPath();
+            }
+            if (this.isBeingRidden()) {
+                this.dismountRidingEntity();
+                this.rideCooldown = 20;
             }
             return true;
         }
@@ -330,6 +350,11 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                 this.setNoGravity(true);
                 if (this.isSitting() || this.isBeingRidden() || this.isInLove()) {
                     this.setFlying(false);
+                } else if (this.isTamed() && this.getCommand() != 1 && this.getCommand() != 3) {
+                    this.setFlying(false);
+                } else if (timeFlying > 400) {
+                    this.setFlying(false);
+                    timeFlying = 0;
                 }
             } else {
                 timeFlying = 0;
@@ -342,16 +367,16 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                 heldItemTime = 0;
                 this.heal(4);
                 this.playSound(SoundEvents.ENTITY_PARROT_EAT, this.getSoundVolume(), this.getSoundPitch());
-                if (this.getHeldItemMainhand().getItem() == Items.PUMPKIN_SEEDS && seedThrowerName != null && !this.isTamed()) {
+                if (this.getHeldItemMainhand().getItem() == Items.PUMPKIN_SEEDS && seedThrowerUUID != null && !this.isTamed()) {
                     if (getRNG().nextFloat() < 0.3F) {
                         this.setTamed(true);
                         this.setCommand(1);
-                        EntityPlayer player = this.world.getPlayerEntityByName(seedThrowerName);
-                        if (player != null) {
-                            this.setOwnerId(player.getUniqueID());
-                            if (player instanceof EntityPlayerMP) {
-                                CriteriaTriggers.TAME_ANIMAL.trigger((EntityPlayerMP) player, this);
-                            }
+                        this.setOwnerId(seedThrowerUUID);
+                        EntityPlayer player = this.world.getMinecraftServer() != null
+                                ? this.world.getMinecraftServer().getPlayerList().getPlayerByUUID(seedThrowerUUID)
+                                : this.world.getPlayerEntityByUUID(seedThrowerUUID);
+                        if (player instanceof EntityPlayerMP) {
+                            CriteriaTriggers.TAME_ANIMAL.trigger((EntityPlayerMP) player, this);
                         }
                         this.world.setEntityState(this, (byte) 7);
                     } else {
@@ -487,6 +512,18 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
 
     public void setSitting(boolean sit) {
         this.dataManager.set(SITTING, Boolean.valueOf(sit));
+        if (this.aiSit != null) {
+            this.aiSit.setSitting(sit);
+        }
+        if (sit) {
+            this.setFlying(false);
+            this.getNavigator().clearPath();
+            if (!this.world.isRemote) {
+                this.motionX = 0.0D;
+                this.motionY = 0.0D;
+                this.motionZ = 0.0D;
+            }
+        }
     }
 
     @Override
@@ -536,6 +573,11 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
 
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.CROW_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.CROW;
     }
 
     public Vec3d getBlockInViewAway(Vec3d fleePos, float radiusAdd) {
@@ -608,7 +650,8 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
     }
 
     private boolean isCrowEdible(ItemStack stack) {
-        return stack.getItem() instanceof ItemFood || AMTagRegistry.itemInTag(AMTagRegistry.CROW_FOODSTUFFS, stack.getItem());
+        return stack.getItem() == Items.PUMPKIN_SEEDS || stack.getItem() instanceof ItemFood
+                || AMTagRegistry.itemInTag(AMTagRegistry.CROW_FOODSTUFFS, stack.getItem());
     }
 
     public double getMaxDistToItem() {
@@ -624,10 +667,20 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
         }
         this.setHeldItem(EnumHand.MAIN_HAND, duplicate);
         if (e.getItem().getItem() == Items.PUMPKIN_SEEDS && !this.isTamed()) {
-            seedThrowerName = e.getThrower();
+            seedThrowerUUID = resolveThrowerUuid(e);
         } else {
-            seedThrowerName = null;
+            seedThrowerUUID = null;
         }
+    }
+
+    @Nullable
+    private static UUID resolveThrowerUuid(EntityItem item) {
+        String throwerName = item.getThrower();
+        if (throwerName == null) {
+            return null;
+        }
+        EntityPlayer player = item.world.getPlayerEntityByName(throwerName);
+        return player != null ? player.getUniqueID() : null;
     }
 
     public BlockPos getPerchPos() {
@@ -645,6 +698,8 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
         protected double y;
         protected double z;
         private boolean flightTarget = false;
+        private int groundPathCooldown = 0;
+        private int flightTaskTicks = 0;
 
         public AIWalkIdle() {
             super();
@@ -686,9 +741,15 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
         @Override
         public void updateTask() {
             if (flightTarget) {
+                flightTaskTicks++;
                 crow.getMoveHelper().setMoveTo(x, y, z, 1F);
             } else {
-                this.crow.getNavigator().tryMoveToXYZ(this.x, this.y, this.z, 1F);
+                if (groundPathCooldown > 0) {
+                    groundPathCooldown--;
+                } else {
+                    this.crow.getNavigator().tryMoveToXYZ(this.x, this.y, this.z, 1F);
+                    groundPathCooldown = 20 + crow.getRNG().nextInt(20);
+                }
             }
             if (!flightTarget && isFlying() && crow.onGround) {
                 crow.setFlying(false);
@@ -724,13 +785,15 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                 return false;
             }
             if (flightTarget) {
-                return crow.isFlying() && crow.getDistanceSq(x, y, z) > 2F;
+                return crow.isFlying() && crow.getDistanceSq(x, y, z) > 2F && flightTaskTicks < 200;
             } else {
                 return (!this.crow.getNavigator().noPath()) && !this.crow.isBeingRidden();
             }
         }
 
         public void startExecuting() {
+            flightTaskTicks = 0;
+            groundPathCooldown = 0;
             if (flightTarget) {
                 crow.setFlying(true);
                 crow.getMoveHelper().setMoveTo(x, y, z, 1F);
@@ -766,6 +829,7 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
         private Entity targetEntity;
         private Vec3d flightTarget = null;
         private int cooldown = 0;
+        private int fleeTicks = 0;
         AIScatter() {
             this.setMutexBits(1);
             this.theNearestAttackableTargetSorter = new AIScatter.Sorter(EntityCrow.this);
@@ -805,16 +869,18 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
 
         @Override
         public boolean shouldContinueExecuting() {
-            return targetEntity != null && !EntityCrow.this.isTamed();
+            return targetEntity != null && targetEntity.isEntityAlive() && !EntityCrow.this.isTamed() && fleeTicks < 200;
         }
 
         public void resetTask() {
             flightTarget = null;
             this.targetEntity = null;
+            fleeTicks = 0;
         }
 
         @Override
         public void updateTask() {
+            fleeTicks++;
             if (cooldown > 0) {
                 cooldown--;
             }
@@ -961,6 +1027,7 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
     }
 
     private class AITargetItems extends CreatureAITargetItems {
+        private int groundWalkCooldown = 0;
 
         public AITargetItems(boolean checkSight, boolean onlyNearby, int tickThreshold, int radius) {
             super(EntityCrow.this, checkSight, onlyNearby, tickThreshold, radius);
@@ -971,6 +1038,7 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
         public void resetTask() {
             super.resetTask();
             EntityCrow.this.aiItemFlag = false;
+            groundWalkCooldown = 0;
         }
 
         @Override
@@ -1008,7 +1076,12 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
                         crow.getMoveHelper().setMoveTo(this.targetEntity.posX, f1 + this.targetEntity.posY, this.targetEntity.posZ, 1);
                     }
                 } else {
-                    crow.getNavigator().tryMoveToXYZ(this.targetEntity.posX, this.targetEntity.posY, this.targetEntity.posZ, 1);
+                    if (groundWalkCooldown > 0) {
+                        groundWalkCooldown--;
+                    } else {
+                        crow.getNavigator().tryMoveToXYZ(this.targetEntity.posX, this.targetEntity.posY, this.targetEntity.posZ, 1);
+                        groundWalkCooldown = 30 + crow.getRNG().nextInt(40);
+                    }
                 }
             }
         }

@@ -25,6 +25,8 @@ public class CrowAICircleCrops extends EntityAIBase {
     private int idleAtFlowerTime = 0;
     private boolean isAboveDestinationBear;
     private int timeoutCounter;
+    private static final int MOVE_TIMEOUT = 600;
+    private int pathRecalcCooldown = 0;
     float circlingTime = 0;
     float circleDistance = 2;
     float yLevel = 2;
@@ -55,7 +57,10 @@ public class CrowAICircleCrops extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return destinationBlock != null && (crow.getAttackTarget() == null || !crow.getAttackTarget().isEntityAlive()) && !crow.isTamed() && !crow.aiItemFlag && crow.fleePumpkinFlag == 0;
+        if (destinationBlock == null || timeoutCounter > MOVE_TIMEOUT) {
+            return false;
+        }
+        return (crow.getAttackTarget() == null || !crow.getAttackTarget().isEntityAlive()) && !crow.isTamed() && !crow.aiItemFlag && crow.fleePumpkinFlag == 0;
     }
 
     @Override
@@ -63,6 +68,7 @@ public class CrowAICircleCrops extends EntityAIBase {
         idleAtFlowerTime = 0;
         circlingTime = 0;
         timeoutCounter = 0;
+        pathRecalcCooldown = 0;
         destinationBlock = null;
     }
 
@@ -95,7 +101,10 @@ public class CrowAICircleCrops extends EntityAIBase {
             if (!isWithinXZDist(blockpos, new Vec3d(crow.posX, crow.posY, crow.posZ), this.getTargetDistanceSq())) {
                 this.isAboveDestinationBear = false;
                 ++this.timeoutCounter;
-                crow.getNavigator().tryMoveToXYZ((double) blockpos.getX() + 0.5D, blockpos.getY() - 0.5D, (double) blockpos.getZ() + 0.5D, 1);
+                if (pathRecalcCooldown-- <= 0) {
+                    crow.getNavigator().tryMoveToXYZ((double) blockpos.getX() + 0.5D, blockpos.getY() - 0.5D, (double) blockpos.getZ() + 0.5D, 1);
+                    pathRecalcCooldown = 10 + crow.getRNG().nextInt(10);
+                }
             } else {
                 this.isAboveDestinationBear = true;
                 --this.timeoutCounter;

@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.entity.ai.*;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
@@ -100,7 +101,7 @@ public class EntityLeafcutterAnt extends EntityAnimal implements IAngerable, IAn
 
     @Nullable
     protected ResourceLocation getLootTable() {
-        return this.isQueen() ? QUEEN_LOOT : super.getLootTable();
+        return this.isQueen() ? AMLootTables.LEAFCUTTER_ANT_QUEEN : AMLootTables.LEAFCUTTER_ANT;
     }
 
     @Override

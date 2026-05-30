@@ -476,16 +476,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
         }
 
         private void steerTowardWater() {
-            double dx = targetPos.getX() + 0.5D - EntityOrca.this.posX;
-            double dz = targetPos.getZ() + 0.5D - EntityOrca.this.posZ;
-            double len = Math.sqrt(dx * dx + dz * dz);
-            if (len > 0.01D) {
-                EntityOrca.this.motionX += (dx / len) * 0.08D;
-                EntityOrca.this.motionZ += (dz / len) * 0.08D;
-            }
-            if (targetPos.getY() > EntityOrca.this.posY + 0.5D) {
-                EntityOrca.this.motionY = Math.max(EntityOrca.this.motionY, 0.35D);
-            }
+            FindWaterSteering.steerToward(EntityOrca.this, targetPos);
         }
 
         @Nullable

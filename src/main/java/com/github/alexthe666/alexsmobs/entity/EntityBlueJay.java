@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.client.particle.AMParticleRegistry;
@@ -56,6 +57,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -464,6 +466,11 @@ public class EntityBlueJay extends EntityAnimal implements ITargetsDroppedItems 
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.BLUE_JAY_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.BLUE_JAY;
     }
 
     public boolean isTargetBlocked(Vec3d target) {

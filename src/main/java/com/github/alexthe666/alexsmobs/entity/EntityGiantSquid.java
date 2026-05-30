@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIFindWater;
@@ -43,6 +44,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.List;
@@ -131,6 +133,11 @@ public class EntityGiantSquid extends EntityCreature {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.GIANT_SQUID_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.GIANT_SQUID;
     }
 
     @Override

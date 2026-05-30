@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -51,6 +52,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -166,6 +168,11 @@ public class EntityBaldEagle extends EntityTameable implements IFollower {
 
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.BALD_EAGLE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.BALD_EAGLE;
     }
 
 

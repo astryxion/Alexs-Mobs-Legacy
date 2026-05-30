@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.CreatureAITargetItems;
@@ -48,6 +49,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.UUID;
 
 public class EntityGrizzlyBear extends EntityTameable implements IAngerable, IAnimatedEntity, ITargetsDroppedItems {
@@ -143,6 +145,11 @@ public class EntityGrizzlyBear extends EntityTameable implements IAngerable, IAn
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.GRIZZLY_BEAR_DIE;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.GRIZZLY_BEAR;
     }
 
     @Override

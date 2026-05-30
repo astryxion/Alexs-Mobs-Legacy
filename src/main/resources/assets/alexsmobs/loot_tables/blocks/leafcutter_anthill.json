@@ -5,7 +5,8 @@
       "entries": [
         {
           "type": "item",
-          "name": "alexsmobs:leafcutter_anthill"
+          "name": "minecraft:bone",
+          "weight": 1
         }
       ]
     }

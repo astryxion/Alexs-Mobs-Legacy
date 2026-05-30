@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -69,7 +70,7 @@ public class EntitySoulVulture extends EntityMob {
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
-        return this.getSoulLevel() > 2 ? SOUL_LOOT : super.getLootTable();
+        return this.getSoulLevel() > 2 ? AMLootTables.SOUL_VULTURE_HEART : AMLootTables.SOUL_VULTURE;
     }
 
     @Override

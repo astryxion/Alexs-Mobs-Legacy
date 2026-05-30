@@ -55,7 +55,8 @@ public class AnimalAIMate extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return this.targetMate.isEntityAlive() && this.targetMate.isInLove() && this.spawnBabyDelay < 60;
+        return this.targetMate != null && this.targetMate.isEntityAlive() && this.targetMate.isInLove()
+                && this.animal.isInLove() && this.spawnBabyDelay < 60;
     }
 
     @Override
@@ -109,6 +110,5 @@ public class AnimalAIMate extends EntityAIBase {
         this.targetMate.setGrowingAge(6000);
         this.animal.resetInLove();
         this.targetMate.resetInLove();
-        this.resetTask();
     }
 }

@@ -4,6 +4,7 @@ import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AquaticMoveController;
 import com.github.alexthe666.alexsmobs.entity.ai.EntityAINearestTarget3D;
 import com.github.alexthe666.alexsmobs.entity.ai.SemiAquaticAIRandomSwimming;
+import com.github.alexthe666.alexsmobs.entity.ai.FindWaterSteering;
 import com.github.alexthe666.alexsmobs.entity.ai.SemiAquaticPathNavigator;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.google.common.base.Predicate;
@@ -165,6 +166,7 @@ public class EntityHammerheadShark extends EntityCreature {
         private final EntityHammerheadShark shark;
         private BlockPos targetPos;
         private int executionChance = 30;
+        private int runTicks;
 
         AIFindWater(EntityHammerheadShark shark) {
             this.shark = shark;
@@ -184,14 +186,43 @@ public class EntityHammerheadShark extends EntityCreature {
 
         @Override
         public void startExecuting() {
-            if (targetPos != null) {
-                shark.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
-            }
+            runTicks = 0;
+            moveTowardWater();
+        }
+
+        @Override
+        public void updateTask() {
+            runTicks++;
+            moveTowardWater();
         }
 
         @Override
         public boolean shouldContinueExecuting() {
-            return targetPos != null && shark.world.getBlockState(shark.getPosition()).getMaterial() != Material.WATER && shark.getDistanceSq(targetPos) > 2;
+            if (runTicks > 200 || shark.world.getBlockState(shark.getPosition()).getMaterial() == Material.WATER) {
+                return false;
+            }
+            return targetPos != null && shark.getDistanceSq(targetPos) > 2;
+        }
+
+        @Override
+        public void resetTask() {
+            targetPos = null;
+            runTicks = 0;
+            shark.getNavigator().clearPath();
+        }
+
+        private void moveTowardWater() {
+            if (targetPos == null) {
+                return;
+            }
+            if (shark.isInWater() || shark.isInLava()) {
+                shark.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
+                return;
+            }
+            shark.getNavigator().clearPath();
+            if (!shark.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D)) {
+                FindWaterSteering.steerToward(shark, targetPos);
+            }
         }
 
         @Nullable

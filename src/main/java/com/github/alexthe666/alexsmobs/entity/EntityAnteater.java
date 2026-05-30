@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -30,6 +31,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -66,6 +68,11 @@ public class EntityAnteater extends EntityAnimal implements IAngerable, IAnimate
         super(world);
         this.stepHeight = 1.0F;
         this.setSize(0.9F, 0.9F);
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.ANTEATER;
     }
 
     @Override

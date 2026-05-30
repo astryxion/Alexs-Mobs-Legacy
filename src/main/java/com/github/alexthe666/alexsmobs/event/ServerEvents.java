@@ -5,6 +5,7 @@ import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.effect.AMEffectRegistry;
 import com.github.alexthe666.alexsmobs.effect.EffectClinging;
 import com.github.alexthe666.alexsmobs.entity.*;
+import com.github.alexthe666.alexsmobs.entity.util.RainbowUtil;
 import com.github.alexthe666.alexsmobs.entity.util.VineLassoUtil;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.item.ItemFalconryGlove;
@@ -36,10 +37,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
@@ -66,7 +69,6 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraft.world.storage.loot.functions.LootFunction;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
@@ -78,21 +80,12 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 @Mod.EventBusSubscriber(modid = AlexsMobs.MODID)
 public class ServerEvents {
-
-    /**
-     * 1.12 {@link EntityLiving#getLootTable()} always returns null; death drops require {@code deathLootTable}
-     * to be set. Entities that override {@code getLootTable()} for stateful drops are left alone.
-     */
-    private static final Field DEATH_LOOT_TABLE_FIELD = ReflectionHelper.findField(
-            EntityLiving.class, "deathLootTable", "field_184659_bA");
 
     private static final UUID SAND_SPEED_MODIFIER = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF28E");
     private static final UUID SNEAK_SPEED_MODIFIER = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF28F");
@@ -254,6 +247,13 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
+    public void onAquaticCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
+        if (!event.isSpawner() && AMEntityRegistry.shouldBlockAquaticNaturalSpawn(event.getWorld(), event.getEntityLiving())) {
+            event.setResult(Event.Result.DENY);
+        }
+    }
+
+    @SubscribeEvent
     public void onLootLevelEvent(LootingLevelEvent event) {
         DamageSource src = event.getDamageSource();
         if (src != null) {
@@ -275,6 +275,16 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onUseItem(PlayerInteractEvent.RightClickItem event) {
+        if (event.getItemStack().getItem() == Item.getItemFromBlock(Blocks.SPONGE) && RainbowUtil.getRainbowType(event.getEntityPlayer()) > 0) {
+            event.getEntityPlayer().swingArm(event.getHand());
+            RainbowUtil.setRainbowType(event.getEntityPlayer(), 0);
+            if (!event.getEntityPlayer().capabilities.isCreativeMode) {
+                event.getItemStack().shrink(1);
+            }
+            event.setCanceled(true);
+            event.setCancellationResult(EnumActionResult.SUCCESS);
+            return;
+        }
         if (event.getItemStack().getItem() == Items.WHEAT && event.getEntityPlayer().getRidingEntity() instanceof EntityElephant) {
             if (((EntityElephant) event.getEntityPlayer().getRidingEntity()).triggerCharge(event.getItemStack())) {
                 event.getEntityPlayer().swingArm(event.getHand());
@@ -307,6 +317,32 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onInteractWithEntity(PlayerInteractEvent.EntityInteract event) {
+        if (event.getTarget() instanceof EntityLivingBase) {
+            EntityLivingBase living = (EntityLivingBase) event.getTarget();
+            if (RainbowUtil.getRainbowType(living) > 0 && event.getItemStack().getItem() == Item.getItemFromBlock(Blocks.SPONGE)) {
+                event.setCanceled(true);
+                event.setCancellationResult(EnumActionResult.SUCCESS);
+                RainbowUtil.setRainbowType(living, 0);
+                if (!event.getEntityPlayer().capabilities.isCreativeMode) {
+                    event.getItemStack().shrink(1);
+                }
+                return;
+            }
+            if (event.getItemStack().getItem() == AMItemRegistry.RAINBOW_JELLY && !event.getEntityPlayer().isSneaking()) {
+                ItemStack stack = event.getItemStack();
+                int i = RainbowUtil.getRainbowTypeFromStack(stack);
+                if (RainbowUtil.getRainbowType(living) != i) {
+                    RainbowUtil.setRainbowType(living, i);
+                    living.playSound(net.minecraft.init.SoundEvents.ENTITY_SLIME_SQUISH, 1.0F, 1.0F);
+                    if (!event.getEntityPlayer().capabilities.isCreativeMode) {
+                        stack.shrink(1);
+                    }
+                    event.setCanceled(true);
+                    event.setCancellationResult(EnumActionResult.SUCCESS);
+                    return;
+                }
+            }
+        }
         if (event.getTarget() instanceof EntityLivingBase && !(event.getTarget() instanceof EntityPlayer)) {
             EntityLivingBase living = (EntityLivingBase) event.getTarget();
             if (!event.getEntityPlayer().isSneaking() && VineLassoUtil.hasLassoData(living)) {
@@ -473,6 +509,20 @@ public class ServerEvents {
                 ((EntityCrimsonMosquito) passenger).repositionOnMount(player);
             }
         }
+        if (!player.world.isRemote && EntitySugarGlider.isMountedSlowFallPartner(player)) {
+            EntitySugarGlider.applySlowFallMotion(player);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onSugarGliderMountFall(LivingFallEvent event) {
+        if (!(event.getEntityLiving() instanceof EntityPlayer)) {
+            return;
+        }
+        EntityPlayer player = (EntityPlayer) event.getEntityLiving();
+        if (EntitySugarGlider.isMountedSlowFallPartner(player)) {
+            event.setDistance(0.0F);
+        }
     }
 
     @SubscribeEvent
@@ -590,45 +640,6 @@ public class ServerEvents {
                     }
                 }
             }
-        }
-    }
-
-    private static boolean declaresLootTableOverride(Class<?> clazz) {
-        Class<?> check = clazz;
-        while (check != null && EntityLiving.class.isAssignableFrom(check)) {
-            if (check != EntityLiving.class) {
-                try {
-                    check.getDeclaredMethod("getLootTable");
-                    return true;
-                } catch (NoSuchMethodException ignored) {
-                }
-            }
-            check = check.getSuperclass();
-        }
-        return false;
-    }
-
-    @SubscribeEvent
-    public static void assignEntityLootTable(EntityEvent.EntityConstructing event) {
-        Entity entity = event.getEntity();
-        if (!(entity instanceof EntityLiving)) {
-            return;
-        }
-        EntityLiving living = (EntityLiving) entity;
-        if (declaresLootTableOverride(living.getClass())) {
-            return;
-        }
-        ResourceLocation key = EntityList.getKey(living);
-        if (key == null || !AlexsMobs.MODID.equals(key.getResourceDomain())) {
-            return;
-        }
-        try {
-            if (DEATH_LOOT_TABLE_FIELD.get(living) != null) {
-                return;
-            }
-            DEATH_LOOT_TABLE_FIELD.set(living, new ResourceLocation(key.getResourceDomain(), "entities/" + key.getResourcePath()));
-        } catch (IllegalAccessException e) {
-            AlexsMobs.LOGGER.warn("Failed to assign loot table for {}", key, e);
         }
     }
 

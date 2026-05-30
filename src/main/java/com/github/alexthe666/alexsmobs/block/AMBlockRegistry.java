@@ -23,6 +23,7 @@ public class AMBlockRegistry {
     public static final Block SKUNK_SPRAY = new BlockSkunkSpray();
     public static final Block BANANA_SLUG_SLIME_BLOCK = new BlockBananaSlugSlime();
     public static final Block CRYSTALIZED_BANANA_SLUG_MUCUS = new BlockCrystalizedMucus();
+    public static final Block RAINBOW_GLASS = new BlockRainbowGlass();
 
     @SubscribeEvent
     public static void registerBlocks(RegistryEvent.Register<Block> event) {

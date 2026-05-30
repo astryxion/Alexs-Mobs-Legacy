@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.client.particle.AMParticleRegistry;
@@ -44,6 +45,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import com.google.common.base.Predicate;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 public class EntityEnderiophage extends EntityCreature {
 
@@ -321,6 +323,11 @@ public class EntityEnderiophage extends EntityCreature {
 
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.ENDERIOPHAGE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.ENDERIOPHAGE;
     }
 
     protected void playStepSound(BlockPos pos, net.minecraft.block.Block state) {

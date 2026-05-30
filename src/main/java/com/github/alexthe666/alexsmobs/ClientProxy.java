@@ -1,6 +1,7 @@
 package com.github.alexthe666.alexsmobs;
 
 import com.github.alexthe666.alexsmobs.block.AMBlockRegistry;
+import com.github.alexthe666.alexsmobs.client.ClientLayerRegistry;
 import com.github.alexthe666.alexsmobs.client.event.ClientEvents;
 import com.github.alexthe666.alexsmobs.client.model.*;
 import com.github.alexthe666.alexsmobs.client.particle.*;
@@ -11,6 +12,7 @@ import com.github.alexthe666.alexsmobs.client.render.tile.RenderVoidWormBeak;
 import com.github.alexthe666.alexsmobs.client.sound.SoundLaCucaracha;
 import com.github.alexthe666.alexsmobs.client.sound.SoundWormBoss;
 import com.github.alexthe666.alexsmobs.entity.*;
+import com.github.alexthe666.alexsmobs.entity.util.RainbowUtil;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.item.ItemAMSpawnEgg;
 import com.github.alexthe666.alexsmobs.item.ItemStraddleboard;
@@ -70,6 +72,7 @@ public class ClientProxy extends CommonProxy {
     public void initClient() {
         setupParticles();
         registerPlayerLayers();
+        ClientLayerRegistry.registerRainbowLayers();
     }
 
     private void registerPlayerLayers() {
@@ -266,11 +269,18 @@ public class ClientProxy extends CommonProxy {
     @SideOnly(Side.CLIENT)
     public static void onItemColors(ColorHandlerEvent.Item event) {
         event.getItemColors().registerItemColorHandler((stack, colorIn) -> colorIn < 1 ? -1 : ((ItemStraddleboard) stack.getItem()).getColor(stack), AMItemRegistry.STRADDLEBOARD);
+        event.getItemColors().registerItemColorHandler((stack, tintIndex) -> RainbowUtil.calculateGlassColor(new net.minecraft.util.math.BlockPos(0, 0, 0)), Item.getItemFromBlock(AMBlockRegistry.RAINBOW_GLASS));
         for (Item item : ForgeRegistries.ITEMS.getValuesCollection()) {
             if (item instanceof ItemAMSpawnEgg) {
                 event.getItemColors().registerItemColorHandler((stack, tintIndex) -> ((ItemAMSpawnEgg) item).getColorFromItemStack(stack, tintIndex), item);
             }
         }
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public static void onBlockColors(ColorHandlerEvent.Block event) {
+        event.getBlockColors().registerBlockColorHandler((state, access, pos, tint) -> access != null && pos != null ? RainbowUtil.calculateGlassColor(pos) : -1, AMBlockRegistry.RAINBOW_GLASS);
     }
 
     private static final String ANIMAL_DICTIONARY_GUI = "com.github.alexthe666.alexsmobs.client.gui.GUIAnimalDictionary";

@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIHerdPanic;
@@ -40,6 +41,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -112,6 +114,11 @@ public class EntityGeladaMonkey extends EntityAnimal implements IAnimatedEntity,
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.GELADA_MONKEY_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.GELADA_MONKEY;
     }
 
     @Override

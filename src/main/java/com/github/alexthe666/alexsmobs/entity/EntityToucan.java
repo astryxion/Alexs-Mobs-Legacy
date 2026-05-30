@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.CreatureAITargetItems;
@@ -26,6 +27,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 public class EntityToucan extends EntityAnimal implements ITargetsDroppedItems {
 
@@ -92,6 +94,11 @@ public class EntityToucan extends EntityAnimal implements ITargetsDroppedItems {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.TOUCAN_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.TOUCAN;
     }
 
     @Override

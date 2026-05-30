@@ -5,7 +5,8 @@
       "entries": [
         {
           "type": "item",
-          "name": "alexsmobs:capsid"
+          "name": "minecraft:bone",
+          "weight": 1
         }
       ]
     }

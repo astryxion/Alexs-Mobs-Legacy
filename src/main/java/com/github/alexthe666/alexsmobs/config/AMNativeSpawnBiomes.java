@@ -128,15 +128,19 @@ public final class AMNativeSpawnBiomes {
         return is(Biomes.FROZEN_OCEAN, Biomes.DEEP_OCEAN);
     }
 
-  /** Main End island (1.16 {@code minecraft:the_end}). */
-    private static Matcher mainEndIsland() {
-        return is(Biomes.SKY);
+    /**
+     * End mob spawn biomes. 1.16+ uses outer End islands (excluding the main island). Vanilla 1.12.2 only
+     * has {@link Biomes#SKY}, so all End biomes qualify here; modded outer End islands still match via END dict.
+     */
+    private static Matcher endSpawnBiomes() {
+        return end();
     }
 
     public static boolean grizzlyBear(Biome biome) {
         return any(
                 all(overworld(), forestCategory()),
-                all(overworld(), dict(BiomeDictionary.Type.FOREST), not(is(Biomes.JUNGLE_EDGE, Biomes.MUTATED_JUNGLE)))
+                all(overworld(), dict(BiomeDictionary.Type.FOREST), not(is(Biomes.JUNGLE_EDGE, Biomes.MUTATED_JUNGLE))),
+                all(overworld(), dict(BiomeDictionary.Type.CONIFEROUS))
         ).test(biome);
     }
 
@@ -202,7 +206,7 @@ public final class AMNativeSpawnBiomes {
     }
 
     public static boolean endergrade(Biome biome) {
-        return all(end(), not(mainEndIsland())).test(biome);
+        return endSpawnBiomes().test(biome);
     }
 
     public static boolean hammerheadShark(Biome biome) {
@@ -238,7 +242,7 @@ public final class AMNativeSpawnBiomes {
     }
 
     public static boolean mimicube(Biome biome) {
-        return all(end(), not(mainEndIsland())).test(biome);
+        return endSpawnBiomes().test(biome);
     }
 
     public static boolean raccoon(Biome biome) {
@@ -317,11 +321,14 @@ public final class AMNativeSpawnBiomes {
     }
 
     public static boolean snowLeopard(Biome biome) {
-        return all(overworld(), dict(BiomeDictionary.Type.MOUNTAIN), dict(BiomeDictionary.Type.SNOWY)).test(biome);
+        return any(
+                all(overworld(), dict(BiomeDictionary.Type.SNOWY)),
+                all(overworld(), dict(BiomeDictionary.Type.MOUNTAIN))
+        ).test(biome);
     }
 
     public static boolean spectre(Biome biome) {
-        return all(end(), not(mainEndIsland())).test(biome);
+        return endSpawnBiomes().test(biome);
     }
 
     public static boolean crow(Biome biome) {
@@ -403,7 +410,7 @@ public final class AMNativeSpawnBiomes {
     }
 
     public static boolean enderiophage(Biome biome) {
-        return all(end(), not(mainEndIsland())).test(biome);
+        return endSpawnBiomes().test(biome);
     }
 
     public static boolean baldEagle(Biome biome) {
@@ -516,9 +523,9 @@ public final class AMNativeSpawnBiomes {
         return all(
                 overworld(),
                 any(
-                        all(dict(BiomeDictionary.Type.MOUNTAIN), dict(BiomeDictionary.Type.PLAINS)),
-                        is(Biomes.EXTREME_HILLS, Biomes.EXTREME_HILLS_WITH_TREES,
-                                Biomes.MUTATED_EXTREME_HILLS, Biomes.MUTATED_EXTREME_HILLS_WITH_TREES)
+                        dict(BiomeDictionary.Type.PLAINS),
+                        dict(BiomeDictionary.Type.MOUNTAIN),
+                        dict(BiomeDictionary.Type.MESA)
                 )
         ).test(biome);
     }

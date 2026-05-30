@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -65,6 +66,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 import java.util.Random;
 
@@ -168,6 +170,11 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.TARANTULA_HAWK_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.TARANTULA_HAWK;
     }
 
     private void switchNavigator(boolean onLand) {

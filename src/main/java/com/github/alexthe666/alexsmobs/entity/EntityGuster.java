@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.client.particle.AMParticleRegistry;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -81,7 +82,7 @@ public class EntityGuster extends EntityMob {
     @Nullable
     @Override
     protected ResourceLocation getLootTable() {
-        return this.getVariant() == 2 ? SOUL_LOOT : this.getVariant() == 1 ? RED_LOOT : super.getLootTable();
+        return this.getVariant() == 2 ? AMLootTables.GUSTER_SOUL : this.getVariant() == 1 ? AMLootTables.GUSTER_RED : AMLootTables.GUSTER;
     }
 
     private static boolean isGusterSpawnBlock(IBlockState state) {

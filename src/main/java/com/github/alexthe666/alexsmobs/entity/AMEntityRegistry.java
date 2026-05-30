@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.util.EnumHelper;
@@ -33,7 +34,10 @@ import net.minecraftforge.fml.common.registry.EntityEntry;
 import net.minecraftforge.fml.common.registry.EntityEntryBuilder;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 import com.google.common.base.Predicate;
 
 import java.util.function.BiPredicate;
@@ -220,7 +224,7 @@ public class AMEntityRegistry {
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityGazelle.class, EntityLiving.SpawnPlacementType.ON_GROUND);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityCrocodile.class, EnumHelper.addSpawnPlacementType("AMALEX_CROC", SpawnPredicateLogic.crocodile()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityFly.class, EnumHelper.addSpawnPlacementType("AMALEX_FLY", SpawnPredicateLogic.fly()));
-        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityHummingbird.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
+        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityHummingbird.class, EnumHelper.addSpawnPlacementType("AMALEX_HUMMINGBIRD", SpawnPredicateLogic.hummingbird()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityOrca.class, AM_IN_WATER_ORCA);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntitySunbird.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityGorilla.class, EnumHelper.addSpawnPlacementType("AMALEX_GORILLA", SpawnPredicateLogic.gorilla()));
@@ -261,7 +265,7 @@ public class AMEntityRegistry {
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityLeafcutterAnt.class, EntityLiving.SpawnPlacementType.ON_GROUND);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityEnderiophage.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityBaldEagle.class, EnumHelper.addSpawnPlacementType("AMALEX_EAGLE", SpawnPredicateLogic.baldEagle()));
-        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityTiger.class, EnumHelper.addSpawnPlacementType("AMALEX_TIGER", SpawnPredicateLogic.tiger()));
+        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityTiger.class, EntityLiving.SpawnPlacementType.ON_GROUND);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityTarantulaHawk.class, EnumHelper.addSpawnPlacementType("AMALEX_THAWK", SpawnPredicateLogic.tarantulaHawk()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityVoidWorm.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityFrilledShark.class, AM_IN_WATER_FRILLED);
@@ -327,6 +331,41 @@ public class AMEntityRegistry {
         return rolls <= 0 || random.nextInt(rolls) == 0;
     }
 
+    /** Water-column spawns registered via {@link #inWater} — blocked from natural spawn on superflat worlds. */
+    private static final Set<Class<? extends Entity>> AQUATIC_WATER_SPAWN = new HashSet<>();
+
+    static {
+        Collections.addAll(AQUATIC_WATER_SPAWN,
+                EntityOrca.class,
+                EntityHammerheadShark.class,
+                EntityLobster.class,
+                EntityBlobfish.class,
+                EntityMantisShrimp.class,
+                EntityCachalotWhale.class,
+                EntityFrilledShark.class,
+                EntityGiantSquid.class,
+                EntityMimicOctopus.class,
+                EntityTriops.class,
+                EntityFlyingFish.class,
+                EntityCombJelly.class,
+                EntityDevilsHolePupfish.class,
+                EntityCatfish.class,
+                EntityTerrapin.class);
+    }
+
+    public static boolean isSuperflatWorld(World world) {
+        return world != null && world.getWorldInfo().getTerrainType() == WorldType.FLAT;
+    }
+
+    public static boolean isAquaticWaterSpawnEntity(Entity entity) {
+        return entity != null && AQUATIC_WATER_SPAWN.contains(entity.getClass());
+    }
+
+    /** Superflat presets expose uniform water in every chunk, which overcrowds aquatic natural spawns. */
+    public static boolean shouldBlockAquaticNaturalSpawn(World world, Entity entity) {
+        return isSuperflatWorld(world) && isAquaticWaterSpawnEntity(entity);
+    }
+
     /**
      * 1.16 {@code IWorldReader.checkNoEntityCollision(entity)}. Vanilla {@link EntityLiving#isNotColliding()}
      * rejects liquids and prevents all {@link net.minecraft.entity.EnumCreatureType#WATER_CREATURE} natural spawns.
@@ -364,7 +403,7 @@ public class AMEntityRegistry {
         private static EntityLiving.SpawnPlacementType inWater(String id, BiPredicate<IBlockAccess, BlockPos> extra) {
             return EnumHelper.addSpawnPlacementType(id, (wa, pos) -> {
                 World w = castWorld(wa);
-                if (w == null) {
+                if (w == null || isSuperflatWorld(w)) {
                     return false;
                 }
                 if (!EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)) {
@@ -802,7 +841,8 @@ public class AMEntityRegistry {
                     return false;
                 }
                 Block block = w.getBlockState(pos.down()).getBlock();
-                boolean validGround = block == Blocks.STONE || block == Blocks.DIRT || block == Blocks.GRASS;
+                boolean validGround = block == Blocks.STONE || block == Blocks.DIRT || block == Blocks.GRASS
+                        || block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
                 return validGround && w.getLight(pos) > 8;
             };
         }

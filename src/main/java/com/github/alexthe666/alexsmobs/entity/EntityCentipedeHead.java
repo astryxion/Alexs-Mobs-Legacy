@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
@@ -32,6 +33,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 import com.google.common.base.Optional;
 import java.util.UUID;
@@ -72,6 +74,11 @@ public class EntityCentipedeHead extends EntityMob {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.CENTIPEDE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.CENTIPEDE_HEAD;
     }
 
     @Override

@@ -1,4 +1,7 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
+import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
@@ -116,7 +119,7 @@ public class EntityMimicube extends EntityMob implements IRangedAttackMob {
     }
 
     /**
-     * 1.16 trident shot — 1.12 has no {@code TridentEntity}; uses ranged arrow with same velocity math.
+     * 1.16 trident shot â€” 1.12 has no {@code TridentEntity}; uses ranged arrow with same velocity math.
      */
     public void attackEntityWithRangedAttackTrident(EntityLivingBase target, float distanceFactor) {
         this.attackEntityWithRangedAttack(target, distanceFactor);
@@ -378,6 +381,11 @@ public class EntityMimicube extends EntityMob implements IRangedAttackMob {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.MIMICUBE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.MIMICUBE;
     }
 
     private class MimicubeMoveHelper extends EntityMoveHelper {

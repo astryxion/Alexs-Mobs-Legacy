@@ -6,15 +6,13 @@
         {
           "type": "item",
           "weight": 20,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:clay_ball"
         },
         {
           "type": "item",
           "weight": 7,
-          "functions": [
-          ],
+          "functions": [],
           "name": "alexsmobs:maggot"
         }
       ]

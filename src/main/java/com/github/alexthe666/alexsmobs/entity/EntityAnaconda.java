@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -40,6 +41,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 import com.google.common.base.Optional;
 import java.util.Random;
@@ -114,6 +116,11 @@ public class EntityAnaconda extends EntityAnimal implements ISemiAquatic {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.ANACONDA_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.ANACONDA;
     }
 
     @Override

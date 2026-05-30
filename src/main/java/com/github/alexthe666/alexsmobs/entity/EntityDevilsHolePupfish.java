@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAISwimBottom;
@@ -87,6 +88,11 @@ public class EntityDevilsHolePupfish extends EntityCreature {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.DEVILS_HOLE_PUPFISH_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.DEVILS_HOLE_PUPFISH;
     }
 
     @Override

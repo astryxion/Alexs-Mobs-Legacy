@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -83,6 +84,7 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
 
     public EntityMungus(World worldIn) {
         super(worldIn);
+        this.setSize(0.75F, 1.45F);
         initBiomeData();
     }
 
@@ -121,6 +123,11 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.MUNGUS_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.MUNGUS;
     }
 
     @Override
@@ -502,6 +509,7 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
     @Override
     @Nullable
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {
+        this.fallDistance = 0.0F;
         this.dataManager.set(ALT_ORDER_MUSHROOMS, rand.nextBoolean());
         this.setMushroomCount(rand.nextInt(2));
         setMushroomState(rand.nextBoolean() ? Blocks.BROWN_MUSHROOM.getDefaultState() : Blocks.RED_MUSHROOM.getDefaultState());
@@ -625,6 +633,8 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
         private final int searchLength;
         protected BlockPos destinationBlock;
         protected int runDelay = 70;
+        private int pathRecalcCooldown = 0;
+        private int pathFailTicks = 0;
 
         private AITargetMushrooms() {
             searchLength = 20;
@@ -633,7 +643,8 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
 
         @Override
         public boolean shouldContinueExecuting() {
-            return destinationBlock != null && EntityMungus.this.isMushroomTarget(destinationBlock) && isCloseToShroom(32);
+            return destinationBlock != null && EntityMungus.this.beamCounter >= 0
+                    && EntityMungus.this.isMushroomTarget(destinationBlock) && isCloseToShroom(32);
         }
 
         public boolean isCloseToShroom(double dist) {
@@ -667,8 +678,21 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
                 resetTask();
             } else {
                 if (!EntityMungus.this.canSeeMushroom(this.destinationBlock)) {
-                    EntityMungus.this.getNavigator().tryMoveToXYZ(this.destinationBlock.getX(), this.destinationBlock.getY(), this.destinationBlock.getZ(), 1D);
+                    if (pathRecalcCooldown-- <= 0) {
+                        EntityMungus.this.getNavigator().tryMoveToXYZ(this.destinationBlock.getX(), this.destinationBlock.getY(), this.destinationBlock.getZ(), 1D);
+                        pathRecalcCooldown = 10 + EntityMungus.this.rand.nextInt(10);
+                        if (EntityMungus.this.getNavigator().noPath()) {
+                            pathFailTicks++;
+                        } else {
+                            pathFailTicks = 0;
+                        }
+                    }
+                    if (pathFailTicks > 60) {
+                        this.destinationBlock = null;
+                        resetTask();
+                    }
                 } else {
+                    pathFailTicks = 0;
                     EntityMungus.this.setBeamTarget(this.destinationBlock);
                     if (!EntityMungus.this.isInLove()) {
                         EntityMungus.this.getNavigator().clearPath();
@@ -680,6 +704,9 @@ public class EntityMungus extends EntityAnimal implements ITargetsDroppedItems, 
         @Override
         public void resetTask() {
             EntityMungus.this.setBeamTarget(null);
+            this.destinationBlock = null;
+            pathRecalcCooldown = 0;
+            pathFailTicks = 0;
         }
 
         protected boolean searchForDestination() {

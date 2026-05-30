@@ -6,50 +6,43 @@
         {
           "type": "item",
           "weight": 20,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:dirt"
         },
         {
           "type": "item",
           "weight": 10,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:gravel"
         },
         {
           "type": "item",
           "weight": 5,
-          "functions": [
-          ],
+          "functions": [],
           "name": "alexsmobs:leafcutter_ant_pupa"
         },
         {
           "type": "item",
           "weight": 5,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:vine"
         },
         {
           "type": "item",
           "weight": 2,
-          "functions": [
-          ],
+          "functions": [],
           "name": "alexsmobs:maggot"
         },
         {
           "type": "item",
           "weight": 1,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:beetroot"
         },
         {
           "type": "item",
           "weight": 1,
-          "functions": [
-          ],
+          "functions": [],
           "name": "minecraft:potato"
         }
       ]

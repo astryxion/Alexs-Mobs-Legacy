@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
@@ -128,7 +129,7 @@ public class EntityVoidWorm extends EntityMob {
     @Nullable
     @Override
     protected ResourceLocation getLootTable() {
-        return this.isSplitter() ? SPLITTER_LOOT : super.getLootTable();
+        return this.isSplitter() ? AMLootTables.VOID_WORM_SPLITTER : AMLootTables.VOID_WORM;
     }
 
     @Override

@@ -8,6 +8,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.EntityMoveHelper;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.pathfinding.WalkNodeProcessor;
@@ -67,9 +68,18 @@ public class CrowAIFollowOwner extends EntityAIBase {
     public boolean shouldContinueExecuting() {
         if (this.crow.isSitting()) {
             return false;
-        } else {
-            return crow.getCommand() == 1 && !crow.isBeingRidden() && (crow.getAttackTarget() == null || !crow.getAttackTarget().isEntityAlive());
         }
+        if (crow.getCommand() != 1 || crow.isBeingRidden()) {
+            return false;
+        }
+        if (crow.getAttackTarget() != null && crow.getAttackTarget().isEntityAlive()) {
+            return false;
+        }
+        EntityLivingBase owner = this.owner;
+        if (owner == null || !owner.isEntityAlive()) {
+            return false;
+        }
+        return crow.getDistanceSq(owner) >= (double) (this.minDist * this.minDist);
     }
 
     @Override
@@ -89,6 +99,8 @@ public class CrowAIFollowOwner extends EntityAIBase {
         this.owner = null;
         this.navigator.clearPath();
         circlingTime = 0;
+        this.crow.setFlying(false);
+        this.crow.getMoveHelper().action = EntityMoveHelper.Action.WAIT;
         this.crow.setPathPriority(PathNodeType.WATER, this.oldWaterCost);
     }
 
@@ -108,24 +120,39 @@ public class CrowAIFollowOwner extends EntityAIBase {
             }
 
             if (!crow.aiItemFlag) {
+                if (dist < (double) (this.minDist * this.minDist)) {
+                    if (circlingTime > maxCircleTime && crow.getRidingCrows(owner) < 2 && crow.getDistance(owner) < 2.5D) {
+                        if (!crow.world.isRemote) {
+                            crow.startRiding(owner, true);
+                            crow.rideCooldown = 40;
+                            AlexsMobs.sendMSGToAll(new MessageCrowMountPlayer(crow.getEntityId(), owner.getEntityId()));
+                        }
+                    } else {
+                        crow.setFlying(false);
+                        crow.getMoveHelper().action = EntityMoveHelper.Action.WAIT;
+                    }
+                    return;
+                }
                 if (this.crow.isFlying()) {
                     circlingTime++;
                 }
                 if (circlingTime > maxCircleTime && crow.getRidingCrows(owner) < 2) {
+                    crow.setFlying(true);
                     crow.getMoveHelper().setMoveTo(owner.posX, owner.posY + owner.getEyeHeight() + 0.2F, owner.posZ, 0.7F);
-                    if (crow.getDistance(owner) < 2) {
+                    if (crow.getDistance(owner) < 2.5D && !crow.world.isRemote) {
                         crow.startRiding(owner, true);
-                        if (!crow.world.isRemote) {
-                            AlexsMobs.sendMSGToAll(new MessageCrowMountPlayer(crow.getEntityId(), owner.getEntityId()));
-                        }
+                        crow.rideCooldown = 40;
+                        AlexsMobs.sendMSGToAll(new MessageCrowMountPlayer(crow.getEntityId(), owner.getEntityId()));
                     }
                 } else {
                     Vec3d circlePos = getVultureCirclePos(owner.getPositionVector());
                     if (circlePos == null) {
-                        circlePos = owner.getPositionVector();
+                        crow.setFlying(false);
+                        crow.getNavigator().tryMoveToEntityLiving(owner, this.followSpeed);
+                    } else {
+                        crow.setFlying(true);
+                        crow.getMoveHelper().setMoveTo(circlePos.x, circlePos.y + owner.getEyeHeight() + 0.2F, circlePos.z, 0.7F);
                     }
-                    crow.setFlying(true);
-                    crow.getMoveHelper().setMoveTo(circlePos.x, circlePos.y + owner.getEyeHeight() + 0.2F, circlePos.z, 0.7F);
                 }
             }
         }

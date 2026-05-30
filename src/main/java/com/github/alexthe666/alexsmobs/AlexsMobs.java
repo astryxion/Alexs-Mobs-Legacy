@@ -11,7 +11,6 @@ import com.github.alexthe666.alexsmobs.misc.EmeraldsForItemsTrade;
 import com.github.alexthe666.alexsmobs.misc.ItemsForEmeraldsTrade;
 import com.github.alexthe666.alexsmobs.world.AMWorldRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMSmeltingRecipes;
-import com.github.alexthe666.alexsmobs.world.spawn.AMSpawnBiomeConfiguration;
 import com.github.alexthe666.alexsmobs.event.ServerEvents;
 import com.github.alexthe666.alexsmobs.message.*;
 import com.github.alexthe666.alexsmobs.misc.AMAdvancementTriggerRegistry;
@@ -48,7 +47,7 @@ public class AlexsMobs {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "alexsmobs";
-    public static final String VERSION = "1.12.2-1.4.0";
+    public static final String VERSION = "1.12.2-1.5.0";
 
     @Mod.Instance(MODID)
     public static AlexsMobs instance;
@@ -98,7 +97,6 @@ public class AlexsMobs {
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         ConfigHolder.initCommonConfiguration(new File(event.getModConfigurationDirectory(), "alexsmobs.cfg"));
-        AMSpawnBiomeConfiguration.init(event.getModConfigurationDirectory());
         BiomeConfig.init();
         registerPackets();
         AMTileEntityRegistry.register();

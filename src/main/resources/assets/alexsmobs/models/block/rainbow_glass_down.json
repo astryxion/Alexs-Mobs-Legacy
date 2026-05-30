@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "particle": "alexsmobs:blocks/rainbow_glass_all",
+    "down": "alexsmobs:blocks/rainbow_glass_blank",
+    "up": "alexsmobs:blocks/rainbow_glass_blank",
+    "north": "alexsmobs:blocks/rainbow_glass_down",
+    "east": "alexsmobs:blocks/rainbow_glass_down",
+    "south": "alexsmobs:blocks/rainbow_glass_down",
+    "west": "alexsmobs:blocks/rainbow_glass_down"
+  }
+}

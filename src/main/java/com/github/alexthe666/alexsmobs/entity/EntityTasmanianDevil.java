@@ -62,6 +62,7 @@ public class EntityTasmanianDevil extends EntityAnimal implements IAnimatedEntit
 
     public EntityTasmanianDevil(World world) {
         super(world);
+        this.setSize(0.7F, 0.8F);
     }
 
     public boolean shouldMove() {
@@ -176,6 +177,13 @@ public class EntityTasmanianDevil extends EntityAnimal implements IAnimatedEntit
     }
 
     @Override
+    @Nullable
+    public net.minecraft.entity.IEntityLivingData onInitialSpawn(net.minecraft.world.DifficultyInstance difficulty, @Nullable net.minecraft.entity.IEntityLivingData livingdata) {
+        this.fallDistance = 0.0F;
+        return super.onInitialSpawn(difficulty, livingdata);
+    }
+
+    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.prevBaskProgress = this.baskProgress;
@@ -192,7 +200,8 @@ public class EntityTasmanianDevil extends EntityAnimal implements IAnimatedEntit
         if (!this.isBasking() && baskProgress > 0) {
             baskProgress--;
         }
-        if (!world.isRemote && this.getAttackTarget() != null && this.getAnimation() == ANIMATION_ATTACK && this.getAnimationTick() == 5 && this.canEntityBeSeen(this.getAttackTarget())) {
+        if (!world.isRemote && this.getAttackTarget() != null && this.getAttackTarget() != this
+                && this.getAnimation() == ANIMATION_ATTACK && this.getAnimationTick() == 5 && this.canEntityBeSeen(this.getAttackTarget())) {
             float f1 = this.rotationYaw * ((float) Math.PI / 180F);
             this.motionX += -MathHelper.sin(f1) * 0.02F;
             this.motionZ += MathHelper.cos(f1) * 0.02F;
@@ -224,18 +233,27 @@ public class EntityTasmanianDevil extends EntityAnimal implements IAnimatedEntit
             scareMobsTime = 40;
         }
         if (scareMobsTime > 0) {
-            List<EntityMob> list = this.world.getEntitiesWithinAABB(EntityMob.class, this.getEntityBoundingBox().grow(16, 8, 16));
-            for (EntityMob e : list) {
-                e.setAttackTarget(null);
-                e.setRevengeTarget(null);
-                if (scareMobsTime % 5 == 0) {
-                    Vec3d vec = RandomPositionGenerator.findRandomTargetBlockAwayFrom(e, 20, 7, new Vec3d(this.posX, this.posY, this.posZ));
-                    if (vec != null) {
-                        e.getNavigator().tryMoveToXYZ(vec.x, vec.y, vec.z, 1.5D);
+            if (!world.isRemote) {
+                List<EntityMob> list = this.world.getEntitiesWithinAABB(EntityMob.class, this.getEntityBoundingBox().grow(16, 8, 16));
+                int processed = 0;
+                for (EntityMob e : list) {
+                    if (processed++ >= 8) {
+                        break;
+                    }
+                    e.setAttackTarget(null);
+                    e.setRevengeTarget(null);
+                    if (scareMobsTime % 10 == 0) {
+                        Vec3d vec = RandomPositionGenerator.findRandomTargetBlockAwayFrom(e, 20, 7, new Vec3d(this.posX, this.posY, this.posZ));
+                        if (vec != null) {
+                            e.getNavigator().tryMoveToXYZ(vec.x, vec.y, vec.z, 1.5D);
+                        }
                     }
                 }
             }
             scareMobsTime--;
+        }
+        if (this.getAttackTarget() == this) {
+            this.setAttackTarget(null);
         }
         if (this.getAttackTarget() != null && this.getAttackTarget().isEntityAlive() && (this.getRevengeTarget() == null || !this.getRevengeTarget().isEntityAlive())) {
             this.setRevengeTarget(this.getAttackTarget());

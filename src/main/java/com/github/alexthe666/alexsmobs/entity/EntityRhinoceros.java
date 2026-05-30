@@ -149,6 +149,11 @@ public class EntityRhinoceros extends EntityAnimal implements IAnimatedEntity {
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 3;
+    }
+
+    @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
         AMEntityRegistry.updateAnimations(this);

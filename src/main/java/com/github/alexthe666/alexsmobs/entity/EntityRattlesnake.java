@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
@@ -35,6 +36,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 
 public class EntityRattlesnake extends EntityAnimal implements IAnimatedEntity {
@@ -93,6 +95,11 @@ public class EntityRattlesnake extends EntityAnimal implements IAnimatedEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.RATTLESNAKE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.RATTLESNAKE;
     }
 
     @Override

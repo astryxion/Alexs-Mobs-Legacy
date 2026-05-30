@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIHerdPanic;
@@ -29,6 +30,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 
 public class EntityGazelle extends EntityAnimal implements IAnimatedEntity, IHerdPanic {
@@ -77,6 +79,11 @@ public class EntityGazelle extends EntityAnimal implements IAnimatedEntity, IHer
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.GAZELLE_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.GAZELLE;
     }
 
     @Override

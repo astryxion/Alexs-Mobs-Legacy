@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -45,6 +46,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Random;
 
 public class EntityDropBear extends EntityMob implements IAnimatedEntity {
@@ -105,6 +107,11 @@ public class EntityDropBear extends EntityMob implements IAnimatedEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.DROPBEAR_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.DROPBEAR;
     }
 
     @Override

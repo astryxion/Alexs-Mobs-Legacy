@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.CosmicCodAIFollowLeader;
@@ -34,6 +35,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 
 public class EntityCosmicCod extends EntityCreature {
@@ -50,7 +52,7 @@ public class EntityCosmicCod extends EntityCreature {
     private EntityCosmicCod groupLeader;
     private int groupSize = 1;
 
-    /** Max cod within this radius of a candidate spawn — prevents void-wide baitballs. */
+    /** Max cod within this radius of a candidate spawn â€” prevents void-wide baitballs. */
     private static final double LOCAL_SPAWN_CAP_RADIUS = 32.0D;
     private static final int LOCAL_SPAWN_CAP = 14;
 
@@ -113,6 +115,11 @@ public class EntityCosmicCod extends EntityCreature {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.COSMIC_COD_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.COSMIC_COD;
     }
 
     @Override

@@ -75,7 +75,6 @@ public class KomodoDragonAIBreed extends AnimalAIMate {
         if (this.getTargetMate() != null) {
             this.getTargetMate().resetInLove();
         }
-        this.resetTask();
     }
 
     private void spawnParthenogenicBaby() {

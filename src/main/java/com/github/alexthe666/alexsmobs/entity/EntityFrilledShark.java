@@ -5,6 +5,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import com.github.alexthe666.alexsmobs.client.particle.AMParticleRegistry;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.effect.AMEffectRegistry;
+import com.github.alexthe666.alexsmobs.entity.ai.FindWaterSteering;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAISwimBottom;
 import com.github.alexthe666.alexsmobs.entity.ai.AquaticMoveController;
 import com.github.alexthe666.alexsmobs.entity.ai.EntityAINearestTarget3D;
@@ -377,6 +378,7 @@ public class EntityFrilledShark extends EntityCreature implements IAnimatedEntit
     private class AIFindWater extends EntityAIBase {
         private BlockPos targetPos;
         private int executionChance = 30;
+        private int runTicks;
 
         AIFindWater() {
             this.setMutexBits(3);
@@ -395,14 +397,43 @@ public class EntityFrilledShark extends EntityCreature implements IAnimatedEntit
 
         @Override
         public void startExecuting() {
-            if (targetPos != null) {
-                EntityFrilledShark.this.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
-            }
+            runTicks = 0;
+            moveTowardWater();
+        }
+
+        @Override
+        public void updateTask() {
+            runTicks++;
+            moveTowardWater();
         }
 
         @Override
         public boolean shouldContinueExecuting() {
-            return targetPos != null && !isWaterAt(EntityFrilledShark.this.getPosition()) && EntityFrilledShark.this.getDistanceSq(targetPos) > 2;
+            if (runTicks > 200 || isWaterAt(EntityFrilledShark.this.getPosition())) {
+                return false;
+            }
+            return targetPos != null && EntityFrilledShark.this.getDistanceSq(targetPos) > 2;
+        }
+
+        @Override
+        public void resetTask() {
+            targetPos = null;
+            runTicks = 0;
+            EntityFrilledShark.this.getNavigator().clearPath();
+        }
+
+        private void moveTowardWater() {
+            if (targetPos == null) {
+                return;
+            }
+            if (EntityFrilledShark.this.isInWater() || EntityFrilledShark.this.isInLava()) {
+                EntityFrilledShark.this.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D);
+                return;
+            }
+            EntityFrilledShark.this.getNavigator().clearPath();
+            if (!EntityFrilledShark.this.getNavigator().tryMoveToXYZ(targetPos.getX(), targetPos.getY(), targetPos.getZ(), 1.2D)) {
+                FindWaterSteering.steerToward(EntityFrilledShark.this, targetPos);
+            }
         }
 
         private boolean isWaterAt(BlockPos pos) {

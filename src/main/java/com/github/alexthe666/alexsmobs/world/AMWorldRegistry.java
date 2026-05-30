@@ -1,7 +1,8 @@
 package com.github.alexthe666.alexsmobs.world;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
-import com.github.alexthe666.alexsmobs.world.spawn.AMFaunaSpawnRegistry;
+import com.github.alexthe666.alexsmobs.world.spawn.AMSpawnEvents;
+import com.github.alexthe666.alexsmobs.world.spawn.AMSpawnRegistry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -13,7 +14,7 @@ import java.util.Random;
 
 /**
  * World features (leafcutter anthill generator). Natural mob spawning is handled by
- * {@link AMFaunaSpawnRegistry} using the Familiar Fauna 1.12.2 biome-list approach.
+ * {@link AMSpawnRegistry} using Mo Creatures-style {@code EntityRegistry.addSpawn} registration.
  */
 public final class AMWorldRegistry {
 
@@ -24,7 +25,8 @@ public final class AMWorldRegistry {
     }
 
     public static void register() {
-        AMFaunaSpawnRegistry.register();
+        AMSpawnRegistry.register();
+        AMSpawnEvents.buildWorldGenSpawnLists();
         registerLeafcutterAnthillGeneratorIfNeeded();
     }
 

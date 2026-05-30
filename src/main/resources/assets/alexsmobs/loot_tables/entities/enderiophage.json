@@ -12,7 +12,8 @@
               "count": 1
             }
           ],
-          "name": "alexsmobs:capsid"
+          "name": "minecraft:bone",
+          "weight": 1
         }
       ]
     }

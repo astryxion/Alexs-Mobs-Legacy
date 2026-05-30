@@ -8,11 +8,12 @@
           "type": "item",
           "functions": [
             {
-              "function": "minecraft:set_count",
+              "function": "set_count",
               "count": 1
             }
           ],
-          "name": "alexsmobs:cosmic_cod"
+          "name": "alexsmobs:cosmic_cod",
+          "weight": 1
         }
       ]
     },
@@ -22,12 +23,19 @@
       "entries": [
         {
           "type": "item",
-          "name": "minecraft:bone_meal"
+          "name": "minecraft:dye",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "set_data",
+              "data": 15
+            }
+          ]
         }
       ],
       "conditions": [
         {
-          "condition": "minecraft:random_chance",
+          "condition": "random_chance",
           "chance": 0.05
         }
       ]

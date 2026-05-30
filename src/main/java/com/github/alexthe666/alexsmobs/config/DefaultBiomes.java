@@ -13,7 +13,10 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 1)
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "forest", 1)
             .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:jungle_edge", 1)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:mutated_jungle", 1);
+            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:mutated_jungle", 1)
+            // 1.20 ALL_FOREST: overworld + is_taiga
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 2)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "coniferous", 2);
 
     public static final SpawnBiomeData ROADRUNNER = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -80,13 +83,10 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.BIOME_CATEGORY, false, "desert", 1);
 
     public static final SpawnBiomeData ENDERGRADE = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:sky", 0);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0);
 
     public static final SpawnBiomeData HAMMERHEAD = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "ocean", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "hot", 0);
+            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "minecraft:ocean", 0);
 
     public static final SpawnBiomeData LOBSTER = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -122,8 +122,7 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "biomesoplenty:tundra_bog", 2);
 
     public static final SpawnBiomeData MIMICUBE = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:sky", 0);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0);
 
     public static final SpawnBiomeData RACCOON = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -165,13 +164,14 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "byg:warped_desert", 1);
     
     public static final SpawnBiomeData SPECTRE = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:sky", 0);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0);
 
+    /** 1.20: snowy overworld biomes, or mountainous peaks (separate groups — not all three at once). */
     public static final SpawnBiomeData SNOW_LEOPARD = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "mountain", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "snowy", 0);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "snowy", 0)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 1)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "mountain", 1);
 
     public static final SpawnBiomeData CROW = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -192,9 +192,7 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "rare", 0);
 
     public static final SpawnBiomeData MANTIS_SHRIMP = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "ocean", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "hot", 0);
+            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "minecraft:ocean", 0);
 
     public static final SpawnBiomeData GUSTER = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -247,30 +245,24 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "jungle", 0);
 
     public static final SpawnBiomeData ENDERIOPHAGE = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, true, "minecraft:sky", 0);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "end", 0);
 
     public static final SpawnBiomeData BALD_EAGLE = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "mountain", 0)
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "forest", 0);
 
+    /** 1.20 bamboo/cherry groves → all jungle-tagged biomes on 1.12.2. */
     public static final SpawnBiomeData TIGER = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "minecraft:jungle", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 1)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "minecraft:jungle_hills", 1)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "biomesoplenty:bamboo_blossom_grove", 2)
-            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "biomesoplenty:cherry_blossom_grove", 3);
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "jungle", 0);
 
     public static final SpawnBiomeData TARANTULA_HAWK = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "sandy", 0);
 
     public static final SpawnBiomeData MIMIC_OCTOPUS = new SpawnBiomeData()
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "ocean", 0)
-            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "hot", 0);
+            .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "minecraft:ocean", 0);
 
     public static final SpawnBiomeData SEAGULL = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
@@ -306,5 +298,14 @@ public class DefaultBiomes {
 
     public static final SpawnBiomeData ALL_NETHER = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "nether", 0);
+
+    /** 1.20 MEADOWS: plains and plateaus; 1.12 also includes mountain for extreme hills / high terrain. */
+    public static final SpawnBiomeData GELADA_MONKEY = new SpawnBiomeData()
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 0)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "plains", 0)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 1)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "mountain", 1)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "overworld", 2)
+            .addBiomeEntry(BiomeEntryType.BIOME_DICT, false, "mesa", 2);
 
 }

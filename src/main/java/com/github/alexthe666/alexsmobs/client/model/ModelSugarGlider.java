@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.model.ModelRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumFacing;
 
 public class ModelSugarGlider extends AdvancedEntityModel<EntitySugarGlider> {
 
@@ -99,6 +100,11 @@ public class ModelSugarGlider extends AdvancedEntityModel<EntitySugarGlider> {
 
     public void setRotationAngles(EntitySugarGlider entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.resetToDefaultPose();
+        if (entityIn.isRiding()) {
+            netHeadYaw = 0.0F;
+            headPitch = 0.0F;
+            limbSwingAmount = 0.0F;
+        }
         float idleSpeed = 0.1F;
         float idleDegree = 0.25F;
         float walkSpeed = 0.9F;
@@ -152,7 +158,7 @@ public class ModelSugarGlider extends AdvancedEntityModel<EntitySugarGlider> {
         this.swing(tail, glideSpeed * 0.2F, glideDegree, true, -1F, 0F, ageInTicks, glideSwingAmount);
         this.bob(head, 1F, 0.6F, false, ageInTicks, forageProgress * 0.2F);
         this.swing(head, 0.5F, 0.6F, true, -1F, 0F, ageInTicks, forageProgress * 0.2F);
-        if (forageProgress == 0) {
+        if (forageProgress == 0 && entityIn.getAttachmentFacing() == EnumFacing.DOWN && !entityIn.isGliding()) {
             this.faceTarget(netHeadYaw, headPitch, 1.2F, head);
         }
     }

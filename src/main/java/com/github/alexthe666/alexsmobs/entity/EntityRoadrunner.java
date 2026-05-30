@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
@@ -38,6 +39,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 
 public class EntityRoadrunner extends EntityAnimal {
 
@@ -68,7 +70,7 @@ public class EntityRoadrunner extends EntityAnimal {
         this.tasks.addTask(6, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
         this.tasks.addTask(7, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new EntityAINearestAttackableTarget<>(this, EntityRattlesnake.class, 55, true, false, null));
-        // 1.20 HurtByTargetGoal(..., Player.class) — do not retaliate against creative/spectator players
+        // 1.20 HurtByTargetGoal(..., Player.class) â€” do not retaliate against creative/spectator players
         this.targetTasks.addTask(2, new RoadrunnerAIHurtByTarget(this));
     }
 
@@ -140,6 +142,11 @@ public class EntityRoadrunner extends EntityAnimal {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.ROADRUNNER_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.ROADRUNNER;
     }
 
     @Override

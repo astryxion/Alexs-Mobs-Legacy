@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -47,6 +48,7 @@ import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Iterator;
 import java.util.List;
 import com.google.common.base.Optional;
@@ -108,6 +110,11 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.RACCOON_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.RACCOON;
     }
 
     @Override

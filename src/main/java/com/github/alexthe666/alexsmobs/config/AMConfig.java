@@ -65,7 +65,7 @@ public class AMConfig {
     public static int elephantSpawnRolls = 0;
     public static int soulVultureSpawnWeight = 30;
     public static int soulVultureSpawnRolls = 0;
-    public static int snowLeopardSpawnWeight = 20;
+    public static int snowLeopardSpawnWeight = 18;
     public static int snowLeopardSpawnRolls = 0;
     public static int spectreSpawnWeight = 10;
     public static int spectreSpawnRolls = 5;
@@ -101,7 +101,7 @@ public class AMConfig {
     public static int enderiophageSpawnRolls = 2;
     public static int baldEagleSpawnWeight = 15;
     public static int baldEagleSpawnRolls = 0;
-    public static int tigerSpawnWeight = 100;
+    public static int tigerSpawnWeight = 30;
     public static int tigerSpawnRolls = 0;
     public static int tarantulaHawkSpawnWeight = 6;
     public static int tarantulaHawkSpawnRolls = 1;
@@ -118,7 +118,8 @@ public class AMConfig {
     public static int bisonSpawnWeight = 9;
     public static int bisonSpawnRolls = 0;
     public static int rhinocerosSpawnWeight = 24;
-    public static int rhinocerosSpawnRolls = 0;
+    /** 1.12 chunk-gen pass can inflate savanna herds; default 1 matches roadrunner/tarantula hawk rarity. */
+    public static int rhinocerosSpawnRolls = 1;
     public static int skunkSpawnWeight = 7;
     public static int skunkSpawnRolls = 0;
     public static int tusklinSpawnWeight = 18;
@@ -219,6 +220,7 @@ public class AMConfig {
     public static boolean seagullStealing = true;
     public static List<? extends String> seagullStealingBlacklist = Lists.newArrayList();
     public static boolean clingingFlipEffect = false;
+    public static double rainbowGlassFidelity = 16.0D;
 
     public static void bake() {
         try {
@@ -426,6 +428,7 @@ public class AMConfig {
             seagullStealing = ConfigHolder.COMMON.seagullStealing.get();
             seagullStealingBlacklist = (List<? extends String>) ConfigHolder.COMMON.seagullStealingBlacklist.get();
             clingingFlipEffect = ConfigHolder.COMMON.clingingFlipEffect.get();
+            rainbowGlassFidelity = ConfigHolder.COMMON.rainbowGlassFidelity.get();
         } catch (Exception e) {
             AlexsMobs.LOGGER.warn("An exception was caused trying to load the config for Alex's Mobs.");
             e.printStackTrace();

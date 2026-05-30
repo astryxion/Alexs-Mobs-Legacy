@@ -81,6 +81,7 @@ public class BiomeConfig {
 	public static Pair<String, SpawnBiomeData> anaconda = Pair.of("alexsmobs:anaconda_spawns", DefaultBiomes.ANACONDA);
 	public static Pair<String, SpawnBiomeData> laviathan = Pair.of("alexsmobs:laviathan_spawns", DefaultBiomes.ALL_NETHER);
 	public static Pair<String, SpawnBiomeData> giant_squid = Pair.of("alexsmobs:giant_squid_spawns", DefaultBiomes.DEEP_SEA);
+	public static Pair<String, SpawnBiomeData> geladaMonkey = Pair.of("alexsmobs:gelada_monkey_spawns", DefaultBiomes.GELADA_MONKEY);
 
 	private static boolean init = false;
 	private static Map<String, SpawnBiomeData> biomeConfigValues = new HashMap<>();

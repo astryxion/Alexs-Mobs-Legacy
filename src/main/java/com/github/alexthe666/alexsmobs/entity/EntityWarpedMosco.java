@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.DirectPathNavigator;
@@ -45,6 +46,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Random;
 
 public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
@@ -122,6 +124,11 @@ public class EntityWarpedMosco extends EntityMob implements IAnimatedEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.WARPED_MOSCO_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.WARPED_MOSCO;
     }
 
     @Override

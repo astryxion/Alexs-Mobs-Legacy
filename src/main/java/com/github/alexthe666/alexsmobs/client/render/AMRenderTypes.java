@@ -71,6 +71,24 @@ public final class AMRenderTypes {
         GlStateManager.depthMask(false);
     }
 
+    public static void beginWeezerRainbowGlint() {
+        setupWeezerRainbowTexturing(8.0F);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.depthMask(false);
+    }
+
+    public static void beginBrazilRainbowGlint() {
+        setupRainbowRendering(4.0F);
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_COLOR, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        GlStateManager.disableLighting();
+        GlStateManager.disableCull();
+        GlStateManager.depthMask(false);
+    }
+
     public static void endRainbowGlint() {
         GlStateManager.depthMask(true);
         GlStateManager.enableLighting();
@@ -205,6 +223,18 @@ public final class AMRenderTypes {
         long i = System.currentTimeMillis() * speedMult;
         float f1 = (float) (i % 30000L) / 30000.0F;
         GlStateManager.translate(0.0F, f1, 0.0F);
+        GlStateManager.scale(scaleIn, scaleIn, scaleIn);
+        GlStateManager.matrixMode(5888);
+    }
+
+    private static void setupWeezerRainbowTexturing(float scaleIn) {
+        GlStateManager.matrixMode(5890);
+        GlStateManager.pushMatrix();
+        GlStateManager.loadIdentity();
+        long i = System.currentTimeMillis() * 8L;
+        float f = (float) (i % 110000L) / 110000.0F;
+        float f1 = (float) (i % 30000L) / 30000.0F;
+        GlStateManager.translate(f, f1, 0.0F);
         GlStateManager.scale(scaleIn, scaleIn, scaleIn);
         GlStateManager.matrixMode(5888);
     }

@@ -11,7 +11,13 @@
         {
           "type": "item",
           "weight": 19,
-          "name": "minecraft:ink_sac"
+          "name": "minecraft:dye",
+          "functions": [
+            {
+              "function": "set_data",
+              "data": 0
+            }
+          ]
         },
         {
           "type": "item",
@@ -30,7 +36,10 @@
           "functions": [
             {
               "function": "set_count",
-              "count": { "min": 1, "max": 10 }
+              "count": {
+                "min": 1,
+                "max": 10
+              }
             }
           ]
         },
@@ -41,7 +50,10 @@
           "functions": [
             {
               "function": "set_count",
-              "count": { "min": 2, "max": 5 }
+              "count": {
+                "min": 2,
+                "max": 5
+              }
             }
           ]
         },
@@ -52,7 +64,10 @@
           "functions": [
             {
               "function": "set_count",
-              "count": { "min": 1, "max": 4 }
+              "count": {
+                "min": 1,
+                "max": 4
+              }
             }
           ]
         },

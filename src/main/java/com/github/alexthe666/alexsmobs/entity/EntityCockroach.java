@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIFleeLight;
@@ -186,7 +187,7 @@ public class EntityCockroach extends EntityAnimal implements IShearable, ITarget
     @Nullable
     @Override
     protected ResourceLocation getLootTable() {
-        return this.hasMaracas() ? this.isHeadless() ? MARACA_HEADLESS_LOOT : MARACA_LOOT : super.getLootTable();
+        return this.hasMaracas() ? this.isHeadless() ? AMLootTables.COCKROACH_MARACAS_HEADLESS : AMLootTables.COCKROACH_MARACAS : AMLootTables.COCKROACH;
     }
 
     public float getBlockPathWeight(BlockPos pos, net.minecraft.world.IBlockAccess worldIn) {

@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.CreatureAITargetItems;
@@ -53,6 +54,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -95,6 +97,7 @@ public class EntitySeagull extends EntityAnimal implements ITargetsDroppedItems 
 
     public EntitySeagull(World worldIn) {
         super(worldIn);
+        this.setSize(0.45F, 0.45F);
         this.setPathPriority(PathNodeType.DANGER_FIRE, -1.0F);
         this.setPathPriority(PathNodeType.WATER, -1.0F);
         this.setPathPriority(PathNodeType.WATER, 16.0F);
@@ -113,6 +116,11 @@ public class EntitySeagull extends EntityAnimal implements ITargetsDroppedItems 
 
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.SEAGULL_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.SEAGULL;
     }
 
     @Override

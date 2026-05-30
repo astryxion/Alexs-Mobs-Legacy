@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -38,6 +39,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.UUID;
 
 public class EntityWarpedToad extends EntityTameable implements ITargetsDroppedItems, IFollower, ISemiAquatic {
@@ -105,6 +107,11 @@ public class EntityWarpedToad extends EntityTameable implements ITargetsDroppedI
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.WARPED_TOAD_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.WARPED_TOAD;
     }
 
     @Override

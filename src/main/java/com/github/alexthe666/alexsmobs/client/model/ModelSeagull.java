@@ -177,9 +177,11 @@ public class ModelSeagull extends AdvancedEntityModel<EntitySeagull> {
             this.head.setScale(1.0F, 1.0F, 1.0F);
             this.head.setShouldScaleChildren(false);
         } else {
+            this.head.setScale(0.9F, 0.9F, 0.9F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }
+            this.head.setScale(1.0F, 1.0F, 1.0F);
         }
     }
 

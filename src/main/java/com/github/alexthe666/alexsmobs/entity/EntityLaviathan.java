@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -145,7 +146,7 @@ public class EntityLaviathan extends EntityAnimal implements ISemiAquatic, IHerd
     @Override
     @Nullable
     protected ResourceLocation getLootTable() {
-        return this.isObsidian() ? OBSIDIAN_LOOT : super.getLootTable();
+        return this.isObsidian() ? AMLootTables.LAVIATHAN_OBSIDIAN : AMLootTables.LAVIATHAN;
     }
 
     @Override

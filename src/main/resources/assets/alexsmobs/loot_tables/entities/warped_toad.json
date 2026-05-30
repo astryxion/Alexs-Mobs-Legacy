@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "item",
-          "name": "minecraft:shroomlight",
+          "name": "minecraft:glowstone",
           "weight": 1,
           "functions": [
             {

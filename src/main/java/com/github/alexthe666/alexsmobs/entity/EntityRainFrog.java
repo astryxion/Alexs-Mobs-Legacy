@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIWanderRanged;
@@ -40,6 +41,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldInfo;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.EnumSet;
 import java.util.Random;
 
@@ -402,6 +404,11 @@ public class EntityRainFrog extends EntityAnimal implements ITargetsDroppedItems
     @Override
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.RAIN_FROG_HURT;
+    }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.RAIN_FROG;
     }
 
     private class AIBurrow extends EntityAIBase {

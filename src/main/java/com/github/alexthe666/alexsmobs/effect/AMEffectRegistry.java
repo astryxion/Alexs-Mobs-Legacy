@@ -36,6 +36,7 @@ public class AMEffectRegistry {
     public static final Potion DEBILITATING_STING = new EffectDebilitatingSting();
     public static final Potion FLEET_FOOTED = new EffectFleetFooted();
     public static final Potion EXSANGUINATION = new EffectExsanguination();
+    public static final Potion SLOW_FALL = new EffectSlowFall();
     public static final PotionType KNOCKBACK_RESISTANCE_POTION = new PotionType(new PotionEffect(KNOCKBACK_RESISTANCE, 3600)).setRegistryName(AlexsMobs.MODID, "knockback_resistance");
     public static final PotionType LONG_KNOCKBACK_RESISTANCE_POTION = new PotionType(new PotionEffect(KNOCKBACK_RESISTANCE, 9600)).setRegistryName(AlexsMobs.MODID, "long_knockback_resistance");
     public static final PotionType STRONG_KNOCKBACK_RESISTANCE_POTION = new PotionType(new PotionEffect(KNOCKBACK_RESISTANCE, 1800, 1)).setRegistryName(AlexsMobs.MODID, "strong_knockback_resistance");

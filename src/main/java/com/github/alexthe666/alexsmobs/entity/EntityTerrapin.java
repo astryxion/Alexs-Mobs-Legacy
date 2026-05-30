@@ -1,4 +1,5 @@
 package com.github.alexthe666.alexsmobs.entity;
+import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
@@ -35,6 +36,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import net.minecraft.util.ResourceLocation;
 import java.util.List;
 import java.util.Random;
 
@@ -107,6 +109,11 @@ public class EntityTerrapin extends EntityAnimal implements ISemiAquatic {
     protected SoundEvent getDeathSound() {
         return AMSoundRegistry.TERRAPIN_HURT;
     }
+    @Override
+    @Nullable
+    protected ResourceLocation getLootTable() {
+        return AMLootTables.TERRAPIN;
+    }
 
     @Override
     protected void initEntityAI() {
@@ -130,6 +137,7 @@ public class EntityTerrapin extends EntityAnimal implements ISemiAquatic {
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
+        this.updateTerrapinLimbSwing();
         this.prevSwimProgress = this.swimProgress;
         this.prevRetreatProgress = this.retreatProgress;
         this.prevSpinProgress = this.spinProgress;
@@ -219,6 +227,22 @@ public class EntityTerrapin extends EntityAnimal implements ISemiAquatic {
             }
             this.setRetreated(this.hideInShellTimer > 0 && !this.isSpinning());
         }
+    }
+
+    /**
+     * 1.20 {@code calculateEntityAnimation}: terrapin is very slow, so vanilla 4x limb distance is too small to drive the walk cycle.
+     */
+    private void updateTerrapinLimbSwing() {
+        float prevAmount = this.limbSwingAmount;
+        double d0 = this.posX - this.prevPosX;
+        double d2 = this.posZ - this.prevPosZ;
+        float speedMul = this.isSpinning() ? 4.0F : 32.0F;
+        float target = (float) MathHelper.sqrt(d0 * d0 + d2 * d2) * speedMul;
+        if (target > 1.0F) {
+            target = 1.0F;
+        }
+        this.limbSwingAmount += (target - this.limbSwingAmount) * 0.4F;
+        this.limbSwing += this.limbSwingAmount - prevAmount;
     }
 
     private void switchNavigator(boolean onLand) {
