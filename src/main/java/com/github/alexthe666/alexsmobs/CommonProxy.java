@@ -3,6 +3,7 @@ package com.github.alexthe666.alexsmobs;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
+import com.github.alexthe666.alexsmobs.misc.RecipeAkashicTomeDictionary;
 import com.github.alexthe666.alexsmobs.misc.RecipeMimicreamRepair;
 import com.github.alexthe666.alexsmobs.misc.BananaLootModifier;
 import com.github.alexthe666.alexsmobs.misc.BlossomLootModifier;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.oredict.OreDictionary;
@@ -61,6 +63,11 @@ public class CommonProxy {
 
     public EntityPlayer getClientSidePlayer() {
         return null;
+    }
+
+    /** Client: whether this player is holding jump. Server always returns false. */
+    public boolean isPlayerJumping(EntityPlayer player) {
+        return false;
     }
 
     public void openBookGUI(ItemStack itemStackIn) {
@@ -110,6 +117,10 @@ public class CommonProxy {
         // Other crafting recipes load from assets/alexsmobs/recipes via Forge CraftingHelper (see _factories.json).
         // Smelting recipes register in AlexsMobs.init via AMSmeltingRecipes.
         event.getRegistry().register(buildAnimalDictionaryRecipe());
+        if (Loader.isModLoaded("akashictome")) {
+            event.getRegistry().register(new RecipeAkashicTomeDictionary()
+                    .setRegistryName(new ResourceLocation(MODID, "akashic_tome_animal_dictionary")));
+        }
     }
 
     /**

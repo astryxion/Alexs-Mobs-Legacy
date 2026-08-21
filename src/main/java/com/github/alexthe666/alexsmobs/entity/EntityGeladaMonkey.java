@@ -82,7 +82,11 @@ public class EntityGeladaMonkey extends EntityAnimal implements IAnimatedEntity,
     @Override
     public boolean getCanSpawnHere() {
         BlockPos pos = new BlockPos(this);
-        return pos.getY() >= AMConfig.geladaMonkeySpawnHeight
+        int minY = AMConfig.geladaMonkeySpawnHeight;
+        if (minY >= 100) {
+            minY = 80;
+        }
+        return pos.getY() >= minY
                 && AMEntityRegistry.rollSpawn(AMConfig.geladaMonkeySpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
                 && super.getCanSpawnHere();
     }
@@ -177,7 +181,9 @@ public class EntityGeladaMonkey extends EntityAnimal implements IAnimatedEntity,
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return AMTagRegistry.itemInTag(AMTagRegistry.GELADA_MONKEY_BREEDABLES, stack.getItem());
+        return AMTagRegistry.isDeadBush(stack)
+                || AMTagRegistry.isTallGrassPlant(stack)
+                || AMTagRegistry.itemInTag(AMTagRegistry.GELADA_MONKEY_BREEDABLES, stack.getItem());
     }
 
     @Override

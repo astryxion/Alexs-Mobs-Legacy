@@ -7,6 +7,7 @@ import com.github.alexthe666.citadel.client.model.AdvancedModelBox;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ModelRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 
 public class ModelToucan extends AdvancedEntityModel<EntityToucan> {
@@ -160,8 +161,23 @@ public class ModelToucan extends AdvancedEntityModel<EntityToucan> {
 
     @Override
     public void render(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        for (ModelRenderer part : this.getParts()) {
-            part.render(scale);
+        if (this.isChild) {
+            float f = 1.24F;
+            this.head.setScale(f, f, f);
+            this.head.setShouldScaleChildren(true);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(0.5F, 0.5F, 0.5F);
+            GlStateManager.translate(0.0F, 1.5F, 0.0F);
+            for (ModelRenderer part : this.getParts()) {
+                part.render(scale);
+            }
+            GlStateManager.popMatrix();
+            this.head.setScale(0.9F, 0.9F, 0.9F);
+        } else {
+            this.head.setScale(0.9F, 0.9F, 0.9F);
+            for (ModelRenderer part : this.getParts()) {
+                part.render(scale);
+            }
         }
     }
 

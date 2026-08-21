@@ -2,8 +2,10 @@ package com.github.alexthe666.alexsmobs.message;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.entity.EntityBaldEagle;
+import com.github.alexthe666.alexsmobs.entity.EntityCapuchinMonkey;
 import com.github.alexthe666.alexsmobs.entity.EntityCrimsonMosquito;
 import com.github.alexthe666.alexsmobs.entity.EntityEnderiophage;
+import com.github.alexthe666.alexsmobs.entity.IFalconry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -58,7 +60,7 @@ public class MessageMosquitoDismount implements IMessage {
             }
             Entity entity = player.world.getEntityByID(message.rider);
             Entity mountEntity = player.world.getEntityByID(message.mount);
-            if ((entity instanceof EntityCrimsonMosquito || entity instanceof EntityBaldEagle || entity instanceof EntityEnderiophage) && mountEntity != null) {
+            if ((entity instanceof EntityCrimsonMosquito || entity instanceof EntityBaldEagle || entity instanceof EntityEnderiophage || entity instanceof EntityCapuchinMonkey || entity instanceof IFalconry) && mountEntity != null) {
                 entity.dismountRidingEntity();
             }
         }

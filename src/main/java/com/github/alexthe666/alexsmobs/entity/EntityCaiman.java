@@ -286,6 +286,14 @@ public class EntityCaiman extends EntityTameable implements ISemiAquatic, IFollo
         return AMTagRegistry.itemInTag(AMTagRegistry.CAIMAN_BREEDABLES, stack.getItem());
     }
 
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. 1.20 caimans breed while untamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
+    }
+
     public boolean isPushedByWater() {
         return false;
     }

@@ -23,7 +23,7 @@ import java.util.Random;
 /**
  * 1.12.2 particle ids + atlas sprites (1.16 used {@link net.minecraft.particles.BasicParticleType} + factory registration).
  */
-@Mod.EventBusSubscriber(modid = AlexsMobs.MODID)
+@Mod.EventBusSubscriber(modid = AlexsMobs.MODID, value = Side.CLIENT)
 public class AMParticleRegistry {
 
     private static int nextParticleId = EnumParticleTypes.values().length;
@@ -68,7 +68,7 @@ public class AMParticleRegistry {
     @SideOnly(Side.CLIENT)
     public static TextureAtlasSprite[] BIRD_SONG_SPRITES;
     @SideOnly(Side.CLIENT)
-    private static final Map<Integer, IParticleFactory> PARTICLE_FACTORIES = new HashMap<>();
+    private static Map<Integer, IParticleFactory> PARTICLE_FACTORIES;
     @SideOnly(Side.CLIENT)
     private static boolean factoriesRegistered;
 
@@ -83,7 +83,7 @@ public class AMParticleRegistry {
         if (!factoriesRegistered) {
             return;
         }
-        IParticleFactory factory = PARTICLE_FACTORIES.get(particleId);
+        IParticleFactory factory = particleFactories().get(particleId);
         if (factory != null) {
             Particle particle = factory.createParticle(particleId, world, x, y, z, motionX, motionY, motionZ, new int[0]);
             if (particle != null) {
@@ -158,7 +158,15 @@ public class AMParticleRegistry {
     @SideOnly(Side.CLIENT)
     private static void registerFactory(ParticleManager manager, int id, IParticleFactory factory) {
         manager.registerParticle(id, factory);
-        PARTICLE_FACTORIES.put(id, factory);
+        particleFactories().put(id, factory);
+    }
+
+    @SideOnly(Side.CLIENT)
+    private static Map<Integer, IParticleFactory> particleFactories() {
+        if (PARTICLE_FACTORIES == null) {
+            PARTICLE_FACTORIES = new HashMap<Integer, IParticleFactory>();
+        }
+        return PARTICLE_FACTORIES;
     }
 
     @SideOnly(Side.CLIENT)

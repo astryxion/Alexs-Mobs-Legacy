@@ -120,7 +120,8 @@ public class EntityRoadrunner extends EntityAnimal {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.roadrunnerSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.roadrunnerSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
     }
 
     @Override

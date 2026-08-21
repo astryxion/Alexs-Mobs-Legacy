@@ -97,6 +97,11 @@ public class EntityBison extends EntityAnimal implements IAnimatedEntity, IShear
         return AMEntityRegistry.rollSpawn(AMConfig.bisonSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
     }
 
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 10;
+    }
+
     @Nullable
     @Override
     public IEntityLivingData onInitialSpawn(DifficultyInstance difficulty, @Nullable IEntityLivingData livingdata) {

@@ -12,4 +12,4 @@ When a Sugar Glider is on its owner's head, they will experience slow falling.
 Occasionally, tamed Sugar Gliders will forage through leaf blocks for items.
 Usually these are junk such as saplings or sticks, but sometimes valuable items like arrows, Hair of Bear, or Moose Antlers can be found.
 <NEWLINE>
-Sugar Gliders can be bred with honeycombs. Baby Sugar Gliders are incapable of gliding.
+Sugar Gliders can be bred with apples. Baby Sugar Gliders are incapable of gliding.

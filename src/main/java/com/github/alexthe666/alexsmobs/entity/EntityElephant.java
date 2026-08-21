@@ -8,7 +8,6 @@ import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
 import com.github.alexthe666.citadel.animation.Animation;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
 import com.google.common.collect.Maps;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
@@ -296,28 +295,27 @@ public class EntityElephant extends EntityTameable implements ITargetsDroppedIte
             }
             if (this.getAnimation() == ANIMATION_EAT && this.getAnimationTick() == 17) {
                 this.eatItemEffect(this.getHeldItemMainhand());
-                if (this.getHeldItemMainhand().getItem() == AMItemRegistry.ACACIA_BLOSSOM && !this.isTamed() && (!isTusked() || isChild()) && blossomThrowerUUID != null) {
-                    if (rand.nextInt(3) == 0) {
-                        this.setTamed(true);
-                        this.setOwnerId(blossomThrowerUUID);
-                        EntityPlayer player = ((net.minecraft.world.WorldServer) this.world).getMinecraftServer().getPlayerList().getPlayerByUUID(blossomThrowerUUID);
-                        if (player != null) {
-                            this.setTamed(true);
-                            this.setOwnerId(player.getUniqueID());
-                            if (player instanceof EntityPlayerMP) {
-                                CriteriaTriggers.TAME_ANIMAL.trigger((EntityPlayerMP) player, this);
+                if (!this.world.isRemote) {
+                    if (this.getHeldItemMainhand().getItem() == AMItemRegistry.ACACIA_BLOSSOM && !this.isTamed() && (!isTusked() || isChild()) && blossomThrowerUUID != null) {
+                        if (rand.nextInt(3) == 0) {
+                            EntityPlayer player = this.world.getPlayerEntityByUUID(blossomThrowerUUID);
+                            if (player != null) {
+                                this.setTamedBy(player);
+                            } else {
+                                this.setTamed(true);
+                                this.setOwnerId(blossomThrowerUUID);
                             }
+                            for (Entity passenger : this.getPassengers()) {
+                                passenger.dismountRidingEntity();
+                            }
+                            this.world.setEntityState(this, (byte) 7);
+                        } else {
+                            this.world.setEntityState(this, (byte) 6);
                         }
-                        for (Entity passenger : this.getPassengers()) {
-                            passenger.dismountRidingEntity();
-                        }
-                        this.world.setEntityState(this, (byte) 7);
-                    } else {
-                        this.world.setEntityState(this, (byte) 6);
                     }
+                    this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
+                    this.heal(10);
                 }
-                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
-                this.heal(10);
             }
         }
         if (chargeCooldown > 0) {

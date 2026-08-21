@@ -6,7 +6,7 @@ import com.github.alexthe666.alexsmobs.entity.ai.AnimalAISwimBottom;
 import com.github.alexthe666.alexsmobs.entity.ai.AquaticMoveController;
 import com.github.alexthe666.alexsmobs.entity.ai.FlyingEntityAITempt;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
-import com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes;
+import com.github.alexthe666.alexsmobs.config.BiomeConfig;
 import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -161,6 +161,11 @@ public class EntityCatfish extends EntityCreature {
     @Override
     public boolean getCanSpawnHere() {
         return AMEntityRegistry.rollSpawn(AMConfig.catfishSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+    }
+
+    @Override
+    public boolean isNotColliding() {
+        return AMEntityRegistry.aquaticNoEntityCollision(this);
     }
 
     @Override
@@ -408,7 +413,8 @@ public class EntityCatfish extends EntityCreature {
             return super.onInitialSpawn(difficulty, livingdata);
         }
         this.setCatfishSize(this.rand.nextFloat() < 0.35F ? 1 : 0);
-        if (this.rand.nextFloat() < 0.1F && AMNativeSpawnBiomes.catfish(this.world.getBiome(this.getPosition()))) {
+        if (this.rand.nextFloat() < 0.1F && BiomeConfig.test(BiomeConfig.catfish, this.world.getBiome(this.getPosition()))
+                && net.minecraftforge.common.BiomeDictionary.hasType(this.world.getBiome(this.getPosition()), net.minecraftforge.common.BiomeDictionary.Type.SWAMP)) {
             this.setCatfishSize(2);
         }
         return super.onInitialSpawn(difficulty, livingdata);

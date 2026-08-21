@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.*;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -569,7 +570,16 @@ public class EntitySugarGlider extends EntityTameable implements IFollower {
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return AMTagRegistry.itemInTag(AMTagRegistry.SUGAR_GLIDER_BREEDABLES, stack.getItem());
+        return AMTagRegistry.itemInTag(AMTagRegistry.SUGAR_GLIDER_BREEDABLES, stack.getItem())
+                || stack.getItem() == Items.APPLE;
+    }
+
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. 1.20 sugar gliders breed without being tamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
     }
 
     @Override

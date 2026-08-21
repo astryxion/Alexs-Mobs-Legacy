@@ -295,6 +295,9 @@ public class EntityWarpedToad extends EntityTameable implements ITargetsDroppedI
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         Item item = itemstack.getItem();
+        if (isBreedingItem(itemstack)) {
+            return super.processInteract(player, hand);
+        }
         if (!isTamed() && item == AMItemRegistry.MOSQUITO_LARVA) {
             if (!player.capabilities.isCreativeMode) {
                 itemstack.shrink(1);

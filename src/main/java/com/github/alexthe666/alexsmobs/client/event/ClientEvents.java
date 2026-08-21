@@ -11,14 +11,18 @@ import com.github.alexthe666.alexsmobs.effect.AMEffectRegistry;
 import com.github.alexthe666.alexsmobs.entity.EntityBaldEagle;
 import com.github.alexthe666.alexsmobs.entity.EntityBlueJay;
 import com.github.alexthe666.alexsmobs.entity.EntityElephant;
+import com.github.alexthe666.alexsmobs.entity.IFalconry;
 import com.github.alexthe666.alexsmobs.entity.util.VineLassoUtil;
 import net.minecraft.entity.Entity;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
+import com.github.alexthe666.alexsmobs.item.ItemFalconryGlove;
 import com.github.alexthe666.alexsmobs.item.ItemTarantulaHawkElytra;
+import com.github.alexthe666.alexsmobs.message.MessageSwingArm;
 import com.github.alexthe666.alexsmobs.message.MessageUpdateEagleControls;
 import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
 import com.github.alexthe666.citadel.client.event.EventGetOutlineColor;
 import com.github.alexthe666.citadel.client.gui.BookBlit;
+import com.github.alexthe666.citadel.client.gui.EntityLinkButton;
 import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -51,6 +55,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderSpecificHandEvent;
@@ -143,6 +148,37 @@ public class ClientEvents {
         return cls.contains("WanderingTrader");
     }
 
+    /**
+     * 1.12 {@code RenderLivingEvent.Pre} fires before the entity is translated to its interpolated
+     * position, unlike 1.16's matrix stack. Offset by the event x/y/z so the 180° flip happens at
+     * the mob's feet instead of around the camera (which made stung spiders vanish).
+     */
+    private static boolean shouldFlipLiving(EntityLivingBase entity) {
+        boolean clinging = entity.isPotionActive(AMEffectRegistry.CLINGING) && entity.getEyeHeight() < entity.height * 0.45F;
+        boolean stung = entity.isPotionActive(AMEffectRegistry.DEBILITATING_STING)
+                && entity.getCreatureAttribute() == EnumCreatureAttribute.ARTHROPOD
+                && entity.width > entity.height;
+        return clinging || stung;
+    }
+
+    private static void applyUpsideDownTransform(RenderLivingEvent<?> event, EntityLivingBase entity) {
+        GlStateManager.pushMatrix();
+        double x = event.getX();
+        double y = event.getY();
+        double z = event.getZ();
+        GlStateManager.translate(x, y, z);
+        GlStateManager.translate(0.0D, entity.height + 0.1F, 0.0D);
+        GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.translate(-x, -y, -z);
+    }
+
+    private static void negateLivingYaw(EntityLivingBase entity) {
+        entity.prevRenderYawOffset = -entity.prevRenderYawOffset;
+        entity.renderYawOffset = -entity.renderYawOffset;
+        entity.prevRotationYawHead = -entity.prevRotationYawHead;
+        entity.rotationYawHead = -entity.rotationYawHead;
+    }
+
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
     public void onPreRenderEntity(RenderLivingEvent.Pre<?> event) {
@@ -159,14 +195,9 @@ public class ClientEvents {
                 }
             }
         }
-        if (entity.isPotionActive(AMEffectRegistry.CLINGING) && entity.getEyeHeight() < entity.height * 0.45F || entity.isPotionActive(AMEffectRegistry.DEBILITATING_STING) && entity.getCreatureAttribute() == EnumCreatureAttribute.ARTHROPOD && entity.width > entity.height) {
-            GlStateManager.pushMatrix();
-            GlStateManager.translate(0.0D, entity.height + 0.1F, 0.0D);
-            GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
-            entity.prevRenderYawOffset = -entity.prevRenderYawOffset;
-            entity.renderYawOffset = -entity.renderYawOffset;
-            entity.prevRotationYawHead = -entity.prevRotationYawHead;
-            entity.rotationYawHead = -entity.rotationYawHead;
+        if (shouldFlipLiving(entity)) {
+            applyUpsideDownTransform(event, entity);
+            negateLivingYaw(entity);
         }
         if (entity.isPotionActive(AMEffectRegistry.ENDER_FLU)) {
             GlStateManager.pushMatrix();
@@ -183,12 +214,9 @@ public class ClientEvents {
         if (entity.isPotionActive(AMEffectRegistry.ENDER_FLU)) {
             GlStateManager.popMatrix();
         }
-        if (entity.isPotionActive(AMEffectRegistry.CLINGING) && entity.getEyeHeight() < entity.height * 0.45F || entity.isPotionActive(AMEffectRegistry.DEBILITATING_STING) && entity.getCreatureAttribute() == EnumCreatureAttribute.ARTHROPOD && entity.width > entity.height) {
+        if (shouldFlipLiving(entity)) {
             GlStateManager.popMatrix();
-            entity.prevRenderYawOffset = -entity.prevRenderYawOffset;
-            entity.renderYawOffset = -entity.renderYawOffset;
-            entity.prevRotationYawHead = -entity.prevRotationYawHead;
-            entity.rotationYawHead = -entity.rotationYawHead;
+            negateLivingYaw(entity);
         }
         if (VineLassoUtil.hasLassoData(entity) && !(entity instanceof EntityPlayer)) {
             Entity lassoedOwner = VineLassoUtil.getLassoedTo(entity);
@@ -201,8 +229,39 @@ public class ClientEvents {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
+    public void onFalconryGloveClick(MouseEvent event) {
+        if (event.getButton() != 0 || !event.isButtonstate()) {
+            return;
+        }
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.currentScreen != null || mc.player == null || mc.getRenderViewEntity() instanceof EntityBaldEagle) {
+            return;
+        }
+        EntityPlayer player = mc.player;
+        if (player.getHeldItemMainhand().getItem() != AMItemRegistry.FALCONRY_GLOVE
+                && player.getHeldItemOffhand().getItem() != AMItemRegistry.FALCONRY_GLOVE) {
+            return;
+        }
+        boolean hasFalcon = false;
+        for (Entity passenger : player.getPassengers()) {
+            if (passenger instanceof IFalconry) {
+                hasFalcon = true;
+                break;
+            }
+        }
+        if (!hasFalcon) {
+            return;
+        }
+        ItemFalconryGlove.onLeftClick(player, player.getHeldItemOffhand());
+        ItemFalconryGlove.onLeftClick(player, player.getHeldItemMainhand());
+        AlexsMobs.sendMSGToServer(new MessageSwingArm());
+        event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void onRenderHand(RenderHandEvent event) {
-        if (Minecraft.getMinecraft().getRenderViewEntity() instanceof EntityBaldEagle) {
+        if (Minecraft.getMinecraft().getRenderViewEntity() instanceof IFalconry) {
             event.setCanceled(true);
         }
     }
@@ -224,19 +283,20 @@ public class ClientEvents {
                 leftHand = player.getPrimaryHand() != EnumHandSide.LEFT;
             }
             for (Entity entity : player.getPassengers()) {
-                if (entity instanceof EntityBaldEagle) {
+                if (entity instanceof IFalconry) {
+                    IFalconry falconry = (IFalconry) entity;
                     float yaw = player.prevRenderYawOffset + (player.renderYawOffset - player.prevRenderYawOffset) * event.getPartialTicks();
                     ClientProxy.currentUnrenderedEntities.remove(entity.getUniqueID());
                     GlStateManager.pushMatrix();
                     GlStateManager.scale(0.5F, 0.5F, 0.5F);
-                    GlStateManager.translate(leftHand ? -0.8F : 0.8F, -0.6F, -1F);
+                    GlStateManager.translate(leftHand ? -falconry.getHandOffset() : falconry.getHandOffset(), -0.6F, -1F);
                     GlStateManager.rotate(yaw, 0.0F, 1.0F, 0.0F);
                     if (leftHand) {
                         GlStateManager.rotate(90.0F, 0.0F, 1.0F, 0.0F);
                     } else {
                         GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
                     }
-                    renderEntitySimple(entity, 0.0D, 0.0D, 0.0D, 0.0F, event.getPartialTicks());
+                    renderEntityInHand(entity, event.getPartialTicks());
                     GlStateManager.popMatrix();
                     ClientProxy.currentUnrenderedEntities.add(entity.getUniqueID());
                 }
@@ -262,6 +322,42 @@ public class ClientEvents {
             return (EnumHand) SWINGING_HAND_FIELD.get(living);
         } catch (IllegalAccessException e) {
             return EnumHand.MAIN_HAND;
+        }
+    }
+
+    private static void renderEntityInHand(Entity entityIn, float partialTicks) {
+        float yaw = 0.0F;
+        float prevYaw = 0.0F;
+        float body = 0.0F;
+        float prevBody = 0.0F;
+        float head = 0.0F;
+        float prevHead = 0.0F;
+        EntityLivingBase living = entityIn instanceof EntityLivingBase ? (EntityLivingBase) entityIn : null;
+        if (living != null) {
+            yaw = living.rotationYaw;
+            prevYaw = living.prevRotationYaw;
+            body = living.renderYawOffset;
+            prevBody = living.prevRenderYawOffset;
+            head = living.rotationYawHead;
+            prevHead = living.prevRotationYawHead;
+            living.rotationYaw = 0.0F;
+            living.prevRotationYaw = 0.0F;
+            living.renderYawOffset = 0.0F;
+            living.prevRenderYawOffset = 0.0F;
+            living.rotationYawHead = 0.0F;
+            living.prevRotationYawHead = 0.0F;
+        }
+        try {
+            renderEntitySimple(entityIn, 0.0D, 0.0D, 0.0D, 0.0F, partialTicks);
+        } finally {
+            if (living != null) {
+                living.rotationYaw = yaw;
+                living.prevRotationYaw = prevYaw;
+                living.renderYawOffset = body;
+                living.prevRenderYawOffset = prevBody;
+                living.rotationYawHead = head;
+                living.prevRotationYawHead = prevHead;
+            }
         }
     }
 
@@ -363,6 +459,29 @@ public class ClientEvents {
 
     @SubscribeEvent
     @SideOnly(Side.CLIENT)
+    public void onRenderTickPrewarmDictionary(TickEvent.RenderTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        EntityLinkButton.prewarm(Minecraft.getMinecraft(), AlexsMobs.MODID);
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onEagleCameraSetup(EntityViewRenderEvent.CameraSetup event) {
+        if (!(Minecraft.getMinecraft().getRenderViewEntity() instanceof EntityBaldEagle)) {
+            return;
+        }
+        EntityPlayerSP player = Minecraft.getMinecraft().player;
+        if (player == null) {
+            return;
+        }
+        event.setYaw(player.rotationYaw + 180.0F);
+        event.setPitch(player.rotationPitch);
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public void onRenderWorldLastEvent(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         AMItemstackRenderer.incrementTick();
@@ -404,7 +523,7 @@ public class ClientEvents {
                 mc.setRenderViewEntity(player);
                 mc.gameSettings.thirdPersonView = AlexsMobs.PROXY.getPreviousPOV();
             } else {
-                float rotX = MathHelper.wrapDegrees(player.rotationYaw + player.rotationYawHead);
+                float rotX = player.rotationYaw;
                 float rotY = player.rotationPitch;
                 Entity over = null;
                 RayTraceResult mop = mc.objectMouseOver;
@@ -413,7 +532,7 @@ public class ClientEvents {
                 } else {
                     mc.objectMouseOver = null;
                 }
-                boolean loadChunks = player.world.getWorldTime() % 10L == 0L;
+                boolean loadChunks = eagle.ticksExisted % 5 == 0;
                 eagle.directFromPlayer(rotX, rotY, false, over);
                 AlexsMobs.NETWORK_WRAPPER.sendToServer(new MessageUpdateEagleControls(mc.getRenderViewEntity().getEntityId(), rotX, rotY, loadChunks, over == null ? -1 : over.getEntityId()));
             }

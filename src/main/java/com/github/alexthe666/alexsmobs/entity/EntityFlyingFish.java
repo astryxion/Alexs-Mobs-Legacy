@@ -1,6 +1,6 @@
 package com.github.alexthe666.alexsmobs.entity;
 import com.github.alexthe666.alexsmobs.misc.AMLootTables;
-
+import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIFindWater;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIRandomSwimming;
@@ -15,14 +15,17 @@ import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIPanic;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -40,6 +43,7 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
 
     private static final DataParameter<Boolean> GLIDING = EntityDataManager.createKey(EntityFlyingFish.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Integer> VARIANT = EntityDataManager.createKey(EntityFlyingFish.class, DataSerializers.VARINT);
+    private static final DataParameter<Boolean> FROM_BUCKET = EntityDataManager.createKey(EntityFlyingFish.class, DataSerializers.BOOLEAN);
 
     public float prevOnLandProgress;
     public float onLandProgress;
@@ -70,6 +74,7 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
         super.entityInit();
         this.dataManager.register(GLIDING, false);
         this.dataManager.register(VARIANT, 0);
+        this.dataManager.register(FROM_BUCKET, false);
     }
 
     @Override
@@ -121,7 +126,7 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
 
     @Override
     protected boolean canDespawn() {
-        return !this.hasCustomName() && super.canDespawn();
+        return !this.isFromBucket() && !this.hasCustomName() && super.canDespawn();
     }
 
     @Override
@@ -243,6 +248,55 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
         this.dataManager.set(VARIANT, variant);
     }
 
+    public boolean isFromBucket() {
+        return this.dataManager.get(FROM_BUCKET);
+    }
+
+    public void setFromBucket(boolean fromBucket) {
+        this.dataManager.set(FROM_BUCKET, fromBucket);
+    }
+
+    protected ItemStack getFishBucket() {
+        ItemStack stack = new ItemStack(AMItemRegistry.FLYING_FISH_BUCKET);
+        if (this.hasCustomName()) {
+            stack.setStackDisplayName(this.getCustomNameTag());
+        }
+        return stack;
+    }
+
+    protected void setBucketData(ItemStack bucket) {
+        if (this.hasCustomName()) {
+            bucket.setStackDisplayName(this.getCustomNameTag());
+        }
+        NBTTagCompound tag = bucket.getTagCompound();
+        if (tag == null) {
+            tag = new NBTTagCompound();
+            bucket.setTagCompound(tag);
+        }
+        tag.setInteger("Variant", this.getVariant());
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (itemstack.getItem() == Items.WATER_BUCKET && this.isEntityAlive()) {
+            this.playSound(SoundEvents.ITEM_BUCKET_FILL, 1.0F, 1.0F);
+            if (!player.capabilities.isCreativeMode) {
+                itemstack.shrink(1);
+            }
+            ItemStack itemstack1 = this.getFishBucket();
+            this.setBucketData(itemstack1);
+            if (itemstack.isEmpty()) {
+                player.setHeldItem(hand, itemstack1);
+            } else if (!player.inventory.addItemStackToInventory(itemstack1)) {
+                player.dropItem(itemstack1, false);
+            }
+            this.setDead();
+            return true;
+        }
+        return super.processInteract(player, hand);
+    }
+
     public boolean isGliding() {
         return this.dataManager.get(GLIDING);
     }
@@ -262,12 +316,14 @@ public class EntityFlyingFish extends EntityAnimal implements ISemiAquatic {
     public void writeEntityToNBT(NBTTagCompound compound) {
         super.writeEntityToNBT(compound);
         compound.setInteger("Variant", this.getVariant());
+        compound.setBoolean("FromBucket", this.isFromBucket());
     }
 
     @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         this.setVariant(compound.getInteger("Variant"));
+        this.setFromBucket(compound.getBoolean("FromBucket"));
     }
 
     @Nullable

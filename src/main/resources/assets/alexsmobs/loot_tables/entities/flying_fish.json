@@ -1,7 +1,7 @@
 {
   "pools": [
     {
-      "name": "blobfish",
+      "name": "flying_fish",
       "rolls": 1,
       "entries": [
         {
@@ -12,13 +12,13 @@
               "count": 1
             }
           ],
-          "name": "minecraft:beef",
+          "name": "alexsmobs:flying_fish",
           "weight": 1
         }
       ]
     },
     {
-      "name": "blobfish_bm",
+      "name": "flying_fish_bonemeal",
       "rolls": 1,
       "entries": [
         {

@@ -2,129 +2,179 @@ package com.github.alexthe666.citadel.client.gui;
 
 import com.github.alexthe666.citadel.client.gui.data.EntityLinkData;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import org.lwjgl.opengl.GL11;
 
+/**
+ * Index-page mob icon. 1.16 draws a black inset, then the dark-gray widget well, then
+ * the entity, then the tinted frame. The well texture is semi-transparent; without that
+ * inset it composites onto parchment and disappears.
+ */
 public class EntityLinkButton extends GuiButton {
-   private static Map<String, Entity> renderedEntites = new HashMap();
-   private EntityLinkData data;
-   private GuiBasicBook bookGUI;
-   private EnttyRenderWindow window = new EnttyRenderWindow();
-   private final int k;
-   private final int l;
+   private static final Map<String, Entity> RENDERED_ENTITIES = new HashMap<String, Entity>();
+   private static final Set<String> COMPILED_MODELS = new HashSet<String>();
+   private static final int NEW_RENDERS_PER_FRAME = 6;
+   private static final int PREWARM_PER_FRAME = 4;
+   private static int newRendersThisFrame = 0;
+
+   private final EntityLinkData data;
+   private final GuiBasicBook bookGUI;
 
    public EntityLinkButton(GuiBasicBook bookGUI, EntityLinkData linkData, int k, int l) {
-      super(0, k + linkData.getX() - 12, l + linkData.getY(), (int)((double)24.0F * linkData.getScale()), (int)((double)24.0F * linkData.getScale()), "");
+      super(0, k + linkData.getX() - 12, l + linkData.getY(), (int) (24.0F * linkData.getScale()), (int) (24.0F * linkData.getScale()), "");
       this.data = linkData;
       this.bookGUI = bookGUI;
-      this.k = k;
-      this.l = l;
    }
 
-   public void func_191745_a(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+   public static void beginFrame() {
+      newRendersThisFrame = 0;
+   }
+
+   public static void prewarm(Minecraft minecraft, String namespace) {
+      if (minecraft == null || minecraft.world == null || minecraft.player == null) {
+         return;
+      }
+      if (minecraft.currentScreen instanceof GuiBasicBook) {
+         return;
+      }
+      int warmed = 0;
+      for (ResourceLocation id : ForgeRegistries.ENTITIES.getKeys()) {
+         if (!namespace.equals(id.getResourceDomain())) {
+            continue;
+         }
+         String key = id.toString();
+         if (COMPILED_MODELS.contains(key)) {
+            continue;
+         }
+         Entity model = getOrCreateEntity(minecraft, key);
+         if (model == null) {
+            COMPILED_MODELS.add(key);
+            continue;
+         }
+         try {
+            GuiBasicBook.drawEntityOnScreen(-500, -500, 1.0F, false, 30.0D, 0.0D, 0.0D, 0.0F, 0.0F, model);
+         } catch (Throwable ignored) {
+         } finally {
+            GuiBasicBook.restoreGuiLighting();
+         }
+         COMPILED_MODELS.add(key);
+         if (++warmed >= PREWARM_PER_FRAME) {
+            return;
+         }
+      }
+   }
+
+   @Override
+   public void drawButton(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
       if (!this.visible) {
          return;
       }
-
       this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-      int lvt_5_1_ = 0;
-      int lvt_6_1_ = 30;
-      float f = (float)this.data.getScale();
-      minecraft.getTextureManager().bindTexture(this.bookGUI.getBookWidgetTexture());
+      float f = (float) this.data.getScale();
+
+      prepare2D();
       GlStateManager.pushMatrix();
-      GlStateManager.translate((float)this.x, (float)this.y, 0.0F);
+      GlStateManager.translate((float) this.x, (float) this.y, 0.0F);
       GlStateManager.scale(f, f, 1.0F);
-      this.drawBtn(false, 0, 0, lvt_5_1_, lvt_6_1_, 24, 24);
-      Entity model = null;
-      ResourceLocation entityId = new ResourceLocation(this.data.getEntity());
-      if (EntityList.isRegistered(entityId)) {
-         model = renderedEntites.get(this.data.getEntity());
-         if (model == null) {
-            model = EntityList.createEntityByIDFromName(entityId, minecraft.world);
-            if (model != null) {
-               renderedEntites.put(this.data.getEntity(), model);
-            }
+      GlStateManager.disableBlend();
+      drawRect(2, 2, 22, 22, -16777216);
+      GlStateManager.enableBlend();
+      GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      BookBlit.setRGB(255, 255, 255, 255);
+      minecraft.getTextureManager().bindTexture(this.bookGUI.getBookWidgetTexture());
+      this.drawTexturedModalRect(0, 0, 0, 30, 24, 24);
+
+      Entity model = getOrCreateEntity(minecraft, this.data.getEntity());
+      if (model != null && minecraft.player != null && canRenderModel()) {
+         model.ticksExisted = minecraft.player.ticksExisted;
+         enableScissor(minecraft,
+               this.x + Math.round(f * 4.0F),
+               this.y + Math.round(f * 4.0F),
+               Math.max(1, Math.round(f * 16.0F)),
+               Math.max(1, Math.round(f * 16.0F)));
+         GlStateManager.enableDepth();
+         GlStateManager.enableRescaleNormal();
+         try {
+            GuiBasicBook.drawEntityOnScreen(
+                  (int) (12.0F + this.data.getOffset_x()),
+                  (int) (24.0F + this.data.getOffset_y()),
+                  10.0F * (float) this.data.getEntityScale(),
+                  false, 30.0D, -130.0D + this.bookGUI.getBookEntityYawOffset(), 0.0D, 0.0F, 0.0F, model);
+         } finally {
+            disableScissor();
+            prepare2D();
          }
       }
 
-      if (model != null) {
-         float renderScale = 10.0F * (float)this.data.getEntityScale();
-         int entityX = (int)(12.0F + this.data.getOffset_x());
-         int entityY = (int)(24.0F + this.data.getOffset_y());
-         this.window.renderEntityWindow(model, entityX, entityY, renderScale);
-      }
+      int overlayU = this.hovered ? 48 : 24;
+      int color = this.bookGUI.getWidgetColor();
+      BookBlit.setRGB((color & 16711680) >> 16, (color & '\uff00') >> 8, color & 255, 255);
+      minecraft.getTextureManager().bindTexture(this.bookGUI.getBookWidgetTexture());
+      BookBlit.func_238464_a_(0, 0, 0, (float) overlayU, 30.0F, 24, 24, 256, 256);
+      GlStateManager.popMatrix();
+      prepare2D();
 
-      GlStateManager.depthFunc(515);
-      GlStateManager.disableDepth();
       if (this.hovered) {
          this.bookGUI.setEntityTooltip(this.data.getHoverText());
-         lvt_5_1_ = 48;
-      } else {
-         lvt_5_1_ = 24;
       }
-
-      int color = this.bookGUI.getWidgetColor();
-      int r = (color & 16711680) >> 16;
-      int g = (color & '\uff00') >> 8;
-      int b = color & 255;
-      BookBlit.setRGB(r, g, b, 255);
-      minecraft.getTextureManager().bindTexture(this.bookGUI.getBookWidgetTexture());
-      this.drawBtn(!this.hovered, 0, 0, lvt_5_1_, lvt_6_1_, 24, 24);
-      GlStateManager.popMatrix();
    }
 
-   public void drawBtn(boolean color, int p_238474_2_, int p_238474_3_, int p_238474_4_, int p_238474_5_, int p_238474_6_, int p_238474_7_) {
-      if (color) {
-         BookBlit.func_238464_a_(p_238474_2_, p_238474_3_, 0, (float)p_238474_4_, (float)p_238474_5_, p_238474_6_, p_238474_7_, 256, 256);
-      } else {
-         this.drawTexturedModalRect(p_238474_2_, p_238474_3_, p_238474_4_, p_238474_5_, p_238474_6_, p_238474_7_);
+   private boolean canRenderModel() {
+      if (COMPILED_MODELS.contains(this.data.getEntity())) {
+         return true;
       }
-
+      if (newRendersThisFrame >= NEW_RENDERS_PER_FRAME) {
+         return false;
+      }
+      newRendersThisFrame++;
+      COMPILED_MODELS.add(this.data.getEntity());
+      return true;
    }
 
-   /**
-    * Same facing as animal dictionary mob pages ({@code rot_x=30}, {@code rot_y=225+180} for 1.12 mirror fix).
-    */
-   private static void renderEntityInInventory(int xPos, int yPos, float scale, Entity entity) {
-      GuiBasicBook.drawEntityOnScreen(xPos, yPos, scale, false, 30.0D, 405.0D, 0.0D, 0.0F, 0.0F, entity);
+   private static void prepare2D() {
+      GuiBasicBook.restoreGuiLighting();
+      GlStateManager.disableDepth();
+      GL11.glDisable(GL11.GL_DEPTH_TEST);
    }
 
-   private class EnttyRenderWindow extends Gui {
-      private EnttyRenderWindow() {
+   private static Entity getOrCreateEntity(Minecraft minecraft, String entityId) {
+      Entity cached = RENDERED_ENTITIES.get(entityId);
+      if (cached != null) {
+         return cached;
       }
-
-      public void renderEntityWindow(Entity toRender, int entityX, int entityY, float renderScale) {
-         GlStateManager.pushMatrix();
-         GlStateManager.enableDepth();
-         GlStateManager.translate(0.0F, 0.0F, 950.0F);
-         GlStateManager.colorMask(false, false, false, false);
-         BookBlit.func_238467_a_(4680, 2260, -4680, -2260, -16777216);
-         GlStateManager.colorMask(true, true, true, true);
-         GlStateManager.translate(0.0F, 0.0F, -950.0F);
-         GlStateManager.depthFunc(518);
-         BookBlit.func_238467_a_(22, 22, 2, 2, -16777216);
-         GlStateManager.depthFunc(515);
-         Minecraft.getMinecraft().getTextureManager().bindTexture(EntityLinkButton.this.bookGUI.getBookWidgetTexture());
-         BookBlit.func_238463_a_(0, 0, 0.0F, 30.0F, 24, 24, 256, 256);
-         if (toRender != null) {
-            toRender.ticksExisted = Minecraft.getMinecraft().player.ticksExisted;
-            renderEntityInInventory(entityX, entityY, renderScale, toRender);
-         }
-
-         GlStateManager.depthFunc(518);
-         GlStateManager.translate(0.0F, 0.0F, -950.0F);
-         GlStateManager.colorMask(false, false, false, false);
-         BookBlit.func_238467_a_(4680, 2260, -4680, -2260, -16777216);
-         GlStateManager.colorMask(true, true, true, true);
-         GlStateManager.translate(0.0F, 0.0F, 950.0F);
-         GlStateManager.depthFunc(515);
-         GlStateManager.popMatrix();
+      if (minecraft.world == null) {
+         return null;
       }
+      ResourceLocation id = new ResourceLocation(entityId);
+      if (!EntityList.isRegistered(id)) {
+         return null;
+      }
+      Entity created = EntityList.createEntityByIDFromName(id, minecraft.world);
+      if (created != null) {
+         RENDERED_ENTITIES.put(entityId, created);
+      }
+      return created;
+   }
+
+   private static void enableScissor(Minecraft mc, int x, int y, int width, int height) {
+      ScaledResolution res = new ScaledResolution(mc);
+      int factor = res.getScaleFactor();
+      GL11.glEnable(GL11.GL_SCISSOR_TEST);
+      GL11.glScissor(x * factor, mc.displayHeight - (y + height) * factor, width * factor, height * factor);
+   }
+
+   private static void disableScissor() {
+      GL11.glDisable(GL11.GL_SCISSOR_TEST);
    }
 }

@@ -19,6 +19,8 @@ import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
 import com.google.common.base.Predicate;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockLog;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.entity.Entity;
@@ -149,7 +151,24 @@ public class EntityCrow extends EntityTameable implements ITargetsDroppedItems {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.crowSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+        return canCrowSpawnAt(this.world, this.getPosition())
+                && AMEntityRegistry.rollSpawn(AMConfig.crowSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+    }
+
+    /** 1.16 {@code EntityCrow#canCrowSpawn}. */
+    public static boolean canCrowSpawnAt(World world, BlockPos pos) {
+        if (world.getLightFromNeighbors(pos) <= 8) {
+            return false;
+        }
+        IBlockState below = world.getBlockState(pos.down());
+        Block block = below.getBlock();
+        return block instanceof BlockLeaves || block instanceof BlockLog
+                || block == Blocks.GRASS || world.isAirBlock(pos.down());
+    }
+
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 5;
     }
 
     public boolean isOnSameTeam(Entity entityIn) {

@@ -10,7 +10,8 @@
     }
   },
   "result": {
-    "item": "minecraft:brown_wool",
+    "item": "minecraft:wool",
+    "data": 12,
     "count": 1
   }
 }

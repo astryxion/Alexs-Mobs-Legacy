@@ -270,7 +270,7 @@ public class ModelElephant extends AdvancedEntityModel<EntityElephant> {
             this.head.setShouldScaleChildren(true);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.35F, 0.35F, 0.35F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 2.8F * scale, 0.0F * scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 2.8F, 0.0F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

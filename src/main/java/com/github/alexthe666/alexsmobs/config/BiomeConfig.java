@@ -4,8 +4,6 @@ import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.citadel.config.biome.BiomeEntryType;
 import com.github.alexthe666.citadel.config.biome.SpawnBiomeConfig;
 import com.github.alexthe666.citadel.config.biome.SpawnBiomeData;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
@@ -13,12 +11,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class BiomeConfig {
 	public static Pair<String, SpawnBiomeData> grizzlyBear = Pair.of("alexsmobs:grizzly_bear_spawns", DefaultBiomes.GRIZZLY_BEAR);
@@ -31,7 +27,6 @@ public class BiomeConfig {
 	public static Pair<String, SpawnBiomeData> orca = Pair.of("alexsmobs:orca_spawns", DefaultBiomes.ORCA);
 	public static Pair<String, SpawnBiomeData> sunbird = Pair.of("alexsmobs:sunbird_spawns", DefaultBiomes.SUNBIRD);
 	public static Pair<String, SpawnBiomeData> gorilla = Pair.of("alexsmobs:gorilla_spawns", DefaultBiomes.GORILLA);
-	public static Pair<String, SpawnBiomeData> anteater = Pair.of("alexsmobs:anteater_spawns", DefaultBiomes.ANTEATER);
 	public static Pair<String, SpawnBiomeData> crimsonMosquito = Pair.of("alexsmobs:crimson_mosquito_spawns", DefaultBiomes.CRIMSON_MOSQUITO);
 	public static Pair<String, SpawnBiomeData> rattlesnake = Pair.of("alexsmobs:rattlesnake_spawns", DefaultBiomes.RATTLESNAKE);
 	public static Pair<String, SpawnBiomeData> endergrade = Pair.of("alexsmobs:endergrade_spawns", DefaultBiomes.ENDERGRADE);
@@ -77,11 +72,30 @@ public class BiomeConfig {
 	public static Pair<String, SpawnBiomeData> mimic_octopus = Pair.of("alexsmobs:mimic_octopus_spawns", DefaultBiomes.MIMIC_OCTOPUS);
 	public static Pair<String, SpawnBiomeData> seagull = Pair.of("alexsmobs:seagull_spawns", DefaultBiomes.SEAGULL);
 	public static Pair<String, SpawnBiomeData> tusklin = Pair.of("alexsmobs:tusklin_spawns", DefaultBiomes.TUSKLIN);
-	public static Pair<String, SpawnBiomeData> banana_slug = Pair.of("alexsmobs:banana_slug_spawns", DefaultBiomes.BANANA_SLUG);
-	public static Pair<String, SpawnBiomeData> anaconda = Pair.of("alexsmobs:anaconda_spawns", DefaultBiomes.ANACONDA);
 	public static Pair<String, SpawnBiomeData> laviathan = Pair.of("alexsmobs:laviathan_spawns", DefaultBiomes.ALL_NETHER);
+	public static Pair<String, SpawnBiomeData> toucan = Pair.of("alexsmobs:toucan_spawns", DefaultBiomes.TOUCAN);
+	public static Pair<String, SpawnBiomeData> maned_wolf = Pair.of("alexsmobs:maned_wolf_spawns", DefaultBiomes.MANED_WOLF);
+	public static Pair<String, SpawnBiomeData> anaconda = Pair.of("alexsmobs:anaconda_spawns", DefaultBiomes.ANACONDA);
+	public static Pair<String, SpawnBiomeData> anteater = Pair.of("alexsmobs:anteater_spawns", DefaultBiomes.ANTEATER);
+	public static Pair<String, SpawnBiomeData> gelada_monkey = Pair.of("alexsmobs:gelada_monkey_spawns", DefaultBiomes.GELADA_MONKEY);
+	public static Pair<String, SpawnBiomeData> jerboa = Pair.of("alexsmobs:jerboa_spawns", DefaultBiomes.DESERT);
+	public static Pair<String, SpawnBiomeData> terrapin = Pair.of("alexsmobs:terrapin_spawns", DefaultBiomes.ICE_FREE_RIVER);
+	public static Pair<String, SpawnBiomeData> comb_jelly = Pair.of("alexsmobs:comb_jelly_spawns", DefaultBiomes.COMB_JELLY);
+	public static Pair<String, SpawnBiomeData> cosmic_cod = Pair.of("alexsmobs:cosmic_cod_spawns", DefaultBiomes.COSMIC_COD);
+	public static Pair<String, SpawnBiomeData> bison = Pair.of("alexsmobs:bison_spawns", DefaultBiomes.BISON);
 	public static Pair<String, SpawnBiomeData> giant_squid = Pair.of("alexsmobs:giant_squid_spawns", DefaultBiomes.DEEP_SEA);
-	public static Pair<String, SpawnBiomeData> geladaMonkey = Pair.of("alexsmobs:gelada_monkey_spawns", DefaultBiomes.GELADA_MONKEY);
+	public static Pair<String, SpawnBiomeData> devils_hole_pupfish = Pair.of("alexsmobs:devils_hole_pupfish_spawns", DefaultBiomes.ALL_OVERWORLD);
+	public static Pair<String, SpawnBiomeData> catfish = Pair.of("alexsmobs:catfish_spawns", DefaultBiomes.CATFISH);
+	public static Pair<String, SpawnBiomeData> flying_fish = Pair.of("alexsmobs:flying_fish_spawns", DefaultBiomes.FLYING_FISH);
+	public static Pair<String, SpawnBiomeData> rain_frog = Pair.of("alexsmobs:rain_frog_spawns", DefaultBiomes.DESERT);
+	public static Pair<String, SpawnBiomeData> potoo = Pair.of("alexsmobs:potoo_spawns", DefaultBiomes.POTOO);
+	public static Pair<String, SpawnBiomeData> rhinoceros = Pair.of("alexsmobs:rhinoceros_spawns", DefaultBiomes.RHINOCEROS);
+	public static Pair<String, SpawnBiomeData> sugar_glider = Pair.of("alexsmobs:sugar_glider_spawns", DefaultBiomes.SUGAR_GLIDER);
+	public static Pair<String, SpawnBiomeData> skunk = Pair.of("alexsmobs:skunk_spawns", DefaultBiomes.SKUNK);
+	public static Pair<String, SpawnBiomeData> banana_slug = Pair.of("alexsmobs:banana_slug_spawns", DefaultBiomes.BANANA_SLUG);
+	public static Pair<String, SpawnBiomeData> blue_jay = Pair.of("alexsmobs:blue_jay_spawns", DefaultBiomes.ALL_FOREST);
+	public static Pair<String, SpawnBiomeData> caiman = Pair.of("alexsmobs:caiman_spawns", DefaultBiomes.MANGROVE);
+	public static Pair<String, SpawnBiomeData> triops = Pair.of("alexsmobs:triops_spawns", DefaultBiomes.DESERT);
 
 	private static boolean init = false;
 	private static Map<String, SpawnBiomeData> biomeConfigValues = new HashMap<>();
@@ -115,9 +129,8 @@ public class BiomeConfig {
 	}
 
 	/**
-	 * 1.12.2 spawn biome matching: Citadel's {@link SpawnBiomeData#matches} compares {@code BIOME_CATEGORY} to Java
-	 * class simple names and does not map 1.16 registry ids to 1.12 ids. This matcher preserves JSON/config semantics
-	 * while resolving both issues for existing and default spawn configs.
+	 * Citadel's {@link SpawnBiomeData#matches} compares {@code BIOME_CATEGORY} to Java class names on 1.12.
+	 * This matcher uses BiomeDictionary + 1.12 registry ids instead.
 	 */
 	private static final class SpawnBiomeMatcher112 {
 
@@ -125,37 +138,6 @@ public class BiomeConfig {
 		private static Field entryTypeField;
 		private static Field entryNegateField;
 		private static Field entryValueField;
-
-		private static final Map<String, Set<String>> REGISTRY_ALIASES = ImmutableMap.<String, Set<String>>builder()
-				.put("minecraft:the_end", ImmutableSet.of("minecraft:sky"))
-				.put("minecraft:end_barrens", ImmutableSet.of("minecraft:sky"))
-				.put("minecraft:end_highlands", ImmutableSet.of("minecraft:sky"))
-				.put("minecraft:small_end_islands", ImmutableSet.of("minecraft:sky"))
-				.put("minecraft:flower_forest", ImmutableSet.of("minecraft:mutated_forest"))
-				.put("minecraft:sunflower_plains", ImmutableSet.of("minecraft:mutated_plains"))
-				.put("minecraft:bamboo_jungle", ImmutableSet.of("minecraft:jungle", "minecraft:jungle_hills"))
-				.put("minecraft:bamboo_jungle_hills", ImmutableSet.of("minecraft:jungle_hills"))
-				.put("minecraft:crimson_forest", ImmutableSet.of("minecraft:hell"))
-				.put("minecraft:warped_forest", ImmutableSet.of("minecraft:hell"))
-				.put("minecraft:soul_sand_valley", ImmutableSet.of("minecraft:hell"))
-				.put("minecraft:basalt_deltas", ImmutableSet.of("minecraft:hell"))
-				.put("minecraft:nether_wastes", ImmutableSet.of("minecraft:hell"))
-				.put("minecraft:mushroom_fields", ImmutableSet.of("minecraft:mushroom_island"))
-				.put("minecraft:deep_lukewarm_ocean", ImmutableSet.of("minecraft:deep_ocean"))
-				.put("minecraft:lukewarm_ocean", ImmutableSet.of("minecraft:ocean"))
-				.put("minecraft:deep_warm_ocean", ImmutableSet.of("minecraft:deep_ocean"))
-				.put("minecraft:deep_cold_ocean", ImmutableSet.of("minecraft:deep_ocean"))
-				.put("minecraft:deep_frozen_ocean", ImmutableSet.of("minecraft:deep_ocean"))
-				.put("minecraft:warm_ocean", ImmutableSet.of("minecraft:ocean"))
-				.put("minecraft:cold_ocean", ImmutableSet.of("minecraft:frozen_ocean"))
-				.put("minecraft:ice_spikes", ImmutableSet.of("minecraft:mutated_ice_flats"))
-				.put("minecraft:snowy_plains", ImmutableSet.of("minecraft:ice_plains"))
-				.put("minecraft:dark_forest", ImmutableSet.of("minecraft:roofed_forest", "minecraft:mutated_roofed_forest"))
-				.put("minecraft:birch_forest", ImmutableSet.of("minecraft:birch_forest", "minecraft:birch_forest_hills", "minecraft:mutated_birch_forest"))
-				.put("minecraft:old_growth_birch_forest", ImmutableSet.of("minecraft:mutated_birch_forest", "minecraft:mutated_birch_forest_hills"))
-				.put("minecraft:modified_jungle_edge", ImmutableSet.of("minecraft:jungle_edge", "minecraft:mutated_jungle"))
-				.put("minecraft:jungle_egde", ImmutableSet.of("minecraft:jungle_edge"))
-				.build();
 
 		static {
 			try {
@@ -191,6 +173,7 @@ public class BiomeConfig {
 					for (Object entry : pool) {
 						if (!matchesEntry(entry, biomeIn)) {
 							overall = false;
+							break;
 						}
 					}
 					if (overall) {
@@ -230,72 +213,63 @@ public class BiomeConfig {
 			if ("end".equals(key)) {
 				return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.END);
 			}
-			List<String> biomeTypes = BiomeDictionary.getTypes(biomeIn).stream()
-					.map(t -> t.getName().toLowerCase(Locale.ROOT))
-					.collect(Collectors.toList());
-			return biomeTypes.contains(key);
+			try {
+				return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.getType(key.toUpperCase(Locale.ROOT)));
+			} catch (Exception e) {
+				return false;
+			}
 		}
 
 		private static boolean matchesBiomeCategory(Biome biomeIn, String category) {
 			String key = category.toLowerCase(Locale.ROOT);
 			switch (key) {
-				case "forest":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.FOREST);
 				case "desert":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.SANDY, BiomeDictionary.Type.DRY, BiomeDictionary.Type.HOT);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.SANDY)
+							&& !BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.MESA)
+							&& !BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.BEACH)
+							&& !BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.OCEAN);
+				case "plains":
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.PLAINS)
+							&& !BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.SAVANNA);
+				case "forest":
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.FOREST)
+							&& !BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.JUNGLE);
 				case "savanna":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.SAVANNA);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.SAVANNA);
 				case "ocean":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.OCEAN);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.OCEAN);
 				case "jungle":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.JUNGLE);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.JUNGLE);
 				case "swamp":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.SWAMP);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.SWAMP);
 				case "mountain":
 				case "extreme_hills":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.MOUNTAIN);
-				case "plains":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.PLAINS);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.MOUNTAIN);
 				case "mesa":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.MESA);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.MESA);
 				case "icy":
 				case "snowy":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.SNOWY, BiomeDictionary.Type.COLD);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.SNOWY);
 				case "river":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.RIVER);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.RIVER);
 				case "beach":
-					return hasAnyDict(biomeIn, BiomeDictionary.Type.BEACH);
+					return BiomeDictionary.hasType(biomeIn, BiomeDictionary.Type.BEACH);
 				default:
 					return biomeIn.getBiomeClass().getSimpleName().toLowerCase(Locale.ROOT).contains(key);
 			}
 		}
 
-		private static boolean hasAnyDict(Biome biomeIn, BiomeDictionary.Type... types) {
-			for (BiomeDictionary.Type type : types) {
-				if (BiomeDictionary.hasType(biomeIn, type)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		private static boolean matchesRegistryName(Biome biomeIn, String configValue, boolean negate) {
 			String biomeId = biomeIn.getRegistryName().toString();
+			String renamed = AMBiomes112.rename(configValue);
+			if (biomeId.equals(configValue) || biomeId.equals(renamed)) {
+				return true;
+			}
 			if (negate) {
-				return biomeId.equals(configValue) || AMBiomes112.resolve(configValue) != null && biomeId.equals(AMBiomes112.resolve(configValue));
+				return false;
 			}
-			Set<String> acceptable = new HashSet<>(AMBiomes112.acceptableIdsForConfigValue(configValue));
-			Set<String> aliases = REGISTRY_ALIASES.get(configValue);
-			if (aliases != null) {
-				for (String alias : aliases) {
-					String resolved = AMBiomes112.resolve(alias);
-					if (resolved != null) {
-						acceptable.add(resolved);
-					}
-					acceptable.add(alias);
-				}
-			}
-			return acceptable.contains(biomeId);
+			Set<String> standIns = AMBiomes112.standIns(configValue);
+			return standIns.contains(biomeId);
 		}
 	}
 }

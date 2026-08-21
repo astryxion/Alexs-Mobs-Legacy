@@ -92,7 +92,12 @@ public class EntityTerrapin extends EntityAnimal implements ISemiAquatic {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.terrapinSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.terrapinSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+    }
+
+    @Override
+    public boolean isNotColliding() {
+        return AMEntityRegistry.aquaticNoEntityCollision(this);
     }
 
     @Override

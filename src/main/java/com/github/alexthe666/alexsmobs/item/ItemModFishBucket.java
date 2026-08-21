@@ -7,6 +7,7 @@ import com.github.alexthe666.alexsmobs.entity.EntityCatfish;
 import com.github.alexthe666.alexsmobs.entity.EntityCombJelly;
 import com.github.alexthe666.alexsmobs.entity.EntityCosmicCod;
 import com.github.alexthe666.alexsmobs.entity.EntityDevilsHolePupfish;
+import com.github.alexthe666.alexsmobs.entity.EntityFlyingFish;
 import com.github.alexthe666.alexsmobs.entity.EntityFrilledShark;
 import com.github.alexthe666.alexsmobs.entity.EntityLobster;
 import com.github.alexthe666.alexsmobs.entity.EntityMimicOctopus;
@@ -291,6 +292,13 @@ public class ItemModFishBucket extends Item {
                 catfish.readEntityFromNBT(tag);
             } else {
                 catfish.setCatfishSize(catfishSizeFromBucketItem(stack));
+            }
+        }
+        if (entity instanceof EntityFlyingFish) {
+            EntityFlyingFish fish = (EntityFlyingFish) entity;
+            fish.setFromBucket(true);
+            if (tag != null && tag.hasKey("Variant")) {
+                fish.setVariant(tag.getInteger("Variant"));
             }
         }
     }

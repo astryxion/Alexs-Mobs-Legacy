@@ -164,6 +164,14 @@ public class ModelJerboa extends AdvancedEntityModel<EntityJerboa> {
 
     @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
-        getParts().forEach(part -> part.render(f5));
+        if (this.isChild) {
+            net.minecraft.client.renderer.GlStateManager.pushMatrix();
+            net.minecraft.client.renderer.GlStateManager.scale(0.65F, 0.65F, 0.65F);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 0.815F, 0.125F);
+            getParts().forEach(part -> part.render(f5));
+            net.minecraft.client.renderer.GlStateManager.popMatrix();
+        } else {
+            getParts().forEach(part -> part.render(f5));
+        }
     }
 }

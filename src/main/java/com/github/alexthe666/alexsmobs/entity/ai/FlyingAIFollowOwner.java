@@ -59,11 +59,10 @@ public class FlyingAIFollowOwner extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        if (this.tameable.isSitting()) {
+        if (this.tameable.isSitting() || this.owner == null || !follower.shouldFollow()) {
             return false;
-        } else {
-            return this.owner != null && this.tameable.getDistanceSq(this.owner) > (double) (this.maxDist * this.maxDist);
         }
+        return this.tameable.getDistanceSq(this.owner) > (double) (this.maxDist * this.maxDist);
     }
 
     @Override

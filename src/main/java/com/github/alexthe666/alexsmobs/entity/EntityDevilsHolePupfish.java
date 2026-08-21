@@ -143,6 +143,11 @@ public class EntityDevilsHolePupfish extends EntityCreature {
     }
 
     @Override
+    public boolean isNotColliding() {
+        return AMEntityRegistry.aquaticNoEntityCollision(this);
+    }
+
+    @Override
     public int getMaxSpawnedInChunk() {
         return 3;
     }

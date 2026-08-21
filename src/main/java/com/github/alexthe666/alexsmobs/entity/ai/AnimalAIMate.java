@@ -70,13 +70,23 @@ public class AnimalAIMate extends EntityAIBase {
         this.animal.getLookHelper().setLookPositionWithEntity(this.targetMate, 10.0F, (float) this.animal.getVerticalFaceSpeed());
         this.animal.getNavigator().tryMoveToEntityLiving(this.targetMate, this.moveSpeed);
         ++this.spawnBabyDelay;
-        if (this.spawnBabyDelay >= 60 && this.animal.getDistanceSq(this.targetMate) < 9.0D) {
+        if (this.spawnBabyDelay >= 60 && this.animal.getDistanceSq(this.targetMate) < getBreedRangeSq()) {
             this.spawnBaby();
         }
     }
 
+    /**
+     * Vanilla mate range is 3 blocks, which is too small for wide aquatic mobs. Scale to AABB contact
+     * (half combined width) while keeping the 3-block floor for normal animals.
+     */
+    private double getBreedRangeSq() {
+        double range = Math.max(3.0D, (this.animal.width + this.targetMate.width) * 0.5D);
+        return range * range;
+    }
+
     private EntityAnimal getNearbyMate() {
-        List<? extends EntityAnimal> list = this.world.getEntitiesWithinAABB(this.mateClass, this.animal.getEntityBoundingBox().grow(8.0D, 4.0D, 8.0D));
+        double search = Math.max(8.0D, this.animal.width + 8.0D);
+        List<? extends EntityAnimal> list = this.world.getEntitiesWithinAABB(this.mateClass, this.animal.getEntityBoundingBox().grow(search, 4.0D, search));
         double closest = Double.MAX_VALUE;
         EntityAnimal mate = null;
         for (EntityAnimal candidate : list) {

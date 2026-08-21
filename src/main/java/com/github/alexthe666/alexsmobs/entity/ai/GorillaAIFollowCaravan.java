@@ -16,6 +16,7 @@ public class GorillaAIFollowCaravan extends EntityAIBase {
     public final EntityGorilla gorilla;
     private double speedModifier;
     private int distCheckCounter;
+    private int pathCooldown;
 
     public GorillaAIFollowCaravan(EntityGorilla llamaIn, double speedModifierIn) {
         this.gorilla = llamaIn;
@@ -112,11 +113,16 @@ public class GorillaAIFollowCaravan extends EntityAIBase {
             if (llamaentity != null) {
                 double d0 = this.gorilla.getDistance(llamaentity);
                 Vec3d vector3d = (new Vec3d(llamaentity.posX - this.gorilla.posX, llamaentity.posY - this.gorilla.posY, llamaentity.posZ - this.gorilla.posZ)).normalize().scale(Math.max(d0 - 2.0D, 0.0D));
-                if (gorilla.getNavigator().noPath()) {
+                if (this.pathCooldown > 0) {
+                    --this.pathCooldown;
+                }
+                if (gorilla.getNavigator().noPath() && this.pathCooldown <= 0) {
                     try {
-                        this.gorilla.getNavigator().tryMoveToXYZ(this.gorilla.posX + vector3d.x, this.gorilla.posY + vector3d.y, this.gorilla.posZ + vector3d.z, this.speedModifier);
+                        boolean foundPath = this.gorilla.getNavigator().tryMoveToXYZ(this.gorilla.posX + vector3d.x, this.gorilla.posY + vector3d.y, this.gorilla.posZ + vector3d.z, this.speedModifier);
+                        this.pathCooldown = foundPath ? 10 : 40;
                     } catch (NullPointerException e) {
                         AlexsMobs.LOGGER.warn("gorilla encountered issue following caravan head");
+                        this.pathCooldown = 40;
                     }
                 }
             }

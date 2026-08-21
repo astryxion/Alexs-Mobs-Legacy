@@ -12,6 +12,7 @@ public class ElephantAIFollowCaravan extends EntityAIBase {
     public final EntityElephant elephant;
     private double speedModifier;
     private int distCheckCounter;
+    private int pathCooldown;
 
     public ElephantAIFollowCaravan(EntityElephant llamaIn, double speedModifierIn) {
         this.elephant = llamaIn;
@@ -111,11 +112,16 @@ public class ElephantAIFollowCaravan extends EntityAIBase {
             if (llamaentity != null) {
                 double d0 = this.elephant.getDistance(llamaentity);
                 Vec3d vector3d = (new Vec3d(llamaentity.posX - this.elephant.posX, llamaentity.posY - this.elephant.posY, llamaentity.posZ - this.elephant.posZ)).normalize().scale(Math.max(d0 - 4.0D, 0.0D));
-                if (elephant.getNavigator().noPath()) {
+                if (this.pathCooldown > 0) {
+                    --this.pathCooldown;
+                }
+                if (elephant.getNavigator().noPath() && this.pathCooldown <= 0) {
                     try {
-                        this.elephant.getNavigator().tryMoveToXYZ(this.elephant.posX + vector3d.x, this.elephant.posY + vector3d.y, this.elephant.posZ + vector3d.z, this.speedModifier);
+                        boolean foundPath = this.elephant.getNavigator().tryMoveToXYZ(this.elephant.posX + vector3d.x, this.elephant.posY + vector3d.y, this.elephant.posZ + vector3d.z, this.speedModifier);
+                        this.pathCooldown = foundPath ? 10 : 40;
                     } catch (NullPointerException e) {
                         AlexsMobs.LOGGER.warn("elephant encountered issue following caravan head");
+                        this.pathCooldown = 40;
                     }
                 }
 

@@ -266,7 +266,7 @@ public class ModelRhinoceros extends AdvancedEntityModel<EntityRhinoceros> {
             rightLeg.setScale(1, feet, 1);
             GlStateManager.pushMatrix();
             GlStateManager.scale(0.5F, 0.5F, 0.5F);
-            GlStateManager.translate(0.0F, 1.3F * scale, 0.0F);
+            GlStateManager.translate(0.0F, 1.3F, 0.0F);
             for (ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

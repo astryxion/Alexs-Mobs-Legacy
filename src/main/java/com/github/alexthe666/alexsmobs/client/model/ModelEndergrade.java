@@ -98,7 +98,7 @@ public class ModelEndergrade extends AdvancedEntityModel<EntityEndergrade> {
             this.head.setShouldScaleChildren(true);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.35F, 0.35F, 0.35F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 2.75F * scale, 0.125F * scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 2.75F, 0.125F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

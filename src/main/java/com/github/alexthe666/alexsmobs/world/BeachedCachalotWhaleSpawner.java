@@ -1,7 +1,7 @@
 package com.github.alexthe666.alexsmobs.world;
 
 import com.github.alexthe666.alexsmobs.config.AMConfig;
-import com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes;
+import com.github.alexthe666.alexsmobs.config.BiomeConfig;
 import com.github.alexthe666.alexsmobs.entity.AMEntityRegistry;
 import com.github.alexthe666.alexsmobs.entity.EntityCachalotWhale;
 import net.minecraft.block.material.Material;
@@ -103,7 +103,7 @@ public class BeachedCachalotWhaleSpawner {
             BlockPos blockpos1 = new BlockPos(j, l, k);
             Biome biome = world.getBiome(blockpos1);
             IBlockState below = world.getBlockState(blockpos1.down());
-            if (AMNativeSpawnBiomes.beachedCachalotWhale(biome)
+            if (BiomeConfig.test(BiomeConfig.cachalot_whale_beached_spawns, biome)
                     && below.isSideSolid(world, blockpos1.down(), EnumFacing.UP)
                     && world.getLight(blockpos1) > 7) {
                 blockpos = blockpos1;

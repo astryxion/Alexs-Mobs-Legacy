@@ -32,6 +32,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
+import org.lwjgl.opengl.GL11;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -105,6 +106,21 @@ public abstract class GuiBasicBook extends GuiScreen {
    public static void drawEntityOnScreen(int posX, int posY, float scale, boolean follow, double xRot, double yRot, double zRot, float mouseX, float mouseY, Entity entity) {
       float f = (float)Math.atan((double)(mouseX / 40.0F));
       float f1 = (float)Math.atan((double)(mouseY / 40.0F));
+      float prevYaw = entity.rotationYaw;
+      float prevPitch = entity.rotationPitch;
+      float prevOffset = 0.0F;
+      float prevPrevOffset = 0.0F;
+      float prevHead = 0.0F;
+      float prevPrevHead = 0.0F;
+      EntityLivingBase living = entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null;
+      if (living != null) {
+         prevOffset = living.renderYawOffset;
+         prevPrevOffset = living.prevRenderYawOffset;
+         prevHead = living.rotationYawHead;
+         prevPrevHead = living.prevRotationYawHead;
+      }
+
+      GlStateManager.enableColorMaterial();
       GlStateManager.pushMatrix();
       GlStateManager.translate((float)posX, (float)posY, 50.0F);
       GlStateManager.scale(-scale, scale, scale);
@@ -113,32 +129,82 @@ public abstract class GuiBasicBook extends GuiScreen {
          float yaw = f * 20.0F;
          entity.rotationYaw = yaw;
          entity.rotationPitch = -f1 * 20.0F;
-         if (entity instanceof EntityLivingBase) {
-            ((EntityLivingBase)entity).renderYawOffset = yaw;
-            ((EntityLivingBase)entity).prevRenderYawOffset = yaw;
-            ((EntityLivingBase)entity).rotationYawHead = yaw;
-            ((EntityLivingBase)entity).prevRotationYawHead = yaw;
+         if (living != null) {
+            living.renderYawOffset = yaw;
+            living.prevRenderYawOffset = yaw;
+            living.rotationYawHead = yaw;
+            living.prevRotationYawHead = yaw;
          }
       }
 
+      GlStateManager.rotate(135.0F, 0.0F, 1.0F, 0.0F);
       RenderHelper.enableStandardItemLighting();
+      GlStateManager.rotate(-135.0F, 0.0F, 1.0F, 0.0F);
       GlStateManager.rotate((float)xRot, 1.0F, 0.0F, 0.0F);
       GlStateManager.rotate((float)yRot, 0.0F, 1.0F, 0.0F);
       GlStateManager.rotate((float)zRot, 0.0F, 0.0F, 1.0F);
-      Minecraft.getMinecraft().getRenderManager().playerViewY = 180.0F;
-      Minecraft.getMinecraft().getRenderManager().setRenderShadow(false);
-      Minecraft.getMinecraft().getRenderManager().renderEntity(entity, 0.0D, 0.0D, 0.0D, f, Minecraft.getMinecraft().getRenderPartialTicks(), false);
-      Minecraft.getMinecraft().getRenderManager().setRenderShadow(true);
-      RenderHelper.disableStandardItemLighting();
-      entity.rotationYaw = 0.0F;
-      entity.rotationPitch = 0.0F;
-      if (entity instanceof EntityLivingBase) {
-         ((EntityLivingBase)entity).renderYawOffset = 0.0F;
-         ((EntityLivingBase)entity).prevRotationYawHead = 0.0F;
-         ((EntityLivingBase)entity).rotationYawHead = 0.0F;
+      double prevX = entity.posX;
+      double prevY = entity.posY;
+      double prevZ = entity.posZ;
+      double prevPrevX = entity.prevPosX;
+      double prevPrevY = entity.prevPosY;
+      double prevPrevZ = entity.prevPosZ;
+      net.minecraft.entity.player.EntityPlayer player = Minecraft.getMinecraft().player;
+      if (player != null) {
+         entity.posX = entity.prevPosX = player.posX;
+         entity.posY = entity.prevPosY = player.posY;
+         entity.posZ = entity.prevPosZ = player.posZ;
       }
 
-      GlStateManager.popMatrix();
+      net.minecraft.client.renderer.entity.RenderManager renderManager = Minecraft.getMinecraft().getRenderManager();
+      float prevViewY = renderManager.playerViewY;
+      renderManager.playerViewY = 180.0F;
+      renderManager.setRenderShadow(false);
+      try {
+         GuiShaderCompat.beginGuiEntity();
+         renderManager.renderEntity(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+      } finally {
+         renderManager.setRenderShadow(true);
+         renderManager.playerViewY = prevViewY;
+         entity.posX = prevX;
+         entity.posY = prevY;
+         entity.posZ = prevZ;
+         entity.prevPosX = prevPrevX;
+         entity.prevPosY = prevPrevY;
+         entity.prevPosZ = prevPrevZ;
+         entity.rotationYaw = prevYaw;
+         entity.rotationPitch = prevPitch;
+         if (living != null) {
+            living.renderYawOffset = prevOffset;
+            living.prevRenderYawOffset = prevPrevOffset;
+            living.rotationYawHead = prevHead;
+            living.prevRotationYawHead = prevPrevHead;
+         }
+         GuiShaderCompat.endGuiEntity();
+         GlStateManager.popMatrix();
+         restoreGuiLighting();
+      }
+   }
+
+   /** Undo inventory-entity lighting so the rest of the GUI / world is not left tinted. */
+   public static void restoreGuiLighting() {
+      RenderHelper.disableStandardItemLighting();
+      GlStateManager.disableRescaleNormal();
+      GlStateManager.disableColorMaterial();
+      GL11.glDisable(GL11.GL_SCISSOR_TEST);
+      GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit);
+      GlStateManager.enableTexture2D();
+      GlStateManager.disableTexture2D();
+      GL11.glDisable(GL11.GL_TEXTURE_2D);
+      GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit);
+      GlStateManager.enableTexture2D();
+      GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GlStateManager.disableLighting();
+      GlStateManager.disableFog();
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+      GlStateManager.enableBlend();
+      GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+      BookBlit.setRGB(255, 255, 255, 255);
    }
 
    public static void drawTabulaModelOnScreen(TabulaModel model, ResourceLocation tex, int posX, int posY, float scale, boolean follow, double xRot, double yRot, double zRot, float mouseX, float mouseY) {
@@ -164,8 +230,10 @@ public abstract class GuiBasicBook extends GuiScreen {
    public void initGui() {
       super.initGui();
       this.playBookOpeningSound();
-      this.addNextPreviousButtons();
-      this.addLinkButtons();
+      this.loadBookEntry();
+      if (this.buttonNextPage == null) {
+         this.addNextPreviousButtons();
+      }
    }
 
    private void addNextPreviousButtons() {
@@ -234,7 +302,8 @@ public abstract class GuiBasicBook extends GuiScreen {
       this.updatePageNavigation();
    }
 
-   protected void func_146284_a(GuiButton button) throws IOException {
+   @Override
+   protected void actionPerformed(GuiButton button) throws IOException {
       if (button == this.buttonNextPage) {
          this.onSwitchPage(true);
          return;
@@ -273,11 +342,15 @@ public abstract class GuiBasicBook extends GuiScreen {
       this.drawDefaultBackground();
       int k = (this.width - this.xSize) / 2;
       int l = (this.height - this.ySize + 128) / 2;
+      BookBlit.setRGB(255, 255, 255, 255);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       this.mc.getTextureManager().bindTexture(this.getBookPageTexture());
       BookBlit.func_238463_a_(k, l, 0.0F, 0.0F, this.xSize, this.ySize, this.xSize, this.ySize);
       this.mc.getTextureManager().bindTexture(this.getBookBindingTexture());
       BookBlit.setRGB(r, g, b, 255);
       BookBlit.func_238463_a_(k, l, 0.0F, 0.0F, this.xSize, this.ySize, this.xSize, this.ySize);
+      BookBlit.setRGB(255, 255, 255, 255);
+      GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       if (this.internalPage == null || this.loadedPageJson == null || !this.currentPageJSON.equals(this.loadedPageJson)) {
          this.loadBookEntry();
       }
@@ -288,12 +361,21 @@ public abstract class GuiBasicBook extends GuiScreen {
       }
 
       this.prevPageJSON = this.currentPageJSON;
+      restoreGuiLighting();
+      EntityLinkButton.beginFrame();
       super.drawScreen(x, y, partialTicks);
+      restoreGuiLighting();
       if (this.entityTooltip != null) {
          this.drawHoveringText(this.fontRenderer.listFormattedStringToWidth((new TextComponentTranslation(this.entityTooltip)).getFormattedText(), Math.max(this.width / 2 - 43, 170)), x, y);
          this.entityTooltip = null;
       }
 
+   }
+
+   @Override
+   public void onGuiClosed() {
+      restoreGuiLighting();
+      super.onGuiClosed();
    }
 
    private void loadBookEntry() {
@@ -490,7 +572,7 @@ public abstract class GuiBasicBook extends GuiScreen {
 
             if (model != null && texture != null) {
                float scale = (float)tabulaRenderData.getScale();
-               drawTabulaModelOnScreen(model, texture, k + tabulaRenderData.getX(), l + tabulaRenderData.getY(), 30.0F * scale, tabulaRenderData.isFollow_cursor(), tabulaRenderData.getRot_x(), tabulaRenderData.getRot_y(), tabulaRenderData.getRot_z(), (float)(k + tabulaRenderData.getX() - x), (float)(l + tabulaRenderData.getY() - y));
+               drawTabulaModelOnScreen(model, texture, k + tabulaRenderData.getX(), l + tabulaRenderData.getY(), 30.0F * scale, tabulaRenderData.isFollow_cursor(), tabulaRenderData.getRot_x(), tabulaRenderData.getRot_y() + this.getBookEntityYawOffset(), tabulaRenderData.getRot_z(), (float)(k + tabulaRenderData.getX() - x), (float)(l + tabulaRenderData.getY() - y));
             }
          }
       }
@@ -514,7 +596,7 @@ public abstract class GuiBasicBook extends GuiScreen {
                model.ticksExisted = Minecraft.getMinecraft().player.ticksExisted;
                int mouseX = k + data.getX() - x;
                int mouseY = k + data.getY() / 2 - y;
-               drawEntityOnScreen(k + data.getX(), l + data.getY(), 30.0F * scale, data.isFollow_cursor(), data.getRot_x(), data.getRot_y(), data.getRot_z(), (float)mouseX, (float)mouseY, model);
+               drawEntityOnScreen(k + data.getX(), l + data.getY(), 30.0F * scale, data.isFollow_cursor(), data.getRot_x(), data.getRot_y() + this.getBookEntityYawOffset(), data.getRot_z(), (float)mouseX, (float)mouseY, model);
             }
          }
       }
@@ -563,7 +645,13 @@ public abstract class GuiBasicBook extends GuiScreen {
 
       for(LineData line : this.lines) {
          if (line.getPage() == this.currentPageCounter) {
-            font.drawString(line.getText(), k + 10 + line.getxIndex(), l + 10 + line.getyIndex() * 12, this.getTextColor());
+            String text = line.getText();
+            if (text != null) {
+               String trimmed = text.trim();
+               if (!trimmed.isEmpty() && !".".equals(trimmed)) {
+                  font.drawString(text, k + 10 + line.getxIndex(), l + 10 + line.getyIndex() * 12, this.getTextColor());
+               }
+            }
          }
       }
 
@@ -582,7 +670,7 @@ public abstract class GuiBasicBook extends GuiScreen {
 
    protected abstract int getBindingColor();
 
-   protected int getWidgetColor() {
+   public int getWidgetColor() {
       return this.getBindingColor();
    }
 
@@ -592,6 +680,11 @@ public abstract class GuiBasicBook extends GuiScreen {
 
    protected int getTitleColor() {
       return 12233880;
+   }
+
+   /** 1.12 entity renderer is mirrored vs 1.16 book JSON yaw. */
+   protected double getBookEntityYawOffset() {
+      return 0.0D;
    }
 
    public abstract ResourceLocation getRootPage();
@@ -606,7 +699,7 @@ public abstract class GuiBasicBook extends GuiScreen {
       return BOOK_BINDING_TEXTURE;
    }
 
-   protected ResourceLocation getBookWidgetTexture() {
+   public ResourceLocation getBookWidgetTexture() {
       return BOOK_WIDGET_TEXTURE;
    }
 

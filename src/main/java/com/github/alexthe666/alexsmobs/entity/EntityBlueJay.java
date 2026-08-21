@@ -161,6 +161,11 @@ public class EntityBlueJay extends EntityAnimal implements ITargetsDroppedItems 
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 4;
+    }
+
+    @Override
     public boolean isBreedingItem(ItemStack stack) {
         return AMTagRegistry.itemInTag(AMTagRegistry.BLUE_JAY_BREEDABLES, stack.getItem());
     }

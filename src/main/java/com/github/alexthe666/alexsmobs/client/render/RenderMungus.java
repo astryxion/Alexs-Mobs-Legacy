@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -220,7 +219,10 @@ public class RenderMungus extends RenderLiving<EntityMungus> {
             }
             GlStateManager.enableLighting();
             GlStateManager.disableBlend();
+            GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            int light = entitylivingbaseIn.getBrightnessForRender();
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light % 65536, light / 65536);
         }
 
         @Override
@@ -240,67 +242,58 @@ public class RenderMungus extends RenderLiving<EntityMungus> {
         @Override
         public void doRenderLayer(EntityMungus entitylivingbaseIn, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
             IBlockState blockstate = entitylivingbaseIn.getMushroomState();
-            if (blockstate == null) {
+            if (blockstate == null || entitylivingbaseIn.getMushroomCount() <= 0) {
                 return;
             }
             boolean altOrder = entitylivingbaseIn.isAltOrderMushroom();
             int mushroomCount = entitylivingbaseIn.getMushroomCount();
-            BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
-            int brightness = entitylivingbaseIn.getBrightnessForRender();
+            net.minecraft.item.ItemStack mushroom = new net.minecraft.item.ItemStack(net.minecraft.item.Item.getItemFromBlock(blockstate.getBlock()), 1, blockstate.getBlock().getMetaFromState(blockstate));
+            if (mushroom.isEmpty()) {
+                return;
+            }
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableRescaleNormal();
+            GlStateManager.enableCull();
+            GlStateManager.disableBlend();
+            int light = entitylivingbaseIn.getBrightnessForRender();
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, light % 65536, light / 65536);
             GlStateManager.pushMatrix();
             if (entitylivingbaseIn.isChild()) {
                 GlStateManager.scale(0.5F, 0.5F, 0.5F);
-                GlStateManager.translate(0.0D, 1.5D, 0D);
+                GlStateManager.translate(0.0F, 1.5F, 0.0F);
             }
             GlStateManager.pushMatrix();
             translateToBody(scale);
             if (mushroomCount == 1 && !altOrder || mushroomCount >= 2) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(0.2F, -1.4F, 0.15F);
-                GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-                GlStateManager.translate(-0.5D, -0.5D, -0.5D);
-                blockrendererdispatcher.renderBlockBrightness(blockstate, brightness);
-                GlStateManager.popMatrix();
+                renderMushroomItem(mushroom, 0.2F, -1.4F, 0.15F, 0.0F);
             }
             if (mushroomCount == 1 && altOrder || mushroomCount >= 2) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(-0.2F, -1.5F, -0.2D);
-                GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-                GlStateManager.translate(-0.5D, -0.5D, -0.5D);
-                blockrendererdispatcher.renderBlockBrightness(blockstate, brightness);
-                GlStateManager.popMatrix();
+                renderMushroomItem(mushroom, -0.2F, -1.5F, -0.2F, 0.0F);
             }
             if (mushroomCount >= 3) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(0.76F, -0.4F, 0.1D);
-                GlStateManager.rotate(90F, 0.0F, 0.0F, 1.0F);
-                GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-                GlStateManager.translate(-0.5D, -0.5D, -0.5D);
-                blockrendererdispatcher.renderBlockBrightness(blockstate, brightness);
-                GlStateManager.popMatrix();
+                renderMushroomItem(mushroom, 0.76F, -0.4F, 0.1F, 90.0F);
             }
             if (mushroomCount >= 4) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(-0.76F, -1.0F, 0.1D);
-                GlStateManager.rotate(-60F, 0.0F, 0.0F, 1.0F);
-                GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-                GlStateManager.translate(-0.5D, -0.5D, -0.5D);
-                blockrendererdispatcher.renderBlockBrightness(blockstate, brightness);
-                GlStateManager.popMatrix();
+                renderMushroomItem(mushroom, -0.76F, -1.0F, 0.1F, -60.0F);
             }
             if (mushroomCount >= 5) {
-                GlStateManager.pushMatrix();
-                GlStateManager.translate(-0.76F, -0.1F, 0.1D);
-                GlStateManager.rotate(-100F, 0.0F, 0.0F, 1.0F);
-                GlStateManager.scale(-1.0F, -1.0F, 1.0F);
-                GlStateManager.translate(-0.5D, -0.5D, -0.5D);
-                blockrendererdispatcher.renderBlockBrightness(blockstate, brightness);
-                GlStateManager.popMatrix();
+                renderMushroomItem(mushroom, -0.76F, -0.1F, 0.1F, -100.0F);
             }
             GlStateManager.popMatrix();
             GlStateManager.popMatrix();
+            GlStateManager.disableCull();
             GlStateManager.disableRescaleNormal();
+        }
+
+        private void renderMushroomItem(net.minecraft.item.ItemStack mushroom, float x, float y, float z, float roll) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(x, y, z);
+            if (roll != 0.0F) {
+                GlStateManager.rotate(roll, 0.0F, 0.0F, 1.0F);
+            }
+            GlStateManager.scale(0.85F, 0.85F, 0.85F);
+            Minecraft.getMinecraft().getRenderItem().renderItem(mushroom, net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType.GROUND);
+            GlStateManager.popMatrix();
         }
 
         protected void translateToBody(float scale) {

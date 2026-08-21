@@ -339,13 +339,20 @@ public class ModelKangaroo extends AdvancedEntityModel<EntityKangaroo> {
 	@Override
     public void render(net.minecraft.entity.Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         if (this.isChild) {
-            this.head.setScale(1, 1, 1);
+            float f = 1.65F;
+            this.head.setScale(f, f, f);
             this.head.setShouldScaleChildren(true);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.5F, 0.5F, 0.5F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 1.5F * scale, 0.0F * scale);
-            for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
-                part.render(scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 1.5F, 0.0F);
+            if (renderOnlyHead) {
+                neck.setRotationPoint(0.0F, 0F, 0.0F);
+                this.neck.render(scale);
+            } else {
+                neck.setRotationPoint(0.0F, 2.0F, -8.0F);
+                for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
+                    part.render(scale);
+                }
             }
             net.minecraft.client.renderer.GlStateManager.popMatrix();
             this.head.setScale(1.0F, 1.0F, 1.0F);

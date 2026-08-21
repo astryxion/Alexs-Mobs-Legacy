@@ -141,8 +141,7 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.triopsSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
-                && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.triopsSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
     }
 
     @Override
@@ -267,8 +266,8 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
     @Override
     public void handleStatusUpdate(byte id) {
         if (id == 67) {
-            for (int i = 0; i < 5; i++) {
-                this.world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY,
+            for (int i = 0; i < 7; i++) {
+                this.world.spawnParticle(EnumParticleTypes.HEART,
                         this.posX + (this.rand.nextFloat() - 0.5F) * this.width,
                         this.posY + this.height * 0.8F,
                         this.posZ + (this.rand.nextFloat() - 0.5F) * this.width,
@@ -283,7 +282,9 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
 
     @Override
     public boolean canTargetItem(ItemStack stack) {
-        return (AMTagRegistry.itemInTag(AMTagRegistry.TRIOPS_BREEDABLES, stack.getItem()) || stack.getItem() == AMItemRegistry.MOSQUITO_LARVA) && !fedCarrot;
+        return stack.getItem() == Items.CARROT
+                || stack.getItem() == AMItemRegistry.MOSQUITO_LARVA
+                || AMTagRegistry.itemInTag(AMTagRegistry.TRIOPS_BREEDABLES, stack.getItem());
     }
 
     @Override
@@ -304,18 +305,17 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
-        if (canTargetItem(itemstack) && !this.fedCarrot) {
+        if ((itemstack.getItem() == Items.CARROT || itemstack.getItem() == AMItemRegistry.MOSQUITO_LARVA
+                || AMTagRegistry.itemInTag(AMTagRegistry.TRIOPS_BREEDABLES, itemstack.getItem())) && this.breedCooldown <= 0) {
             if (!player.capabilities.isCreativeMode) {
                 itemstack.shrink(1);
             }
             this.playSound(SoundEvents.ENTITY_PLAYER_BURP, this.getSoundPitch(), this.getSoundVolume());
             this.heal(5.0F);
-            if (AMTagRegistry.itemInTag(AMTagRegistry.TRIOPS_BREEDABLES, itemstack.getItem())) {
-                if (!this.world.isRemote && breedCooldown == 0) {
-                    this.world.setEntityState(this, (byte) 67);
-                }
-                this.fedCarrot = true;
+            if (!this.world.isRemote) {
+                this.world.setEntityState(this, (byte) 67);
             }
+            this.fedCarrot = true;
             return true;
         }
         ItemStack bucket = this.getFishBucket();
@@ -361,7 +361,7 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
     }
 
     public boolean isSearchingForMate() {
-        return this.isEntityAlive() && this.isInWater() && this.fedCarrot && this.breedCooldown <= 0;
+        return this.isEntityAlive() && this.fedCarrot && this.breedCooldown <= 0;
     }
 
     @Override
@@ -417,7 +417,7 @@ public class EntityTriops extends EntityCreature implements ISemiAquatic, ITarge
 
         @Override
         public boolean shouldExecute() {
-            if (!EntityTriops.this.isInWater() || !EntityTriops.this.fedCarrot || EntityTriops.this.breedCooldown > 0 || EntityTriops.this.breedWith != null) {
+            if (!EntityTriops.this.fedCarrot || EntityTriops.this.breedCooldown > 0 || EntityTriops.this.breedWith != null) {
                 return false;
             }
             if (executionCooldown > 0) {

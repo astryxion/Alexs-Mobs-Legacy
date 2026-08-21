@@ -5,6 +5,7 @@ import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.effect.AMEffectRegistry;
 import com.github.alexthe666.alexsmobs.effect.EffectClinging;
 import com.github.alexthe666.alexsmobs.entity.*;
+import com.github.alexthe666.alexsmobs.entity.util.FlyingFishBootsUtil;
 import com.github.alexthe666.alexsmobs.entity.util.RainbowUtil;
 import com.github.alexthe666.alexsmobs.entity.util.VineLassoUtil;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
@@ -87,6 +88,20 @@ import java.util.*;
 @Mod.EventBusSubscriber(modid = AlexsMobs.MODID)
 public class ServerEvents {
 
+    private static boolean isHoldingFalconryGlove(EntityPlayer player) {
+        return player.getHeldItemMainhand().getItem() == AMItemRegistry.FALCONRY_GLOVE
+                || player.getHeldItemOffhand().getItem() == AMItemRegistry.FALCONRY_GLOVE;
+    }
+
+    private static boolean hasFalconPassenger(EntityPlayer player) {
+        for (Entity passenger : player.getPassengers()) {
+            if (passenger instanceof IFalconry) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static final UUID SAND_SPEED_MODIFIER = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF28E");
     private static final UUID SNEAK_SPEED_MODIFIER = UUID.fromString("7E0292F2-9434-48D5-A29F-9583AF7DF28F");
     private static final AttributeModifier SAND_SPEED_BONUS = new AttributeModifier(SAND_SPEED_MODIFIER, "roadrunner speed bonus", 0.1D, 0);
@@ -138,6 +153,67 @@ public class ServerEvents {
         if (event.getWorld() instanceof WorldServer) {
             BEACHED_CACHALOT_WHALE_SPAWNER_MAP.remove(event.getWorld());
         }
+    }
+
+    private boolean tryFeedLookedCetacean(PlayerInteractEvent.RightClickItem event) {
+        EntityPlayer player = event.getEntityPlayer();
+        ItemStack stack = event.getItemStack();
+        if (stack.isEmpty() || stack.getItem() != Items.FISH) {
+            return false;
+        }
+        if (player.world.isRemote) {
+            return false;
+        }
+        Entity hit = findLookedCetacean(player, 10.0D);
+        if (hit == null) {
+            return false;
+        }
+        boolean fed = false;
+        if (hit instanceof EntityCachalotPart) {
+            fed = ((EntityCachalotPart) hit).processInitialInteract(player, event.getHand());
+        } else if (hit instanceof EntityCachalotWhale) {
+            fed = ((EntityCachalotWhale) hit).processInteract(player, event.getHand());
+        } else if (hit instanceof EntityOrca) {
+            fed = ((EntityOrca) hit).processInteract(player, event.getHand());
+        }
+        if (fed) {
+            player.swingArm(event.getHand());
+            event.setCanceled(true);
+            event.setCancellationResult(EnumActionResult.SUCCESS);
+            return true;
+        }
+        return false;
+    }
+
+    private Entity findLookedCetacean(EntityPlayer player, double range) {
+        Vec3d eye = player.getPositionEyes(1.0F);
+        Vec3d look = player.getLook(1.0F);
+        Vec3d end = eye.addVector(look.x * range, look.y * range, look.z * range);
+        AxisAlignedBB search = player.getEntityBoundingBox().expand(look.x * range, look.y * range, look.z * range).grow(2.0D);
+        List<Entity> list = player.world.getEntitiesWithinAABB(Entity.class, search);
+        Entity best = null;
+        double bestDist = range;
+        for (Entity entity : list) {
+            if (entity == player) {
+                continue;
+            }
+            if (!(entity instanceof EntityOrca || entity instanceof EntityCachalotWhale || entity instanceof EntityCachalotPart)) {
+                continue;
+            }
+            AxisAlignedBB aabb = entity.getEntityBoundingBox().grow(1.0D);
+            RayTraceResult intercept = aabb.calculateIntercept(eye, end);
+            if (intercept != null) {
+                double dist = eye.distanceTo(intercept.hitVec);
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = entity;
+                }
+            } else if (aabb.contains(eye)) {
+                best = entity;
+                bestDist = 0.0D;
+            }
+        }
+        return best;
     }
 
     protected static RayTraceResult rayTrace(World worldIn, EntityPlayer player, boolean stopOnLiquid) {
@@ -247,8 +323,16 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void onAquaticCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (!event.isSpawner() && AMEntityRegistry.shouldBlockAquaticNaturalSpawn(event.getWorld(), event.getEntityLiving())) {
+    public void onAlexsMobsCheckSpawn(LivingSpawnEvent.CheckSpawn event) {
+        if (event.isSpawner()) {
+            return;
+        }
+        EntityLivingBase living = event.getEntityLiving();
+        if (AMEntityRegistry.shouldBlockAquaticNaturalSpawn(event.getWorld(), living)) {
+            event.setResult(Event.Result.DENY);
+            return;
+        }
+        if (living instanceof EntityLiving && AMEntityRegistry.shouldBlockNaturalSpawnDensity(event.getWorld(), (EntityLiving) living)) {
             event.setResult(Event.Result.DENY);
         }
     }
@@ -275,6 +359,9 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onUseItem(PlayerInteractEvent.RightClickItem event) {
+        if (tryFeedLookedCetacean(event)) {
+            return;
+        }
         if (event.getItemStack().getItem() == Item.getItemFromBlock(Blocks.SPONGE) && RainbowUtil.getRainbowType(event.getEntityPlayer()) > 0) {
             event.getEntityPlayer().swingArm(event.getHand());
             RainbowUtil.setRainbowType(event.getEntityPlayer(), 0);
@@ -433,7 +520,17 @@ public class ServerEvents {
     }
 
     @SubscribeEvent
-    public void onPlayerAttackEntityEvent(AttackEntityEvent event) {
+    public static void onPlayerAttackEntityEvent(AttackEntityEvent event) {
+        EntityPlayer player = event.getEntityPlayer();
+        if (isHoldingFalconryGlove(player) && hasFalconPassenger(player)) {
+            event.setCanceled(true);
+            ItemFalconryGlove.onLeftClick(player, player.getHeldItemOffhand());
+            ItemFalconryGlove.onLeftClick(player, player.getHeldItemMainhand());
+            if (player.world.isRemote) {
+                AlexsMobs.sendMSGToServer(new MessageSwingArm());
+            }
+            return;
+        }
         if (event.getEntityPlayer().getItemStackFromSlot(EntityEquipmentSlot.HEAD).getItem() == AMItemRegistry.MOOSE_HEADGEAR && event.getTarget() instanceof EntityLivingBase) {
             float f1 = 2;
             ((EntityLivingBase) event.getTarget()).knockBack(event.getEntityPlayer(), f1 * 0.5F, MathHelper.sin(event.getEntityPlayer().rotationYaw * ((float) Math.PI / 180F)), -MathHelper.cos(event.getEntityPlayer().rotationYaw * ((float) Math.PI / 180F)));
@@ -592,7 +689,13 @@ public class ServerEvents {
 
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.player.world.isRemote) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        if (FlyingFishBootsUtil.isWearing(event.player)) {
+            FlyingFishBootsUtil.tickFlyingFishBoots(event.player);
+        }
+        if (event.player.world.isRemote) {
             return;
         }
         if (!(event.player instanceof EntityPlayerMP)) {

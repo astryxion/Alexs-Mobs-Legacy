@@ -17,6 +17,11 @@ public class RenderAlligatorSnappingTurtle extends RenderLiving<EntityAlligatorS
         this.addLayer(new AlligatorSnappingTurtleMossLayer(this));
     }
 
+    public void doRender(EntityAlligatorSnappingTurtle entity, double x, double y, double z, float entityYaw, float partialTicks) {
+        this.shadowSize = entity.isChild() ? 0.25F : 0.75F;
+        super.doRender(entity, x, y, z, entityYaw, partialTicks);
+    }
+
     @Override
     protected void preRenderCallback(EntityAlligatorSnappingTurtle entitylivingbaseIn, float partialTickTime) {
         float d = entitylivingbaseIn.getTurtleScale() < 0.01F ? 1F : entitylivingbaseIn.getTurtleScale();

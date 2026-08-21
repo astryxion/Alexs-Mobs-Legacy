@@ -57,6 +57,7 @@ public class ClientProxy extends CommonProxy {
     private static final ModelSpikedTurtleShell SPIKED_TURTLE_SHELL_MODEL = new ModelSpikedTurtleShell(1.0F);
     private static final ModelFedora FEDORA_MODEL = new ModelFedora(0.3F);
     private static final ModelAMElytra ELYTRA_MODEL = new ModelAMElytra();
+    private static final ModelFlyingFishBoots FLYING_FISH_BOOTS_MODEL = new ModelFlyingFishBoots(0.3F);
     public static final Map<Integer, SoundLaCucaracha> COCKROACH_SOUND_MAP = new HashMap<>();
     public static final Map<Integer, SoundWormBoss> WORMBOSS_SOUND_MAP = new HashMap<>();
     public static List<UUID> currentUnrenderedEntities = new ArrayList<UUID>();
@@ -333,6 +334,15 @@ public class ClientProxy extends CommonProxy {
         return Minecraft.getMinecraft().player;
     }
 
+    @Override
+    public boolean isPlayerJumping(EntityPlayer player) {
+        if (player instanceof net.minecraft.client.entity.EntityPlayerSP) {
+            net.minecraft.client.entity.EntityPlayerSP sp = (net.minecraft.client.entity.EntityPlayerSP) player;
+            return sp.movementInput != null && sp.movementInput.jump;
+        }
+        return false;
+    }
+
     @SideOnly(Side.CLIENT)
     public Object getArmorModel(int armorId, EntityLivingBase entity) {
         switch (armorId) {
@@ -350,6 +360,8 @@ public class ClientProxy extends CommonProxy {
                 return FEDORA_MODEL;
             case 6:
                 return ELYTRA_MODEL.withAnimations(entity);
+            case 7:
+                return FLYING_FISH_BOOTS_MODEL.withAnimations(entity);
             default:
                 return null;
         }

@@ -70,15 +70,20 @@ public class LayerCockroachMaracas implements LayerRenderer<EntityCockroach> {
             Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.GROUND);
             GlStateManager.popMatrix();
             if (!entitylivingbaseIn.isHeadless()) {
+                float dance = entitylivingbaseIn.prevDanceProgress + (entitylivingbaseIn.danceProgress - entitylivingbaseIn.prevDanceProgress) * partialTicks;
                 GlStateManager.pushMatrix();
                 translateToHand(4, scale);
-                GlStateManager.translate(0.0F, -0.4F, -0.01F);
-                GlStateManager.translate(0.0F, entitylivingbaseIn.danceProgress * 0.045F, entitylivingbaseIn.danceProgress * -0.09F);
+                // Brim cubes sit at y=-8 (0.4 blocks after 0.8 scale). +Y is toward the feet.
+                GlStateManager.translate(0.0F, 0.55F, -0.01F);
+                GlStateManager.translate(0.0F, dance * 0.045F, dance * -0.09F);
                 GlStateManager.scale(0.8F, 0.8F, 0.8F);
-                GlStateManager.rotate(60.0F * entitylivingbaseIn.danceProgress * 0.2F, 1.0F, 0.0F, 0.0F);
+                GlStateManager.rotate(60.0F * dance * 0.2F, 1.0F, 0.0F, 0.0F);
                 this.renderer.bindTexture(SOMBRERO_TEX);
                 AMRenderTypes.beginEntityCutoutNoCull();
-                sombrero.render(entitylivingbaseIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale);
+                this.sombrero.sombrero.rotateAngleX = 0.0F;
+                this.sombrero.sombrero.rotateAngleY = 0.0F;
+                this.sombrero.sombrero.rotateAngleZ = 0.0F;
+                this.sombrero.sombrero.render(scale);
                 AMRenderTypes.endEntityCutoutNoCull();
                 GlStateManager.popMatrix();
             }

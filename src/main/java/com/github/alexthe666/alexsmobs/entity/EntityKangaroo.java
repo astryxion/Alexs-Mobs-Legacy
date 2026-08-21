@@ -17,6 +17,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -164,7 +165,8 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.emuSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
+        return AMEntityRegistry.rollSpawn(AMConfig.kangarooSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
     }
 
     @Override
@@ -219,6 +221,10 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         Item item = itemstack.getItem();
+        if (isBreedingItem(itemstack)) {
+            super.processInteract(player, hand);
+            return true;
+        }
         boolean type = super.processInteract(player, hand);
         if (!isTamed() && item == Items.CARROT) {
             if (!player.capabilities.isCreativeMode) {
@@ -800,8 +806,15 @@ public class EntityKangaroo extends EntityTameable implements IInventoryChangedL
     }
 
     public boolean isBreedingItem(ItemStack stack) {
-        Item item = stack.getItem();
-        return item == Item.getItemFromBlock(Blocks.DEADBUSH) || item == Item.getItemFromBlock(Blocks.GRASS);
+        return AMTagRegistry.isDeadBush(stack) || AMTagRegistry.isTallGrassPlant(stack);
+    }
+
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. 1.16 kangaroos breed without being tamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
     }
 
     public void resetKangarooSlots() {

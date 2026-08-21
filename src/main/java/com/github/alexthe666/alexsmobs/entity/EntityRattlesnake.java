@@ -104,7 +104,8 @@ public class EntityRattlesnake extends EntityAnimal implements IAnimatedEntity {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.rattlesnakeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.rattlesnakeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
     }
 
     @Override

@@ -26,3 +26,9 @@ description='''New, original, engaging, and aesthetic mobs for Minecraft.'''
     versionRange="[36.0.42,)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.alexsmobs]]
+    modId="jei"
+    mandatory=false
+    versionRange="[4.12.0,)"
+    ordering="AFTER"
+    side="BOTH"

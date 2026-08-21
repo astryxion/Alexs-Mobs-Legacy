@@ -17,9 +17,13 @@ import javax.annotation.Nullable;
 import java.util.Random;
 
 /**
- * Forge 1.12.2 port of 1.16 {@code GorillaAIForageLeaves} / {@code MoveToBlockGoal}.
+ * Forge 1.12.2 port of 1.16 {@code GorillaAIForageLeaves} / {@code MoveToBlockGoal},
+ * with 1.20.1 path-recalc cooldown so A* is not invoked every tick.
  */
 public class GorillaAIForageLeaves extends EntityAIBase {
+
+    private static final int MAX_TIMEOUT = 1200;
+    private static final int MAX_FAILED_PATHS = 3;
 
     private final EntityGorilla gorilla;
     private final double movementSpeed;
@@ -28,11 +32,14 @@ public class GorillaAIForageLeaves extends EntityAIBase {
     private int idleAtLeavesTime = 0;
     private boolean isAboveDestinationBear;
     private int timeoutCounter;
-    private static final int MAX_TIMEOUT = 600;
+    private int runDelay;
+    private int moveCooldown;
+    private int failedPathAttempts;
 
     public GorillaAIForageLeaves(EntityGorilla gorilla) {
         this.gorilla = gorilla;
         this.movementSpeed = 1.0D;
+        this.setMutexBits(1);
     }
 
     @Override
@@ -40,6 +47,11 @@ public class GorillaAIForageLeaves extends EntityAIBase {
         if (gorilla.isChild() || !gorilla.getHeldItemMainhand().isEmpty()) {
             return false;
         }
+        if (this.runDelay > 0) {
+            --this.runDelay;
+            return false;
+        }
+        this.runDelay = 100 + gorilla.getRNG().nextInt(200);
         return findDestination();
     }
 
@@ -53,6 +65,8 @@ public class GorillaAIForageLeaves extends EntityAIBase {
                 destinationBlock = p;
                 timeoutCounter = 0;
                 idleAtLeavesTime = 0;
+                failedPathAttempts = 0;
+                moveCooldown = 0;
                 return true;
             }
         }
@@ -61,7 +75,9 @@ public class GorillaAIForageLeaves extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return destinationBlock != null && timeoutCounter < MAX_TIMEOUT;
+        return destinationBlock != null
+                && timeoutCounter < MAX_TIMEOUT
+                && shouldMoveTo(gorilla.world, destinationBlock);
     }
 
     @Override
@@ -69,6 +85,8 @@ public class GorillaAIForageLeaves extends EntityAIBase {
         idleAtLeavesTime = 0;
         destinationBlock = null;
         isAboveDestinationBear = false;
+        failedPathAttempts = 0;
+        gorilla.getNavigator().clearPath();
     }
 
     public double getTargetDistanceSq() {
@@ -84,14 +102,29 @@ public class GorillaAIForageLeaves extends EntityAIBase {
         if (destinationBlock == null) {
             return;
         }
+        if (moveCooldown > 0) {
+            --moveCooldown;
+        }
         if (!isWithinXZDist(destinationBlock, gorilla.getPositionVector(), getTargetDistanceSq())) {
             this.isAboveDestinationBear = false;
             ++this.timeoutCounter;
-            gorilla.getNavigator().tryMoveToXYZ(
-                    (double) ((float) destinationBlock.getX()) + 0.5D,
-                    destinationBlock.getY(),
-                    (double) ((float) destinationBlock.getZ()) + 0.5D,
-                    this.movementSpeed);
+            if (this.moveCooldown == 0) {
+                this.moveCooldown = 30 + gorilla.getRNG().nextInt(50);
+                boolean foundPath = gorilla.getNavigator().tryMoveToXYZ(
+                        (double) ((float) destinationBlock.getX()) + 0.5D,
+                        destinationBlock.getY(),
+                        (double) ((float) destinationBlock.getZ()) + 0.5D,
+                        this.movementSpeed);
+                if (!foundPath) {
+                    ++this.failedPathAttempts;
+                    if (this.failedPathAttempts >= MAX_FAILED_PATHS) {
+                        this.giveUp();
+                        return;
+                    }
+                } else {
+                    this.failedPathAttempts = 0;
+                }
+            }
         } else {
             this.isAboveDestinationBear = true;
             --this.timeoutCounter;
@@ -121,6 +154,11 @@ public class GorillaAIForageLeaves extends EntityAIBase {
                 ++this.idleAtLeavesTime;
             }
         }
+    }
+
+    private void giveUp() {
+        this.runDelay = 100 + gorilla.getRNG().nextInt(200);
+        this.destinationBlock = null;
     }
 
     private boolean isWithinXZDist(BlockPos blockpos, Vec3d positionVec, double distance) {

@@ -17,7 +17,6 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.ai.EntityAILookIdle;
-import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.item.EntityBoat;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -101,7 +100,7 @@ public class EntityCachalotWhale extends EntityAnimal implements ISemiAquatic {
         super(world);
         this.setPathPriority(PathNodeType.WATER, 0.0F);
         this.setSize(9.0F, 4.0F);
-        this.moveHelper = new AquaticMoveController(this, 1.0F, 10.0F);
+        this.moveHelper = new AnimalSwimMoveControllerSink(this, 1.0F, 1.0F, 3.0F);
         this.headPart = new EntityCachalotPart(this, 3.0F, 3.5F);
         this.bodyFrontPart = new EntityCachalotPart(this, 4.0F, 4.0F);
         this.bodyPart = new EntityCachalotPart(this, 5.0F, 4.0F);
@@ -173,7 +172,7 @@ public class EntityCachalotWhale extends EntityAnimal implements ISemiAquatic {
 
     @Override
     public boolean canBeCollidedWith() {
-        return false;
+        return !this.isDead;
     }
 
     @Override
@@ -187,6 +186,24 @@ public class EntityCachalotWhale extends EntityAnimal implements ISemiAquatic {
     @Override
     public boolean isBreedingItem(ItemStack stack) {
         return stack.getItem() == Items.FISH;
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
+        if (this.isBreedingItem(stack)) {
+            if (!this.world.isRemote) {
+                if (this.getGrowingAge() == 0 && !this.isInLove()) {
+                    this.consumeItemFromStack(player, stack);
+                    this.setInLove(player);
+                } else if (this.isChild()) {
+                    this.consumeItemFromStack(player, stack);
+                    this.ageUp((int) ((float) (-this.getGrowingAge() / 20) * 0.1F), true);
+                }
+            }
+            return true;
+        }
+        return super.processInteract(player, hand);
     }
 
     @Override
@@ -227,7 +244,7 @@ public class EntityCachalotWhale extends EntityAnimal implements ISemiAquatic {
     protected void initEntityAI() {
         this.tasks.addTask(0, new AIBreathe());
         this.tasks.addTask(1, new AnimalAIFindWater(this));
-        this.tasks.addTask(2, new EntityAIMate(this, 1.0D));
+        this.tasks.addTask(2, new AnimalAIMate(this, 1.0D));
         this.tasks.addTask(3, new AnimalAIFollowParentRanged(this, 1.1D, 32, 10));
         this.tasks.addTask(4, new AnimalAIRandomSwimming(this, 0.6D, 10, 24, true) {
             @Override

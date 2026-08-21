@@ -1,12 +1,12 @@
 package com.github.alexthe666.alexsmobs.item;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
-import com.github.alexthe666.alexsmobs.entity.EntityBaldEagle;
-import com.github.alexthe666.alexsmobs.message.MessageMosquitoDismount;
+import com.github.alexthe666.alexsmobs.entity.IFalconry;
 import com.github.alexthe666.alexsmobs.message.MessageSyncEntityPos;
 import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,6 +15,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import com.google.common.base.Optional;
 
@@ -43,6 +44,9 @@ public class ItemFalconryGlove extends Item {
             double d2 = d1;
             for (int j = 0; j < list.size(); ++j) {
                 Entity entity1 = list.get(j);
+                if (entity1 instanceof IFalconry && entity1.getRidingEntity() == playerIn) {
+                    continue;
+                }
                 AxisAlignedBB axisalignedbb = entity1.getEntityBoundingBox().grow(entity1.getCollisionBorderSize());
                 RayTraceResult trace = axisalignedbb.calculateIntercept(eyePos, endPos);
                 Optional<Vec3d> optional = trace == null || trace.hitVec == null ? Optional.absent() : Optional.of(trace.hitVec);
@@ -68,40 +72,18 @@ public class ItemFalconryGlove extends Item {
             }
 
             if (!playerIn.getPassengers().isEmpty()) {
-                for (Entity entity : playerIn.getPassengers()) {
-                    if (entity instanceof EntityBaldEagle) {
-                        EntityBaldEagle eagle = (EntityBaldEagle) entity;
-                        eagle.setLaunched(true);
-                        eagle.dismountRidingEntity();
-                        eagle.setSitting(false);
-                        eagle.setCommand(0);
-                        eagle.setLocationAndAngles(playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ, eagle.rotationYaw, eagle.rotationPitch);
-                        if (eagle.world.isRemote) {
-                            AlexsMobs.sendMSGToServer(new MessageSyncEntityPos(eagle.getEntityId(), playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ));
+                for (Entity entity : new ArrayList<Entity>(playerIn.getPassengers())) {
+                    if (entity instanceof IFalconry && entity instanceof EntityAnimal) {
+                        EntityAnimal animal = (EntityAnimal) entity;
+                        IFalconry falcon = (IFalconry) entity;
+                        animal.dismountRidingEntity();
+                        animal.setLocationAndAngles(playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ, animal.rotationYaw, animal.rotationPitch);
+                        if (animal.world.isRemote) {
+                            AlexsMobs.sendMSGToServer(new MessageSyncEntityPos(animal.getEntityId(), playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ));
                         } else {
-                            AlexsMobs.sendMSGToAll(new MessageSyncEntityPos(eagle.getEntityId(), playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ));
+                            AlexsMobs.sendMSGToAll(new MessageSyncEntityPos(animal.getEntityId(), playerIn.posX, playerIn.posY + (double) playerIn.getEyeHeight(), playerIn.posZ));
                         }
-                        if (eagle.hasCap()) {
-                            eagle.setFlying(true);
-                            eagle.getMoveHelper().setMoveTo(eagle.posX, eagle.posY, eagle.posZ, 0.1F);
-                            if (eagle.world.isRemote) {
-                                AlexsMobs.sendMSGToServer(new MessageMosquitoDismount(eagle.getEntityId(), playerIn.getEntityId()));
-                            }
-                            AlexsMobs.PROXY.setRenderViewEntity(eagle);
-                        } else {
-                            eagle.getNavigator().clearPath();
-                            eagle.getMoveHelper().setMoveTo(eagle.posX, eagle.posY, eagle.posZ, 0.1F);
-                            if (pointedEntity != null && !eagle.isOnSameTeam(pointedEntity)) {
-                                eagle.setFlying(true);
-                                if (pointedEntity instanceof EntityLivingBase) {
-                                    eagle.setAttackTarget((EntityLivingBase) pointedEntity);
-                                }
-                            } else {
-                                eagle.setFlying(false);
-                                eagle.setCommand(2);
-                                eagle.setSitting(true);
-                            }
-                        }
+                        falcon.onLaunch(playerIn, pointedEntity);
                     }
                 }
             }

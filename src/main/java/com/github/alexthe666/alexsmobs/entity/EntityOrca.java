@@ -14,6 +14,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.ai.*;
 import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,6 +29,7 @@ import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -57,6 +59,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
 
     public EntityOrca(World worldIn) {
         super(worldIn);
+        this.setSize(3.75F, 1.75F);
         this.setPathPriority(PathNodeType.WATER, 0.0F);
         this.moveHelper = new MoveHelperController(this);
     }
@@ -113,6 +116,7 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
         this.tasks.addTask(0, new BreatheAirGoal(this));
         this.tasks.addTask(1, new AIFindWater());
         this.tasks.addTask(2, new SwimWithPlayerGoal(this, 4.0D));
+        this.tasks.addTask(3, new AnimalAIMate(this, 1.0D));
         this.tasks.addTask(4, new AnimalAIRandomSwimming(this, 1.0D, 10, 10, true));
         this.tasks.addTask(4, new EntityAILookIdle(this));
         this.tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
@@ -318,7 +322,33 @@ public class EntityOrca extends EntityTameable implements IAnimatedEntity {
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return stack.getItem() == Items.FISH;
+        return stack.getItem() == Items.FISH && stack.getMetadata() == 1;
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
+        if (this.isBreedingItem(stack)) {
+            if (!this.world.isRemote) {
+                if (this.getGrowingAge() == 0 && !this.isInLove()) {
+                    this.consumeItemFromStack(player, stack);
+                    this.setInLove(player);
+                } else if (this.isChild()) {
+                    this.consumeItemFromStack(player, stack);
+                    this.ageUp((int) ((float) (-this.getGrowingAge() / 20) * 0.1F), true);
+                }
+            }
+            return true;
+        }
+        return super.processInteract(player, hand);
+    }
+
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. Orcas are never tamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
     }
 
     @Nullable

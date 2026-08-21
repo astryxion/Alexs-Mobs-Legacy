@@ -278,7 +278,7 @@ public class EntityGrizzlyBear extends EntityTameable implements IAngerable, IAn
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return isTamed() && stack.getItem() == Items.FISH;
+        return isTamed() && stack.getItem() == Items.FISH && stack.getMetadata() == 1;
     }
 
     @Nullable
@@ -313,6 +313,31 @@ public class EntityGrizzlyBear extends EntityTameable implements IAngerable, IAn
             this.setSnowy(false);
             this.playSound(SoundEvents.BLOCK_SNOW_BREAK, this.getSoundVolume(), this.getSoundPitch());
             return true;
+        }
+
+        if (!itemstack.isEmpty() && (item == Items.FISH || item == Items.COOKED_FISH)) {
+            if (!player.capabilities.isCreativeMode) {
+                itemstack.shrink(1);
+            }
+            this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
+            this.heal(4);
+            if (!this.isTamed()) {
+                if (!this.world.isRemote) {
+                    if (getRNG().nextFloat() < 0.3F) {
+                        this.setTamedBy(player);
+                        this.world.setEntityState(this, (byte) 7);
+                    } else {
+                        this.world.setEntityState(this, (byte) 6);
+                    }
+                }
+            } else if (this.getGrowingAge() == 0) {
+                this.setInLove(player);
+            }
+            return true;
+        }
+
+        if (isBreedingItem(itemstack)) {
+            return super.processInteract(player, hand);
         }
 
         if (isTamed() && isOwner(player) && !isBreedingItem(itemstack)) {
@@ -401,22 +426,20 @@ public class EntityGrizzlyBear extends EntityTameable implements IAngerable, IAn
             if (eatingTime > 100) {
                 ItemStack stack = this.getHeldItemMainhand();
                 if (!stack.isEmpty()) {
-                    if (AMTagRegistry.itemInTag(AMTagRegistry.GRIZZLY_HONEY, stack.getItem())) {
+                    if (AMTagRegistry.itemInTag(AMTagRegistry.GRIZZLY_HONEY, stack.getItem()) && stack.getItem() != Items.FISH) {
                         this.setHoneyed(true);
                         this.heal(10);
                         this.honeyedTime = 700;
                     } else {
                         this.heal(4);
                     }
-                    if (stack.getItem() == Items.FISH && !this.isTamed() && this.salmonThrowerName != null) {
+                    if (!this.world.isRemote && stack.getItem() == Items.FISH && !this.isTamed() && this.salmonThrowerName != null) {
                         if (getRNG().nextFloat() < 0.3F) {
-                            this.setTamed(true);
-                            EntityPlayer player = world.getMinecraftServer().getPlayerList().getPlayerByUsername(salmonThrowerName);
+                            EntityPlayer player = this.world.getPlayerEntityByName(this.salmonThrowerName);
                             if (player != null) {
-                                this.setOwnerId(player.getUniqueID());
-                            }
-                            if (player instanceof EntityPlayerMP) {
-                                CriteriaTriggers.TAME_ANIMAL.trigger((EntityPlayerMP) player, this);
+                                this.setTamedBy(player);
+                            } else {
+                                this.setTamed(true);
                             }
                             this.world.setEntityState(this, (byte) 7);
                         } else {

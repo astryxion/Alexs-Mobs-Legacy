@@ -176,15 +176,21 @@ public class ModelCockroach extends AdvancedEntityModel<EntityCockroach> {
             head.showModel = false;
             left_antenna.showModel = false;
             right_antenna.showModel = false;
+            left_wing.showModel = false;
+            right_wing.showModel = false;
         }else{
             head.showModel = true;
             left_antenna.showModel = true;
             right_antenna.showModel = true;
+            if(!entity.isChild()){
+                left_wing.showModel = true;
+                right_wing.showModel = true;
+            }
         }
         if(entity.isChild()){
             left_wing.showModel = false;
             right_wing.showModel = false;
-        }else{
+        }else if(!entity.isHeadless()){
             left_wing.showModel = true;
             right_wing.showModel = true;
         }
@@ -196,7 +202,7 @@ public class ModelCockroach extends AdvancedEntityModel<EntityCockroach> {
             this.head.setScale(1.5F, 1.5F, 1.5F);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.65F, 0.65F, 0.65F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 0.815F * scale, 0.125F * scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 0.815F, 0.125F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

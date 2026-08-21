@@ -11,12 +11,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAILookIdle;
+import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -55,9 +57,10 @@ public class EntityToucan extends EntityAnimal implements ITargetsDroppedItems {
 
     @Override
     protected void initEntityAI() {
-        this.tasks.addTask(0, new EntityAIWander(this, 1.0D));
-        this.tasks.addTask(1, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
-        this.tasks.addTask(2, new EntityAILookIdle(this));
+        this.tasks.addTask(0, new EntityAIMate(this, 1.0D));
+        this.tasks.addTask(1, new EntityAIWander(this, 1.0D));
+        this.tasks.addTask(2, new EntityAIWatchClosest(this, EntityPlayer.class, 6.0F));
+        this.tasks.addTask(3, new EntityAILookIdle(this));
         this.targetTasks.addTask(1, new CreatureAITargetItems(this, false, false, 15, 16));
     }
 
@@ -82,6 +85,11 @@ public class EntityToucan extends EntityAnimal implements ITargetsDroppedItems {
     }
 
     @Override
+    public int getMaxSpawnedInChunk() {
+        return 5;
+    }
+
+    @Override
     protected SoundEvent getAmbientSound() {
         return AMSoundRegistry.TOUCAN_IDLE;
     }
@@ -103,7 +111,19 @@ public class EntityToucan extends EntityAnimal implements ITargetsDroppedItems {
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return AMTagRegistry.itemInTag(AMTagRegistry.TOUCAN_BREEDABLES, stack.getItem());
+        return AMTagRegistry.isEgg(stack) || AMTagRegistry.itemInTag(AMTagRegistry.TOUCAN_BREEDABLES, stack.getItem());
+    }
+
+    @Override
+    public boolean processInteract(EntityPlayer player, EnumHand hand) {
+        ItemStack itemstack = player.getHeldItem(hand);
+        if (this.isBreedingItem(itemstack)) {
+            if (!super.processInteract(player, hand) && !player.capabilities.isCreativeMode) {
+                return true;
+            }
+            return true;
+        }
+        return super.processInteract(player, hand);
     }
 
     @Override

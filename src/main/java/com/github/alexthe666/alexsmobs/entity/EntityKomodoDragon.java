@@ -64,7 +64,8 @@ public class EntityKomodoDragon extends EntityTameable implements ITargetsDroppe
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.komodoDragonSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.komodoDragonSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
     }
 
     @Override

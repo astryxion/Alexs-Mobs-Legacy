@@ -10,7 +10,8 @@
       "item": "minecraft:glass_bottle"
     },
     "F": {
-      "item": "minecraft:sunflower"
+      "item": "minecraft:double_plant",
+      "data": 0
     },
     "P": {
       "type": "alexsmobs:tag",

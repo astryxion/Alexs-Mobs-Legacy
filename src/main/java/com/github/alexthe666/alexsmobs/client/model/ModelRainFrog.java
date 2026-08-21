@@ -162,6 +162,21 @@ public class ModelRainFrog extends AdvancedEntityModel<EntityRainFrog> {
 
     @Override
     public void render(Entity entity, float f, float f1, float f2, float f3, float f4, float f5) {
-        getParts().forEach(part -> part.render(f5));
+        if (this.isChild) {
+            float eyeScale = 1.25F;
+            right_eye.setScale(eyeScale, eyeScale, eyeScale);
+            left_eye.setScale(eyeScale, eyeScale, eyeScale);
+            right_eye.setShouldScaleChildren(true);
+            left_eye.setShouldScaleChildren(true);
+            net.minecraft.client.renderer.GlStateManager.pushMatrix();
+            net.minecraft.client.renderer.GlStateManager.scale(0.5F, 0.5F, 0.5F);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 1.5F, 0.125F);
+            getParts().forEach(part -> part.render(f5));
+            net.minecraft.client.renderer.GlStateManager.popMatrix();
+            right_eye.setScale(1F, 1F, 1F);
+            left_eye.setScale(1F, 1F, 1F);
+        } else {
+            getParts().forEach(part -> part.render(f5));
+        }
     }
 }

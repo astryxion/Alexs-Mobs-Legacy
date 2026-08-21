@@ -302,6 +302,41 @@ public class AMTagRegistry {
         return set != null && set.contains(item);
     }
 
+    public static boolean isDeadBush(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() == Item.getItemFromBlock(Blocks.DEADBUSH);
+    }
+
+    public static boolean isTallGrassPlant(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) {
+            return false;
+        }
+        Item item = stack.getItem();
+        if (item == Item.getItemFromBlock(Blocks.TALLGRASS)) {
+            return true;
+        }
+        if (item == Item.getItemFromBlock(Blocks.DOUBLE_PLANT)) {
+            int meta = stack.getMetadata() & 7;
+            return meta == 2 || meta == 3;
+        }
+        return false;
+    }
+
+    public static boolean isPufferfish(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() == Items.FISH && stack.getMetadata() == 3;
+    }
+
+    public static boolean isRawSalmon(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() == Items.FISH && stack.getMetadata() == 1;
+    }
+
+    public static boolean isClownfish(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() == Items.FISH && stack.getMetadata() == 2;
+    }
+
+    public static boolean isEgg(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.getItem() == Items.EGG;
+    }
+
     private static void loadBlockTagSetFor(ResourceLocation tagId) {
         if (BLOCK_TAG_SETS.containsKey(tagId)) {
             return;
@@ -317,6 +352,12 @@ public class AMTagRegistry {
             return;
         }
         reloadItemTagSetFor(tagId);
+    }
+
+    /** Rebuilds every item tag after the item registry is populated (tags are first loaded in preInit). */
+    public static void reloadAllItemTags() {
+        ITEM_TAG_SETS.clear();
+        loadDataItemTags();
     }
 
     /** Rebuilds a tag after the item registry is populated (tags are first loaded in preInit). */
@@ -467,6 +508,18 @@ public class AMTagRegistry {
             }
             return;
         }
+        if ("#forge:eggs".equals(name) || "#forge:egg".equals(name)) {
+            out.add(Items.EGG);
+            addOreDictionaryItems(out, "egg");
+            addOreDictionaryItems(out, "listAllEgg");
+            return;
+        }
+        if ("#minecraft:flowers".equals(name)) {
+            out.add(Item.getItemFromBlock(Blocks.YELLOW_FLOWER));
+            out.add(Item.getItemFromBlock(Blocks.RED_FLOWER));
+            out.add(Item.getItemFromBlock(Blocks.DOUBLE_PLANT));
+            return;
+        }
         if (name.startsWith("#forge:crops/")) {
             addOreDictionaryItems(out, "crop" + capitalize(name.substring("#forge:crops/".length())));
             return;
@@ -478,6 +531,10 @@ public class AMTagRegistry {
         if ("#minecraft:fishes".equals(name)) {
             out.add(Items.FISH);
             out.add(Items.COOKED_FISH);
+            Item flyingFish = ForgeRegistries.ITEMS.getValue(new ResourceLocation("alexsmobs", "flying_fish"));
+            if (flyingFish != null) {
+                out.add(flyingFish);
+            }
             return;
         }
         if (name.startsWith("#")) {
@@ -765,6 +822,8 @@ public class AMTagRegistry {
                 return Items.APPLE;
             case "minecraft:melon_slice":
                 return Items.MELON;
+            case "minecraft:dead_bush":
+                return Item.getItemFromBlock(Blocks.DEADBUSH);
             case "minecraft:honeycomb":
             case "minecraft:honey_bottle":
                 return Items.GOLDEN_APPLE;

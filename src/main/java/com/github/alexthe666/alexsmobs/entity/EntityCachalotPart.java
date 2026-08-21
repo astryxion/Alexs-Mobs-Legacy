@@ -44,7 +44,26 @@ public class EntityCachalotPart extends Entity {
 
     @Nullable
     public EntityCachalotWhale getWhale() {
-        return this.whale;
+        return this.resolveWhale();
+    }
+
+    @Nullable
+    private EntityCachalotWhale resolveWhale() {
+        if (this.whale != null && this.whale.isEntityAlive()) {
+            return this.whale;
+        }
+        List<EntityCachalotWhale> nearby = this.world.getEntitiesWithinAABB(EntityCachalotWhale.class, this.getEntityBoundingBox().grow(8.0D));
+        EntityCachalotWhale nearest = null;
+        double best = Double.MAX_VALUE;
+        for (EntityCachalotWhale candidate : nearby) {
+            double dist = this.getDistanceSq(candidate);
+            if (dist < best) {
+                best = dist;
+                nearest = candidate;
+            }
+        }
+        this.whale = nearest;
+        return nearest;
     }
 
     @Override
@@ -75,7 +94,8 @@ public class EntityCachalotPart extends Entity {
 
     @Override
     public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
-        return this.whale != null && this.whale.applyInteractionFromPart(player, hand);
+        EntityCachalotWhale parent = this.resolveWhale();
+        return parent != null && parent.applyInteractionFromPart(player, hand);
     }
 
     @Override
@@ -85,10 +105,11 @@ public class EntityCachalotPart extends Entity {
 
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (this.whale == null) {
+        EntityCachalotWhale parent = this.resolveWhale();
+        if (parent == null) {
             return false;
         }
-        return !this.isEntityInvulnerable(source) && this.whale.attackEntityPartFrom(this, source, amount);
+        return !this.isEntityInvulnerable(source) && parent.attackEntityPartFrom(this, source, amount);
     }
 
     @Override

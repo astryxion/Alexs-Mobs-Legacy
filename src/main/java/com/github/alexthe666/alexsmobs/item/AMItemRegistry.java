@@ -45,6 +45,7 @@ public class AMItemRegistry {
     public static CustomArmorMaterial SPIKED_TURTLE_SHELL_ARMOR_MATERIAL = new AMArmorMaterial("spiked_turtle_shell", 35, new int[]{3, 3, 3, 3}, 30, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 1F, 0.2F);
     public static CustomArmorMaterial FEDORA_ARMOR_MATERIAL = new AMArmorMaterial("fedora", 10, new int[]{2, 2, 2, 2}, 30, SoundEvents.ITEM_ARMOR_EQUIP_LEATHER, 0.5F);
     public static CustomArmorMaterial EMU_ARMOR_MATERIAL = new AMArmorMaterial("emu", 9, new int[]{4, 4, 4, 4}, 20, SoundEvents.ITEM_ARMOR_EQUIP_LEATHER, 0.5F);
+    public static CustomArmorMaterial FLYING_FISH_MATERIAL = new AMArmorMaterial("flying_fish", 9, new int[]{1, 1, 1, 1}, 8, SoundEvents.ITEM_ARMOR_EQUIP_LEATHER, 0F);
     public static final Item TARANTULA_HAWK_ELYTRA = new ItemTarantulaHawkElytra().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:tarantula_hawk_elytra");
 
     /** 1.12 has no composter block; chances preserved for mod-compat / future blocks (same values as 1.16 {@code ComposterBlock#CHANCES}). */
@@ -89,6 +90,9 @@ public class AMItemRegistry {
     public static final Item LARGE_CATFISH_BUCKET = new ItemModFishBucket(AMEntityRegistry.CATFISH, ItemModFishBucket.FluidKind.WATER).setRegistryName("alexsmobs:large_catfish_bucket");
     public static final Item RAW_CATFISH = new ItemFood(2, 0.4F, true).setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:raw_catfish");
     public static final Item COOKED_CATFISH = new ItemFood(6, 0.65F, true).setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:cooked_catfish");
+    public static final Item FLYING_FISH = new ItemFood(3, 0.4F, true).setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:flying_fish");
+    public static final Item FLYING_FISH_BOOTS = new ItemModArmor(FLYING_FISH_MATERIAL, EntityEquipmentSlot.FEET).setRegistryName("alexsmobs:flying_fish_boots");
+    public static final Item FLYING_FISH_BUCKET = new ItemModFishBucket(AMEntityRegistry.FLYING_FISH, ItemModFishBucket.FluidKind.WATER).setRegistryName("alexsmobs:flying_fish_bucket");
     public static final Item COSMIC_COD = new ItemFood(3, 0.4F, true).setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:cosmic_cod");
     public static final Item KOMODO_SPIT = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:komodo_spit");
     public static final Item KOMODO_SPIT_BOTTLE = new Item().setCreativeTab(AlexsMobs.TAB).setRegistryName("alexsmobs:komodo_spit_bottle");
@@ -306,12 +310,10 @@ public class AMItemRegistry {
         }
         OreDictionary.registerOre("cropBanana", BANANA);
         OreDictionary.registerOre("fruitBanana", BANANA);
-        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.BANANAS);
-        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.CAPUCHIN_MONKEY_TAMEABLES);
-        AMTagRegistry.reloadItemTagSetFor(new net.minecraft.util.ResourceLocation("alexsmobs", "animal_dictionary_ingredient"));
-        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_TAMEABLES);
-        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_BREEDABLES);
-        AMTagRegistry.reloadItemTagSetFor(AMTagRegistry.GORILLA_FOODSTUFFS);
+        OreDictionary.registerOre("listAllfishraw", FLYING_FISH);
+        OreDictionary.registerOre("listAllfishfresh", FLYING_FISH);
+        OreDictionary.registerOre("foodFishraw", FLYING_FISH);
+        AMTagRegistry.reloadAllItemTags();
         try {
             for (Field f : AMBlockRegistry.class.getDeclaredFields()) {
                 Object obj = f.get(null);
@@ -337,6 +339,7 @@ public class AMItemRegistry {
         SPIKED_TURTLE_SHELL_ARMOR_MATERIAL.setRepairMaterial(Ingredient.fromItems(SPIKED_SCUTE));
         FEDORA_ARMOR_MATERIAL.setRepairMaterial(Ingredient.fromItems(Items.LEATHER));
         EMU_ARMOR_MATERIAL.setRepairMaterial(Ingredient.fromItems(EMU_FEATHER));
+        FLYING_FISH_MATERIAL.setRepairMaterial(Ingredient.fromItems(FLYING_FISH));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(SHARK_TOOTH_ARROW, new BehaviorProjectileDispense() {
             @Override
             protected IProjectile getProjectileEntity(World worldIn, IPosition position, ItemStack stackIn) {

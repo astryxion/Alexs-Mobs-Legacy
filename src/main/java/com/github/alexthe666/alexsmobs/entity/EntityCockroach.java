@@ -2,6 +2,7 @@ package com.github.alexthe666.alexsmobs.entity;
 import com.github.alexthe666.alexsmobs.misc.AMLootTables;
 
 import com.github.alexthe666.alexsmobs.AlexsMobs;
+import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.AnimalAIFleeLight;
 import com.github.alexthe666.alexsmobs.entity.ai.CreatureAITargetItems;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
@@ -93,6 +94,12 @@ public class EntityCockroach extends EntityAnimal implements IShearable, ITarget
     public static boolean canCockroachSpawn(World world, BlockPos pos, Random random) {
         return !world.canSeeSky(pos) && pos.getY() <= 64 && isValidLightLevel(world, pos, random)
                 && net.minecraft.entity.EntityLiving.SpawnPlacementType.ON_GROUND.canSpawnAt(world, pos);
+    }
+
+    @Override
+    public boolean getCanSpawnHere() {
+        return AMEntityRegistry.rollSpawn(AMConfig.cockroachSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && canCockroachSpawn(this.world, this.getPosition(), this.getRNG());
     }
 
     @Override
@@ -241,12 +248,16 @@ public class EntityCockroach extends EntityAnimal implements IShearable, ITarget
             return !this.world.isRemote;
         } else if (stack.getItem() == AMItemRegistry.MARACA && this.isEntityAlive() && !this.hasMaracas()) {
             this.setMaracas(true);
-            stack.shrink(1);
-            return !this.world.isRemote;
+            if (!player.capabilities.isCreativeMode) {
+                stack.shrink(1);
+            }
+            return true;
         } else if (stack.getItem() != AMItemRegistry.MARACA && this.isEntityAlive() && this.hasMaracas()) {
             this.setMaracas(false);
             this.setDancing(false);
-            this.entityDropItem(new ItemStack(AMItemRegistry.MARACA), 0.0F);
+            if (!this.world.isRemote) {
+                this.entityDropItem(new ItemStack(AMItemRegistry.MARACA), 0.0F);
+            }
             return true;
         } else {
             return super.processInteract(player, hand);
@@ -445,7 +456,12 @@ public class EntityCockroach extends EntityAnimal implements IShearable, ITarget
             }
         }
         this.setHeadless(true);
-        return java.util.Collections.emptyList();
+        java.util.List<ItemStack> drops = new java.util.ArrayList<ItemStack>();
+        drops.add(new ItemStack(AMItemRegistry.COCKROACH_WING));
+        if (this.rand.nextBoolean()) {
+            drops.add(new ItemStack(AMItemRegistry.COCKROACH_WING));
+        }
+        return drops;
     }
 
     @Override

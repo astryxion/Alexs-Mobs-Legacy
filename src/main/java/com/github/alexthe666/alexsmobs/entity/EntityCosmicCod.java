@@ -52,9 +52,9 @@ public class EntityCosmicCod extends EntityCreature {
     private EntityCosmicCod groupLeader;
     private int groupSize = 1;
 
-    /** Max cod within this radius of a candidate spawn â€” prevents void-wide baitballs. */
-    private static final double LOCAL_SPAWN_CAP_RADIUS = 32.0D;
-    private static final int LOCAL_SPAWN_CAP = 14;
+    /** Max cod within this radius of a candidate spawn - prevents void-wide baitballs. */
+    private static final double LOCAL_SPAWN_CAP_RADIUS = 48.0D;
+    private static final int LOCAL_SPAWN_CAP = 8;
 
     public EntityCosmicCod(World world) {
         super(world);
@@ -67,6 +67,9 @@ public class EntityCosmicCod extends EntityCreature {
      */
     public static boolean canSpawnAt(World world, BlockPos pos) {
         if (world == null || world.provider.getDimension() != 1) {
+            return false;
+        }
+        if (!AMEntityRegistry.isOuterEnd(world, pos)) {
             return false;
         }
         if (!world.isAirBlock(pos)) {

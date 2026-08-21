@@ -143,18 +143,19 @@ public class ModelCrow extends AdvancedEntityModel<EntityCrow> {
 	@Override
     public void render(net.minecraft.entity.Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
         if (this.isChild) {
-            this.head.setScale(0.9F, 0.9F, 0.9F);
+            this.head.setScale(1.45F, 1.45F, 1.45F);
             this.head.setShouldScaleChildren(true);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.5F, 0.5F, 0.5F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 1.5F * scale, 0.0F * scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 1.5F, 0.0F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }
             net.minecraft.client.renderer.GlStateManager.popMatrix();
-            this.head.setScale(1.0F, 1.0F, 1.0F);
+            this.head.setScale(0.9F, 0.9F, 0.9F);
             this.head.setShouldScaleChildren(false);
         } else {
+            this.head.setScale(0.9F, 0.9F, 0.9F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

@@ -260,7 +260,7 @@ public class ModelSnowLeopard extends AdvancedEntityModel<EntitySnowLeopard> {
             this.head.setShouldScaleChildren(true);
             net.minecraft.client.renderer.GlStateManager.pushMatrix();
             net.minecraft.client.renderer.GlStateManager.scale(0.5F, 0.5F, 0.5F);
-            net.minecraft.client.renderer.GlStateManager.translate(0.0F * scale, 1.5F * scale, 0.0F * scale);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 1.5F, 0.0F);
             for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
                 part.render(scale);
             }

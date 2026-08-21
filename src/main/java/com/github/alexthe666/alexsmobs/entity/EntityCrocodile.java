@@ -623,6 +623,14 @@ public class EntityCrocodile extends EntityTameable implements IAnimatedEntity, 
         return stack.getItem() == Items.ROTTEN_FLESH;
     }
 
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. 1.16 crocodiles breed while untamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
+    }
+
     @Override
     public boolean shouldEnterWater() {
         if (!this.getPassengers().isEmpty()) {

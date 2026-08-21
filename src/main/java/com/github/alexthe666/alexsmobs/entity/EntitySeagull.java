@@ -192,14 +192,20 @@ public class EntitySeagull extends EntityAnimal implements ITargetsDroppedItems 
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return stack.getItem() == Items.FISH;
+        return stack.getItem() == Items.FISH && stack.getMetadata() == 0;
     }
 
     @Override
     public boolean getCanSpawnHere() {
         BlockPos pos = this.getPosition();
         return this.world.getLightFromNeighbors(pos) > 8 && !this.world.getBlockState(pos.down()).getMaterial().isLiquid()
-                && AMEntityRegistry.rollSpawn(AMConfig.seagullSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+                && AMEntityRegistry.rollSpawn(AMConfig.seagullSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
+    }
+
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 6;
     }
 
     @Override

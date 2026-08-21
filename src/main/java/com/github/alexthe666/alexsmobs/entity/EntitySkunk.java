@@ -307,7 +307,8 @@ public class EntitySkunk extends EntityAnimal {
                             BlockSkunkSpray.applyPlacementState(EntitySkunk.this.world, pos, sprayState);
                         }
                         double sprayDist = hitResult.hitVec.subtract(skunkPos).lengthVector() / maxSprayDist;
-                        AxisAlignedBB poisonBox = new AxisAlignedBB(skunkPos, skunkPos.add(modelBack.scale(sprayDist)).add(new Vec3d(0, 1.5D, 0))).grow(1F);
+                        Vec3d sprayEnd = skunkPos.add(modelBack.scale(sprayDist)).addVector(0.0D, 1.5D, 0.0D);
+                        AxisAlignedBB poisonBox = new AxisAlignedBB(skunkPos.x, skunkPos.y, skunkPos.z, sprayEnd.x, sprayEnd.y, sprayEnd.z).grow(1.0F);
                         Collection<PotionEffect> collection = EntitySkunk.this.getActivePotionEffects();
                         for (EntityLivingBase entity : EntitySkunk.this.world.getEntitiesWithinAABB(EntityLivingBase.class, poisonBox)) {
                             if (!(entity instanceof EntitySkunk)) {

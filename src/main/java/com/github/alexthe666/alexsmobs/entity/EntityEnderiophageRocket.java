@@ -8,7 +8,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -22,8 +21,6 @@ import javax.annotation.Nullable;
 public class EntityEnderiophageRocket extends EntityFireworkRocket {
 
     private static final String LIFETIME_SRG = "field_92055_b";
-    private static final String BOOSTED_ENTITY_SRG = "field_191513_e";
-    private static final String BOOSTED_ENTITY_ID_SRG = "field_191512_b";
 
     private int phageAge = 0;
 
@@ -41,24 +38,10 @@ public class EntityEnderiophageRocket extends EntityFireworkRocket {
 
     public EntityEnderiophageRocket(World worldIn, @Nullable Entity shooter, double x, double y, double z, ItemStack givenItem) {
         this(worldIn, x, y, z, givenItem);
-        if (shooter instanceof EntityLivingBase) {
-            ReflectionHelper.setPrivateValue(EntityFireworkRocket.class, this, (EntityLivingBase) shooter, "boostedEntity", BOOSTED_ENTITY_SRG);
-            this.dataManager.set(getBoostedEntityIdParameter(), shooter.getEntityId());
-        }
     }
 
     public EntityEnderiophageRocket(World worldIn, ItemStack stack, EntityLivingBase shooter) {
         super(worldIn, stack, shooter);
-        this.dataManager.set(getBoostedEntityIdParameter(), shooter.getEntityId());
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DataParameter<Integer> getBoostedEntityIdParameter() {
-        try {
-            return (DataParameter<Integer>) ReflectionHelper.findField(EntityFireworkRocket.class, BOOSTED_ENTITY_ID_SRG).get(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

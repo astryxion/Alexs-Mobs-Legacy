@@ -3,6 +3,7 @@ package com.github.alexthe666.alexsmobs.message;
 import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.entity.EntityBaldEagle;
 import com.github.alexthe666.alexsmobs.entity.EntityStraddleboard;
+import com.github.alexthe666.alexsmobs.entity.IFalconry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -64,7 +65,7 @@ public class MessageSyncEntityPos implements IMessage {
                 return;
             }
             Entity entity = player.world.getEntityByID(message.eagleId);
-            if (entity instanceof EntityBaldEagle || entity instanceof EntityStraddleboard) {
+            if (entity instanceof IFalconry || entity instanceof EntityBaldEagle || entity instanceof EntityStraddleboard) {
                 entity.setPosition(message.posX, message.posY, message.posZ);
             }
         }

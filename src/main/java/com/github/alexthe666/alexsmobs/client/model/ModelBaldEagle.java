@@ -152,6 +152,10 @@ public class ModelBaldEagle extends AdvancedEntityModel<EntityBaldEagle> {
     }
 
     public void setRotationAngles(EntityBaldEagle entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        if (entity.isRiding()) {
+            limbSwing = 0.0F;
+            limbSwingAmount = 0.0F;
+        }
         this.resetToDefaultPose();
         float flapSpeed = 0.4F;
         float flapDegree = 0.2F;

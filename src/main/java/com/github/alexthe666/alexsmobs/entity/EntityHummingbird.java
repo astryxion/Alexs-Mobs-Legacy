@@ -11,6 +11,7 @@ import com.github.alexthe666.alexsmobs.entity.ai.HummingbirdAIWander;
 import com.github.alexthe666.alexsmobs.misc.AMPointOfInterestRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.material.Material;
@@ -114,7 +115,19 @@ public class EntityHummingbird extends EntityAnimal {
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockFlower;
+        if (!(stack.getItem() instanceof ItemBlock)) {
+            return false;
+        }
+        Block block = ((ItemBlock) stack.getItem()).getBlock();
+        if (block instanceof BlockFlower) {
+            return true;
+        }
+        // 1.16 ItemTags.FLOWERS includes sunflower, lilac, rose bush, peony (not tall grass/fern).
+        if (block instanceof BlockDoublePlant) {
+            int meta = stack.getMetadata();
+            return meta == 0 || meta == 1 || meta == 4 || meta == 5;
+        }
+        return false;
     }
 
     @Override

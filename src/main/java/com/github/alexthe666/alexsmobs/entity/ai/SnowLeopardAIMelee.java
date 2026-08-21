@@ -6,6 +6,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.RandomPositionGenerator;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.pathfinding.PathNavigate;
 import net.minecraft.pathfinding.PathNodeType;
@@ -22,11 +23,18 @@ import java.util.function.ToDoubleFunction;
 
 public class SnowLeopardAIMelee extends EntityAIBase {
 
+    private static final int MAX_FAILED_VANTAGE = 3;
+
     private final EntitySnowLeopard leopard;
+    private final WalkNodeProcessor walkNodeProcessor = new WalkNodeProcessor();
     private EntityLivingBase target;
     private boolean secondPartOfLeap = false;
     private Vec3d leapPos = null;
     private boolean stalk = false;
+    private int pathCooldown;
+    private int vantageCooldown;
+    private int jumpCooldown;
+    private int failedVantageAttempts;
 
     public SnowLeopardAIMelee(EntitySnowLeopard snowLeopard) {
         this.leopard = snowLeopard;
@@ -92,6 +100,10 @@ public class SnowLeopardAIMelee extends EntityAIBase {
             stalk = this.leopard.getDistance(target) > 4F;
         }
         secondPartOfLeap = false;
+        pathCooldown = 0;
+        vantageCooldown = 0;
+        jumpCooldown = 0;
+        failedVantageAttempts = 0;
     }
 
     @Override
@@ -99,20 +111,39 @@ public class SnowLeopardAIMelee extends EntityAIBase {
         secondPartOfLeap = false;
         stalk = false;
         leapPos = null;
+        pathCooldown = 0;
+        vantageCooldown = 0;
+        jumpCooldown = 0;
+        failedVantageAttempts = 0;
         this.leopard.setTackling(false);
         this.leopard.setSlSneaking(false);
     }
 
     @Override
     public void updateTask() {
+        if (pathCooldown > 0) {
+            --pathCooldown;
+        }
+        if (vantageCooldown > 0) {
+            --vantageCooldown;
+        }
+        if (jumpCooldown > 0) {
+            --jumpCooldown;
+        }
         if (stalk) {
             if (secondPartOfLeap) {
+                this.leopard.setTackling(!leopard.onGround);
                 leopard.faceEntity(target, 180F, 10F);
                 leopard.getLookHelper().setLookPositionWithEntity(target, 180F, 10F);
                 leopard.renderYawOffset = leopard.rotationYaw;
-                if (leopard.onGround) {
+                if (this.leopard.getDistance(target) < 3F && this.leopard.canEntityBeSeen(target)) {
+                    target.attackEntityFrom(DamageSource.causeMobDamage(leopard),
+                            (float) (leopard.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue() * 2.5F));
+                    this.stalk = false;
+                    this.secondPartOfLeap = false;
+                } else if (leopard.onGround && jumpCooldown == 0) {
                     this.leopard.setSlSneaking(false);
-                    this.leopard.setTackling(true);
+                    jumpCooldown = 10 + leopard.getRNG().nextInt(10);
                     Vec3d vector3d = new Vec3d(this.leopard.motionX, this.leopard.motionY, this.leopard.motionZ);
                     Vec3d vector3d1 = new Vec3d(this.target.posX - this.leopard.posX, 0.0D, this.target.posZ - this.leopard.posZ);
                     if (vector3d1.lengthSquared() > 1.0E-7D) {
@@ -122,21 +153,35 @@ public class SnowLeopardAIMelee extends EntityAIBase {
                     this.leopard.motionY = vector3d1.y + 0.6F;
                     this.leopard.motionZ = vector3d1.z;
                 }
-                if (this.leopard.getDistance(target) < 3F && this.leopard.canEntityBeSeen(target)) {
-                    target.attackEntityFrom(DamageSource.causeMobDamage(leopard),
-                            (float) (leopard.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue() * 2.5F));
-                    this.stalk = false;
-                    this.secondPartOfLeap = false;
-                }
             } else {
                 if (leapPos == null || target.getDistanceSq(leapPos.x, leapPos.y, leapPos.z) > 250) {
-                    Vec3d vector3d1 = calculateFarPoint(50);
-                    if (vector3d1 != null) {
-                        leapPos = vector3d1;
+                    if (this.vantageCooldown == 0) {
+                        this.vantageCooldown = 20;
+                        Vec3d vector3d1 = calculateFarPoint(50);
+                        if (vector3d1 != null) {
+                            leapPos = vector3d1;
+                            failedVantageAttempts = 0;
+                        } else {
+                            Vec3d fallback = RandomPositionGenerator.findRandomTargetBlockTowards(
+                                    leopard, 10, 10, new Vec3d(target.posX, target.posY, target.posZ));
+                            if (fallback != null) {
+                                leapPos = fallback;
+                                failedVantageAttempts = 0;
+                            } else {
+                                ++failedVantageAttempts;
+                                if (failedVantageAttempts >= MAX_FAILED_VANTAGE) {
+                                    this.stalk = false;
+                                }
+                            }
+                        }
                     }
-                } else {
+                }
+                if (leapPos != null) {
                     this.leopard.setSlSneaking(true);
-                    this.leopard.getNavigator().tryMoveToXYZ(leapPos.x, leapPos.y, leapPos.z, 1D);
+                    if (leopard.getNavigator().noPath() && this.pathCooldown <= 0) {
+                        boolean foundPath = this.leopard.getNavigator().tryMoveToXYZ(leapPos.x, leapPos.y, leapPos.z, 1D);
+                        this.pathCooldown = foundPath ? 10 : 30;
+                    }
                     if (this.leopard.getDistanceSq(leapPos.x, leapPos.y, leapPos.z) < 9) {
                         if (this.leopard.canEntityBeSeen(target)) {
                             secondPartOfLeap = true;
@@ -147,7 +192,19 @@ public class SnowLeopardAIMelee extends EntityAIBase {
             }
         } else {
             this.leopard.setSlSneaking(false);
-            this.leopard.getNavigator().tryMoveToEntityLiving(target, 1D);
+            if (this.pathCooldown <= 0) {
+                double distSq = this.leopard.getDistanceSq(target);
+                boolean foundPath = this.leopard.getNavigator().tryMoveToEntityLiving(target, 1D);
+                this.pathCooldown = 4 + leopard.getRNG().nextInt(7);
+                if (distSq > 1024.0D) {
+                    this.pathCooldown += 10;
+                } else if (distSq > 256.0D) {
+                    this.pathCooldown += 5;
+                }
+                if (!foundPath) {
+                    this.pathCooldown += 15;
+                }
+            }
             if (this.leopard.getDistance(target) < 3F) {
                 if (leopard.getAnimation() == IAnimatedEntity.NO_ANIMATION) {
                     leopard.setAnimation(leopard.getRNG().nextBoolean() ? EntitySnowLeopard.ANIMATION_ATTACK_R : EntitySnowLeopard.ANIMATION_ATTACK_L);
@@ -183,7 +240,6 @@ public class SnowLeopardAIMelee extends EntityAIBase {
         boolean lvt_16_1_ = false;
         double lvt_17_1_ = -1.0D / 0.0;
         BlockPos lvt_19_1_ = creature.getPosition();
-        WalkNodeProcessor walkNodeProcessor = new WalkNodeProcessor();
 
         for (int lvt_20_1_ = 0; lvt_20_1_ < 10; ++lvt_20_1_) {
             BlockPos lvt_21_1_ = func_226343_a_(lvt_14_1_, xz, y, p_226339_3_, p_226339_4_, p_226339_6_);

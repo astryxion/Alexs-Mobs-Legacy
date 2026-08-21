@@ -9,7 +9,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.potion.PotionEffect;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -47,9 +46,6 @@ public class MessageTarantulaHawkSting implements IMessage {
         public IMessage onMessage(MessageTarantulaHawkSting message, MessageContext ctx) {
             if (ctx.side == Side.CLIENT) {
                 Minecraft.getMinecraft().addScheduledTask(() -> doWork(message, AlexsMobs.PROXY.getClientSidePlayer()));
-            } else {
-                EntityPlayerMP sender = ctx.getServerHandler().player;
-                sender.mcServer.addScheduledTask(() -> doWork(message, sender));
             }
             return null;
         }

@@ -88,8 +88,9 @@ public class ItemTarantulaHawkElytra extends ItemElytra {
     }
 
     public static void clearGlidingState(EntityPlayer player) {
-        ACTIVE_GLIDERS.remove(player.getEntityId());
-        if (player.isElytraFlying()) {
+        // Only abort flight we started. Vanilla elytra uses the same flag, so
+        // calling clearElytraFlying here would immediately cancel takeoff for Items.ELYTRA.
+        if (ACTIVE_GLIDERS.contains(player.getEntityId())) {
             stopElytraFlight(player);
         }
     }

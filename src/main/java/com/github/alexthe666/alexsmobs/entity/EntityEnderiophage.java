@@ -99,12 +99,21 @@ public class EntityEnderiophage extends EntityCreature {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.enderiophageSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.enderiophageSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.isOuterEnd(this.world, this.getPosition())
+                && AMEntityRegistry.isSolidSpawnFloor(this.world, this.getPosition());
     }
 
     private void doInitialPosing() {
-        BlockPos down = this.getPhageGround(this.getPosition());
-        this.setPosition(down.getX() + 0.5F, down.getY() + 1, down.getZ() + 0.5F);
+        BlockPos start = this.getPosition();
+        BlockPos ground = new BlockPos(start.getX(), (int) this.posY, start.getZ());
+        while (ground.getY() > 1 && world.isAirBlock(ground)) {
+            ground = ground.down();
+        }
+        if (ground.getY() < 2 || !world.getBlockState(ground).isNormalCube()) {
+            return;
+        }
+        this.setPosition(ground.getX() + 0.5F, ground.getY() + 1, ground.getZ() + 0.5F);
     }
 
     @Override

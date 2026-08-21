@@ -135,8 +135,22 @@ public class ModelMungus extends AdvancedEntityModel<EntityMungus> {
     }
     @Override
     public void render(net.minecraft.entity.Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, float scale) {
-        for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
-            part.render(scale);
+        if (this.isChild) {
+            this.eye.setScale(1.5F, 1.5F, 1.5F);
+            this.nose.setScale(1.5F, 1.5F, 1.5F);
+            net.minecraft.client.renderer.GlStateManager.pushMatrix();
+            net.minecraft.client.renderer.GlStateManager.scale(0.5F, 0.5F, 0.5F);
+            net.minecraft.client.renderer.GlStateManager.translate(0.0F, 1.5F, 0.125F);
+            for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
+                part.render(scale);
+            }
+            net.minecraft.client.renderer.GlStateManager.popMatrix();
+        } else {
+            this.eye.setScale(1F, 1F, 1F);
+            this.nose.setScale(1F, 1F, 1F);
+            for (net.minecraft.client.model.ModelRenderer part : this.getParts()) {
+                part.render(scale);
+            }
         }
     }
 

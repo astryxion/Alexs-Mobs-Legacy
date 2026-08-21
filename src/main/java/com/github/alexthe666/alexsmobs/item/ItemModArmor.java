@@ -31,6 +31,7 @@ public class ItemModArmor extends ItemArmor {
     };
     private Multimap<String, AttributeModifier> attributeMapCroc;
     private Multimap<String, AttributeModifier> attributeMapMoose;
+    private Multimap<String, AttributeModifier> attributeMapFlyingFish;
     private final CustomArmorMaterial customMaterial;
 
     public ItemModArmor(CustomArmorMaterial armorMaterial, EntityEquipmentSlot slot) {
@@ -59,6 +60,15 @@ public class ItemModArmor extends ItemArmor {
         if (this.customMaterial == AMItemRegistry.RACCOON_ARMOR_MATERIAL) {
             tooltip.add(TextFormatting.BLUE + I18n.translateToLocal("item.alexsmobs.frontier_cap.desc"));
         }
+        if (this.customMaterial == AMItemRegistry.FLYING_FISH_MATERIAL) {
+            tooltip.add(TextFormatting.GRAY + I18n.translateToLocal("item.alexsmobs.flying_fish_boots.desc"));
+        }
+    }
+
+    @Override
+    public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
+        net.minecraft.item.crafting.Ingredient mat = this.customMaterial.getRepairMaterial();
+        return mat != net.minecraft.item.crafting.Ingredient.EMPTY && mat.apply(repair);
     }
 
     private void buildCrocAttributes(CustomArmorMaterial materialIn) {
@@ -84,6 +94,15 @@ public class ItemModArmor extends ItemArmor {
         attributeMapMoose = builder.build();
     }
 
+    private void buildFlyingFishAttributes(CustomArmorMaterial materialIn) {
+        com.google.common.collect.ImmutableMultimap.Builder<String, AttributeModifier> builder = com.google.common.collect.ImmutableMultimap.builder();
+        UUID uuid = ARMOR_MODIFIERS[this.armorType.getIndex()];
+        builder.put(SharedMonsterAttributes.ARMOR.getName(), new AttributeModifier(uuid, "Armor modifier", materialIn.getDamageReductionAmount(this.armorType), 0));
+        builder.put(SharedMonsterAttributes.ARMOR_TOUGHNESS.getName(), new AttributeModifier(uuid, "Armor toughness", materialIn.getToughness(), 0));
+        builder.put(EntityLivingBase.SWIM_SPEED.getName(), new AttributeModifier(uuid, "Swim speed", 0.5D, 0));
+        attributeMapFlyingFish = builder.build();
+    }
+
     @Override
     public Multimap<String, AttributeModifier> getItemAttributeModifiers(EntityEquipmentSlot equipmentSlot) {
         if (equipmentSlot != this.armorType) {
@@ -100,6 +119,12 @@ public class ItemModArmor extends ItemArmor {
                 buildMooseAttributes(AMItemRegistry.MOOSE_ARMOR_MATERIAL);
             }
             return attributeMapMoose;
+        }
+        if (this.customMaterial == AMItemRegistry.FLYING_FISH_MATERIAL) {
+            if (attributeMapFlyingFish == null) {
+                buildFlyingFishAttributes(AMItemRegistry.FLYING_FISH_MATERIAL);
+            }
+            return attributeMapFlyingFish;
         }
         com.google.common.collect.ImmutableMultimap.Builder<String, AttributeModifier> builder = com.google.common.collect.ImmutableMultimap.builder();
         UUID uuid = ARMOR_MODIFIERS[this.armorType.getIndex()];
@@ -131,6 +156,8 @@ public class ItemModArmor extends ItemArmor {
             return "alexsmobs:textures/armor/fedora.png";
         } else if (this.customMaterial == AMItemRegistry.EMU_ARMOR_MATERIAL) {
             return "alexsmobs:textures/armor/emu_leggings.png";
+        } else if (this.customMaterial == AMItemRegistry.FLYING_FISH_MATERIAL) {
+            return "alexsmobs:textures/armor/flying_fish_boots.png";
         }
         return null;
     }
@@ -150,6 +177,8 @@ public class ItemModArmor extends ItemArmor {
             return (ModelBiped) AlexsMobs.PROXY.getArmorModel(4, entityLiving);
         } else if (this.customMaterial == AMItemRegistry.FEDORA_ARMOR_MATERIAL) {
             return (ModelBiped) AlexsMobs.PROXY.getArmorModel(5, entityLiving);
+        } else if (this.customMaterial == AMItemRegistry.FLYING_FISH_MATERIAL) {
+            return (ModelBiped) AlexsMobs.PROXY.getArmorModel(7, entityLiving);
         }
         return null;
     }

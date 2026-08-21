@@ -125,7 +125,8 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.tarantulaHawkSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.tarantulaHawkSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.canLandSpawnWithoutGrass(this);
     }
 
     @Nullable
@@ -445,17 +446,36 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         Item item = itemstack.getItem();
+        if (item == Items.NAME_TAG) {
+            return super.processInteract(player, hand);
+        }
+        // Wild: 15-25 spider eyes (same as 1.16/1.20). Fermented eyes are breeding-only once tamed.
         if (!isTamed() && item == Items.SPIDER_EYE) {
-            if (!player.capabilities.isCreativeMode) {
-                itemstack.shrink(1);
-            }
             this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
-            spiderFeedings++;
-            if (spiderFeedings >= 15 && getRNG().nextInt(6) == 0 || spiderFeedings > 25) {
-                this.setTamedBy(player);
-                this.world.setEntityState(this, (byte) 7);
-            } else {
-                this.world.setEntityState(this, (byte) 6);
+            if (!this.world.isRemote) {
+                if (!player.capabilities.isCreativeMode) {
+                    itemstack.shrink(1);
+                }
+                spiderFeedings++;
+                if (spiderFeedings >= 15 && getRNG().nextInt(6) == 0 || spiderFeedings > 25) {
+                    this.setTamedBy(player);
+                    this.world.setEntityState(this, (byte) 7);
+                } else {
+                    this.world.setEntityState(this, (byte) 6);
+                }
+            }
+            return true;
+        }
+        if (isTamed() && isBreedingItem(itemstack)) {
+            if (this.isChild()) {
+                return super.processInteract(player, hand);
+            }
+            if (!this.world.isRemote && this.getGrowingAge() == 0 && !this.isInLove()) {
+                if (!player.capabilities.isCreativeMode) {
+                    itemstack.shrink(1);
+                }
+                this.setInLove(player);
+                this.releaseForHunt();
             }
             return true;
         }
@@ -469,9 +489,6 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
                 return true;
             }
             return false;
-        }
-        if (super.processInteract(player, hand)) {
-            return true;
         }
         if (isTamed() && isOwner(player)) {
             if (player.isSneaking()) {
@@ -488,27 +505,44 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
                     this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                     return true;
                 }
-            } else if (!isBreedingItem(itemstack)) {
+            } else {
                 this.setCommand(this.getCommand() + 1);
                 if (this.getCommand() == 3) {
                     this.setCommand(0);
                 }
-                player.sendStatusMessage(new TextComponentTranslation("entity.alexsmobs.all.command_" + this.getCommand(), this.getCustomNameTag()), true);
+                player.sendStatusMessage(new TextComponentTranslation("entity.alexsmobs.all.command_" + this.getCommand(), this.getName()), true);
                 boolean sit = this.getCommand() == 2;
-                if (sit) {
-                    this.setSitting(true);
-                } else {
-                    this.setSitting(false);
+                this.setSitting(sit);
+                if (this.aiSit != null) {
+                    this.aiSit.setSitting(sit);
                 }
                 return true;
             }
         }
-        return false;
+        return super.processInteract(player, hand);
     }
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
         return isTamed() && stack.getItem() == Items.FERMENTED_SPIDER_EYE;
+    }
+
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        if (otherAnimal == this || !(otherAnimal instanceof EntityTarantulaHawk)) {
+            return false;
+        }
+        EntityTarantulaHawk other = (EntityTarantulaHawk) otherAnimal;
+        return this.isTamed() && other.isTamed() && this.isInLove() && other.isInLove();
+    }
+
+    private void releaseForHunt() {
+        this.setSitting(false);
+        if (this.aiSit != null) {
+            this.aiSit.setSitting(false);
+        }
+        this.setCommand(0);
+        this.setFlying(false);
     }
 
     @Override
@@ -549,6 +583,12 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
 
     private void onBreedComplete(EntityAnimal partner) {
         bredBuryFlag = true;
+        this.releaseForHunt();
+        if (partner instanceof EntityTarantulaHawk) {
+            EntityTarantulaHawk other = (EntityTarantulaHawk) partner;
+            other.bredBuryFlag = true;
+            other.releaseForHunt();
+        }
         EntityPlayerMP breeder = this.getLoveCause();
         if (breeder == null && partner.getLoveCause() != null) {
             breeder = partner.getLoveCause();
@@ -701,7 +741,8 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
 
     @Override
     public boolean shouldFollow() {
-        return getCommand() == 1 && !this.isDragging() && !this.isDigging() && (this.getAttackTarget() == null || !this.getAttackTarget().isEntityAlive());
+        return getCommand() == 1 && !this.bredBuryFlag && !this.isDragging() && !this.isDigging()
+                && (this.getAttackTarget() == null || !this.getAttackTarget().isEntityAlive());
     }
 
     public boolean isAngry() {
@@ -858,7 +899,6 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
         @Override
         public void resetTask() {
             orbitCooldown = 0;
-            hawk.bredBuryFlag = false;
             clockwise = hawk.getRNG().nextBoolean();
             orbitVec = null;
             if (hawk.getPassengers().isEmpty()) {
@@ -1011,6 +1051,9 @@ public class EntityTarantulaHawk extends EntityTameable implements IFollower {
             hawk.setDragging(false);
             hawk.setAttackTarget(null);
             hawk.setRevengeTarget(null);
+            if (hawk.bredBuryFlag) {
+                hawk.bredBuryFlag = false;
+            }
         }
 
         @Override

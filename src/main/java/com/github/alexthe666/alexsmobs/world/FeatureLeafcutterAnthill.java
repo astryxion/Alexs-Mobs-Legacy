@@ -2,11 +2,13 @@ package com.github.alexthe666.alexsmobs.world;
 
 import com.github.alexthe666.alexsmobs.block.AMBlockRegistry;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
-import com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes;
+import com.github.alexthe666.alexsmobs.config.BiomeConfig;
 import com.github.alexthe666.alexsmobs.entity.AMEntityRegistry;
 import com.github.alexthe666.alexsmobs.entity.EntityLeafcutterAnt;
 import com.github.alexthe666.alexsmobs.tileentity.TileEntityLeafcutterAnthill;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -31,7 +33,7 @@ public class FeatureLeafcutterAnthill extends WorldGenerator {
     @Override
     public boolean generate(World worldIn, Random rand, BlockPos pos) {
         Biome biome = worldIn.getBiome(pos.add(8, 0, 8));
-        if (!AMNativeSpawnBiomes.leafcutterAnthill(biome)) {
+        if (!BiomeConfig.test(BiomeConfig.leafcutter_anthill_spawns, biome)) {
             return false;
         }
         if (AMConfig.leafcutterAnthillSpawnChance <= 0D) {
@@ -40,12 +42,8 @@ public class FeatureLeafcutterAnthill extends WorldGenerator {
         if (rand.nextFloat() > (float) AMConfig.leafcutterAnthillSpawnChance) {
             return false;
         }
-        int z = 8;
-        int x = 8;
-        BlockPos heightProbe = new BlockPos(pos.getX() + x, 0, pos.getZ() + z);
-        int y = worldIn.getPrecipitationHeight(heightProbe).getY();
-        BlockPos heightPos = new BlockPos(pos.getX() + x, y, pos.getZ() + z);
-        if (worldIn.getBlockState(heightPos.down()).getMaterial().isLiquid()) {
+        BlockPos heightPos = pickSurfaceInChunk(worldIn, rand, pos);
+        if (heightPos == null) {
             return false;
         }
         IBlockState coarse = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
@@ -110,6 +108,9 @@ public class FeatureLeafcutterAnthill extends WorldGenerator {
                 worldIn.setBlockState(heightPos.up(outOfGround - 1).west(), coarse, 4);
                 worldIn.setBlockState(heightPos.up(outOfGround - 2).west(), coarse, 4);
             }
+            // 1.16 places this feature before trees. 1.12 runs after, so punch a small
+            // foliage hole or the dirt mound is invisible under the jungle canopy.
+            clearFoliageAbove(worldIn, heightPos.up(outOfGround), 4);
         }
         int i = outOfGround;
         int down = rand.nextInt(2) + 1;
@@ -132,5 +133,104 @@ public class FeatureLeafcutterAnthill extends WorldGenerator {
             }
         }
         return true;
+    }
+
+    /**
+     * 1.16 places this feature in {@code SURFACE_STRUCTURES} using {@code WORLD_SURFACE_WG}
+     * (terrain height before trees). 1.12 {@code IWorldGenerator} runs after biome decoration,
+     * and {@link World#getPrecipitationHeight} includes leaves, so jungles would spawn the
+     * mound on the canopy. Walk down through air/foliage/logs to the real ground.
+     * Try several columns: jungle chunk centers are often trees over water.
+     */
+    private static BlockPos pickSurfaceInChunk(World world, Random rand, BlockPos chunkStart) {
+        BlockPos found = findSurfaceAboveGround(world, chunkStart.getX() + 8, chunkStart.getZ() + 8);
+        if (found != null) {
+            return found;
+        }
+        for (int attempt = 0; attempt < 8; attempt++) {
+            found = findSurfaceAboveGround(world, chunkStart.getX() + rand.nextInt(16), chunkStart.getZ() + rand.nextInt(16));
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    private static BlockPos findSurfaceAboveGround(World world, int x, int z) {
+        int y = world.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
+        if (y <= 1) {
+            y = world.getHeight();
+        }
+        if (y > 255) {
+            y = 255;
+        }
+        for (int scanY = y; scanY > 1; scanY--) {
+            BlockPos ground = new BlockPos(x, scanY, z);
+            IBlockState state = world.getBlockState(ground);
+            if (isAirOrFoliage(world, ground, state)) {
+                continue;
+            }
+            if (state.getMaterial().isLiquid()) {
+                return null;
+            }
+            if (!state.getMaterial().blocksMovement() || !isTerrain(state)) {
+                continue;
+            }
+            return ground.up();
+        }
+        return null;
+    }
+
+    private static boolean isTerrain(IBlockState state) {
+        Block block = state.getBlock();
+        Material material = state.getMaterial();
+        return block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.SAND || block == Blocks.GRAVEL
+                || block == Blocks.CLAY || block == Blocks.STONE || material == Material.GRASS
+                || material == Material.GROUND || material == Material.SAND || material == Material.ROCK;
+    }
+
+    private static void clearFoliageAbove(World world, BlockPos anthill, int radius) {
+        int top = world.getPrecipitationHeight(anthill).getY() + 1;
+        if (top < anthill.getY() + 2) {
+            top = anthill.getY() + 4;
+        }
+        Iterator<BlockPos> it = BlockPos.getAllInBox(anthill.add(-radius, 1, -radius), new BlockPos(anthill.getX() + radius, top, anthill.getZ() + radius)).iterator();
+        while (it.hasNext()) {
+            BlockPos p = it.next();
+            if (p.distanceSq(anthill) > (double) (radius * radius)) {
+                continue;
+            }
+            IBlockState state = world.getBlockState(p);
+            if (isCanopyFoliage(world, p, state)) {
+                world.setBlockState(p, Blocks.AIR.getDefaultState(), 4);
+            }
+        }
+    }
+
+    private static boolean isAirOrFoliage(World world, BlockPos pos, IBlockState state) {
+        Block block = state.getBlock();
+        Material material = state.getMaterial();
+        if (block.isAir(state, world, pos)) {
+            return true;
+        }
+        if (block.isLeaves(state, world, pos) || block.isWood(world, pos) || block.isFoliage(world, pos)) {
+            return true;
+        }
+        if (material == Material.LEAVES || material == Material.VINE || material == Material.PLANTS || material == Material.WOOD) {
+            return true;
+        }
+        return block == Blocks.COCOA || block == Blocks.SNOW_LAYER || block == Blocks.VINE;
+    }
+
+    private static boolean isCanopyFoliage(World world, BlockPos pos, IBlockState state) {
+        Block block = state.getBlock();
+        Material material = state.getMaterial();
+        if (block.isLeaves(state, world, pos) || block.isFoliage(world, pos)) {
+            return true;
+        }
+        if (material == Material.LEAVES || material == Material.VINE || material == Material.PLANTS) {
+            return true;
+        }
+        return block == Blocks.COCOA || block == Blocks.VINE;
     }
 }

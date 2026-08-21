@@ -251,7 +251,9 @@ public class EntityRhinoceros extends EntityAnimal implements IAnimatedEntity {
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return AMTagRegistry.itemInTag(RHINOCEROS_BREEDABLES, stack.getItem());
+        return AMTagRegistry.isDeadBush(stack)
+                || AMTagRegistry.isTallGrassPlant(stack)
+                || AMTagRegistry.itemInTag(RHINOCEROS_BREEDABLES, stack.getItem());
     }
 
     public String getAppliedPotionId() {
@@ -471,6 +473,9 @@ public class EntityRhinoceros extends EntityAnimal implements IAnimatedEntity {
     @Override
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
+        if (isBreedingItem(itemstack)) {
+            return super.processInteract(player, hand);
+        }
         if (!isChild() && (itemstack.getItem() == Items.POTIONITEM
                 || itemstack.getItem() == Items.SPLASH_POTION
                 || itemstack.getItem() == Items.LINGERING_POTION)) {

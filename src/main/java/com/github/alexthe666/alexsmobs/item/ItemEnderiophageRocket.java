@@ -31,7 +31,7 @@ public class ItemEnderiophageRocket extends Item {
                 held.shrink(1);
             }
         }
-        return world.isRemote ? EnumActionResult.PASS : EnumActionResult.SUCCESS;
+        return EnumActionResult.SUCCESS;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ItemEnderiophageRocket extends Item {
                     itemstack.shrink(1);
                 }
             }
-            return new ActionResult<>(worldIn.isRemote ? EnumActionResult.PASS : EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
+            return new ActionResult<>(EnumActionResult.SUCCESS, playerIn.getHeldItem(handIn));
         }
         return new ActionResult<>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
     }

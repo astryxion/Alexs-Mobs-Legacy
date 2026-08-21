@@ -122,13 +122,18 @@ public class EntityMimicOctopus extends EntityTameable implements ISemiAquatic, 
     }
 
     public static MimicState getStateForItem(ItemStack stack) {
+        if (AMTagRegistry.isClownfish(stack) || (stack.getItem() == Items.FISH && stack.getMetadata() == 2)) {
+            return null;
+        }
         if (AMTagRegistry.itemInTag(AMTagRegistry.MIMIC_OCTOPUS_CREEPER_ITEMS, stack.getItem())) {
             return MimicState.CREEPER;
         }
         if (AMTagRegistry.itemInTag(AMTagRegistry.MIMIC_OCTOPUS_GUARDIAN_ITEMS, stack.getItem())) {
             return MimicState.GUARDIAN;
         }
-        if (AMTagRegistry.itemInTag(AMTagRegistry.MIMIC_OCTOPUS_PUFFERFISH_ITEMS, stack.getItem())) {
+        if (AMTagRegistry.isPufferfish(stack)
+                || AMTagRegistry.itemInTag(AMTagRegistry.MIMIC_OCTOPUS_PUFFERFISH_ITEMS, stack.getItem())
+                && stack.getItem() != Items.FISH) {
             return MimicState.PUFFERFISH;
         }
         return null;
@@ -319,7 +324,12 @@ public class EntityMimicOctopus extends EntityTameable implements ISemiAquatic, 
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return isTamed() && stack.getItem() == Items.FISH;
+        return AMTagRegistry.isClownfish(stack) || (stack.getItem() == Items.FISH && stack.getMetadata() == 2);
+    }
+
+    @Override
+    public boolean canMateWith(net.minecraft.entity.passive.EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
     }
 
     public boolean isActiveCamo() {
@@ -334,6 +344,10 @@ public class EntityMimicOctopus extends EntityTameable implements ISemiAquatic, 
     public boolean processInteract(EntityPlayer player, EnumHand hand) {
         ItemStack itemstack = player.getHeldItem(hand);
         Item item = itemstack.getItem();
+        if (isBreedingItem(itemstack)) {
+            super.processInteract(player, hand);
+            return true;
+        }
         MimicState readState = getStateForItem(itemstack);
         if (super.processInteract(player, hand)) {
             return true;

@@ -101,10 +101,33 @@ public class EntityFly extends EntityAnimal {
         return !this.isNoDespawn() && super.canDespawn();
     }
 
+    /**
+     * 1.16 {@code EntityFly#canFlySpawn}: Y &gt; 63, {@code nextInt(4) == 0}, sky light &gt; 8,
+     * no block light, sand or dirt/grass. The 1/4 roll lives here so ambient spawning still uses
+     * it even if placement is skipped. Pass {@code applyRarityRoll = false} from placement.
+     */
+    public static boolean canFlySpawnAt(World world, BlockPos pos, java.util.Random random, boolean applyRarityRoll) {
+        if (pos.getY() <= 63) {
+            return false;
+        }
+        if (applyRarityRoll && random.nextInt(4) != 0) {
+            return false;
+        }
+        if (world.getLightFromNeighbors(pos) <= 8) {
+            return false;
+        }
+        if (world.getLightFor(EnumSkyBlock.BLOCK, pos) != 0) {
+            return false;
+        }
+        Block down = world.getBlockState(pos.down()).getBlock();
+        return down == Blocks.SAND || down == Blocks.DIRT || down == Blocks.GRASS
+                || down == Blocks.GRASS_PATH || down == Blocks.FARMLAND || down == Blocks.MYCELIUM;
+    }
+
     @Override
     public boolean getCanSpawnHere() {
         return AMEntityRegistry.rollSpawn(AMConfig.flySpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
-                && super.getCanSpawnHere();
+                && canFlySpawnAt(this.world, this.getPosition(), this.rand, true);
     }
 
     public boolean isInNether() {

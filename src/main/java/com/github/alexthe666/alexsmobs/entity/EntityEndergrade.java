@@ -295,7 +295,9 @@ public class EntityEndergrade extends EntityAnimal {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.endergradeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.endergradeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.isOuterEnd(this.world, this.getPosition())
+                && canEndergradeSpawn(this.world, this.getPosition(), this.rand);
     }
 
     public static boolean canEndergradeSpawn(World worldIn, BlockPos pos, Random random) {

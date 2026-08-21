@@ -184,6 +184,11 @@ public class EntityStradpole extends EntityCreature implements ISemiAquatic {
     }
 
     @Override
+    public boolean isNotColliding() {
+        return AMEntityRegistry.aquaticNoEntityCollision(this);
+    }
+
+    @Override
     public void readEntityFromNBT(NBTTagCompound compound) {
         super.readEntityFromNBT(compound);
         if (compound.hasUniqueId("ParentUUID")) {

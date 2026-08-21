@@ -75,7 +75,11 @@ public class EntityMimicube extends EntityMob implements IRangedAttackMob {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.mimicubeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        if (AMConfig.mimicubeSpawnInEndCity && !AMEntityRegistry.isInsideEndCity(this.world, this.getPosition())) {
+            return false;
+        }
+        return AMEntityRegistry.rollSpawn(AMConfig.mimicubeSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && super.getCanSpawnHere();
     }
 
     @Override

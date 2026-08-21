@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.5.0'
+version = '1.12.2-1.6.0'
 group = 'com.github.alexthe666'
 archivesBaseName = 'alexsmobs'
 
@@ -71,6 +71,11 @@ minecraft {
 
 repositories {
     maven { url = 'https://maven.cleanroommc.com' }
+    maven { url = 'https://www.cursemaven.com' }
+}
+
+configurations {
+    devRuntimeMods
 }
 
 dependencies {
@@ -88,24 +93,16 @@ dependencies {
     }
     runtimeOnly(fg.deobf('mezz:jei:4.31.2'))
 
-    // You may put jars on which you depend on in ./libs or you may define them like so..
-    // compile "some.group:artifact:version:classifier"
-    // compile "some.group:artifact:version"
+    // Optional Spark profiler for a real Minecraft instance (not FG3 runClient).
+    // Production Spark mixins use SRG names and crash the deobfuscated Gradle client.
+    // Run `gradlew copySparkJars` and drop those jars next to alexsmobs in your game mods folder.
+    devRuntimeMods 'curse.maven:mixinbootstrap-357178:3437402'
+    devRuntimeMods 'curse.maven:spark-unforged-900927:6751437'
+}
 
-    // Real examples
-    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
-    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
-
-    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
-    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // These dependencies get remapped to your current MCP mappings
-    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
+task copySparkJars(type: Copy) {
+    from configurations.devRuntimeMods
+    into file('new jars')
 }
 
 tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
@@ -126,17 +123,6 @@ jar {
         ])
     }
     exclude 'META-INF/services/net.minecraftforge.fml.relauncher.IFMLLoadingPlugin'
-}
-
-// Release needs both jars in mods/: alexsmobs + citadel (see :citadel:build).
-task copyReleaseJars(type: Copy, dependsOn: ['build', ':citadel:build']) {
-    from('build/libs') {
-        include "alexsmobs-${version}.jar"
-    }
-    from(project(':citadel').file('build/libs')) {
-        include "citadel-${project(':citadel').version}.jar"
-    }
-    into 'Production Jars'
 }
 
 // This is the preferred method to reobfuscate your jar file

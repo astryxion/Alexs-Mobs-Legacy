@@ -42,11 +42,18 @@ public class EntitySpectre extends EntityAnimal {
 
     @Override
     public boolean getCanSpawnHere() {
-        return AMEntityRegistry.rollSpawn(AMConfig.spectreSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER) && super.getCanSpawnHere();
+        return AMEntityRegistry.rollSpawn(AMConfig.spectreSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
+                && AMEntityRegistry.isOuterEnd(this.world, this.getPosition())
+                && AMEntityRegistry.isSolidSpawnFloor(this.world, this.getPosition());
     }
 
     public static boolean canSpectreSpawn(World worldIn, BlockPos pos, Random random) {
-        return true;
+        return AMEntityRegistry.isSolidSpawnFloor(worldIn, pos);
+    }
+
+    @Override
+    public int getMaxSpawnedInChunk() {
+        return 2;
     }
 
     @Override

@@ -58,7 +58,6 @@ public class RenderBaldEagle extends RenderLiving<EntityBaldEagle> {
                 net.minecraft.client.renderer.entity.RenderLivingBase<?> livingR = (net.minecraft.client.renderer.entity.RenderLivingBase<?>) playerRender;
                 if (livingR.getMainModel() instanceof ModelBiped) {
                     ModelBiped biped = (ModelBiped) livingR.getMainModel();
-                    GlStateManager.pushMatrix();
                     if (leftHand) {
                         GlStateManager.translate(-0.3F, -0.7F, 0.5F);
                         biped.bipedLeftArm.postRender(0.0625F);
@@ -72,7 +71,6 @@ public class RenderBaldEagle extends RenderLiving<EntityBaldEagle> {
                         GlStateManager.rotate(40.0F, 1.0F, 0.0F, 0.0F);
                         GlStateManager.rotate(-70.0F, 0.0F, 1.0F, 0.0F);
                     }
-                    GlStateManager.popMatrix();
                 }
             }
         }

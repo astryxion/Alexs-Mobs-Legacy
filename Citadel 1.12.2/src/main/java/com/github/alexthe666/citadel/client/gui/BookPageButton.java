@@ -22,10 +22,10 @@ public class BookPageButton extends GuiButton {
       this.bookGUI = bookGUI;
    }
 
-   public void func_191745_a(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+   @Override
+   public void drawButton(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
       if (this.visible) {
          this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
-         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          int u = this.hovered ? 23 : 0;
          int v = this.isForward ? 0 : 13;
          int color = this.bookGUI.getWidgetColor();
@@ -33,8 +33,11 @@ public class BookPageButton extends GuiButton {
          int green = (color & '\uff00') >> 8;
          int blue = color & 255;
          BookBlit.setRGB(red, green, blue, 255);
+         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
          minecraft.getTextureManager().bindTexture(this.bookGUI.getBookWidgetTexture());
          this.drawNextArrow(this.x, this.y, u, v, 18, 12);
+         BookBlit.setRGB(255, 255, 255, 255);
+         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
       }
    }
 
@@ -46,7 +49,8 @@ public class BookPageButton extends GuiButton {
       }
    }
 
-   public void func_146113_a(SoundHandler soundHandler) {
+   @Override
+   public void playPressSound(SoundHandler soundHandler) {
       if (this.playTurnSound) {
          soundHandler.playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, 1.0F));
       }

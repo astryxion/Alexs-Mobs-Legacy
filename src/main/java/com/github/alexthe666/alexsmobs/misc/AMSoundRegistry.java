@@ -329,7 +329,7 @@ public class AMSoundRegistry {
 
     public static final SoundEvent TOUCAN_HURT = createSoundEvent("toucan_hurt");
 
-    public static final SoundEvent POTOO_IDLE = createSoundEvent("potoo_idle");
+    public static final SoundEvent POTOO_CALL = createSoundEvent("potoo_call");
 
     public static final SoundEvent POTOO_HURT = createSoundEvent("potoo_hurt");
 

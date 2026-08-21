@@ -42,12 +42,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = AlexsMobs.MODID, name = "Alex's Mobs (Legacy)", version = AlexsMobs.VERSION, acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:citadel;after:jei")
+@Mod(modid = AlexsMobs.MODID, name = "Alex's Mobs (Legacy)", version = AlexsMobs.VERSION, acceptedMinecraftVersions = "[1.12.2]", dependencies = "required-after:citadel;after:jei;after:akashictome")
 public class AlexsMobs {
 
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MODID = "alexsmobs";
-    public static final String VERSION = "1.12.2-1.5.0";
+    public static final String VERSION = "1.12.2-1.6.0";
 
     @Mod.Instance(MODID)
     public static AlexsMobs instance;

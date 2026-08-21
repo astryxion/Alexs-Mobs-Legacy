@@ -3,9 +3,11 @@
   "modid": "alexsmobs",
   "name": "Alex's Mobs (Legacy)",
   "description": "New, original, engaging, and aesthetic mobs for Minecraft.",
-  "version": "1.12.2-1.5.0",
+  "version": "1.12.2-1.6.0",
   "mcversion": "1.12.2",
   "authorList": ["Astryxion"],
-  "credits": "Astryxion, AlexThe666"
+  "credits": "Astryxion, AlexThe666",
+  "requiredMods": ["citadel"],
+  "dependencies": ["citadel", "jei"]
 }
 ]

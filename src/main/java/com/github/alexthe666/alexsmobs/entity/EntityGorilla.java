@@ -358,6 +358,9 @@ public class EntityGorilla extends EntityTameable implements IAnimatedEntity, IT
         if (itemstack.getItem() == Items.NAME_TAG) {
             return super.processInteract(player, hand);
         }
+        if (isBreedingItem(itemstack)) {
+            return super.processInteract(player, hand);
+        }
         if (isTamed() && isTameableFood(itemstack) && this.getHealth() < this.getMaxHealth()) {
             this.heal(5);
             if (!player.capabilities.isCreativeMode) {

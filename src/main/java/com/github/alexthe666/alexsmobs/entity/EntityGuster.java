@@ -96,8 +96,7 @@ public class EntityGuster extends EntityMob {
         boolean spawnBlock = isGusterSpawnBlock(this.world.getBlockState(down));
         boolean weatherOk = !AMConfig.limitGusterSpawnsToWeather || this.world.isThundering() || this.world.isRaining() || isBiomeNether(this.world, down);
         return spawnBlock && weatherOk
-                && AMEntityRegistry.rollSpawn(AMConfig.gusterSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER)
-                && super.getCanSpawnHere();
+                && AMEntityRegistry.rollSpawn(AMConfig.gusterSpawnRolls, this.getRNG(), AMEntityRegistry.AMSpawnReason.OTHER);
     }
 
     @Override
@@ -232,7 +231,7 @@ public class EntityGuster extends EntityMob {
             this.attackEntityFrom(DamageSource.DROWN, 0.5F);
         }
         float f = (float) this.posY;
-        if (this.isEntityAlive()) {
+        if (this.isEntityAlive() && this.world.isRemote) {
             int type = this.getVariant() == 2 ? AMParticleRegistry.GUSTER_SAND_SPIN_SOUL : this.getVariant() == 1 ? AMParticleRegistry.GUSTER_SAND_SPIN_RED : AMParticleRegistry.GUSTER_SAND_SPIN;
             for (int j = 0; j < 4; ++j) {
                 float f1 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width * 0.95F;

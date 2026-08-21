@@ -1,9 +1,12 @@
 package com.github.alexthe666.alexsmobs.entity;
 
+import com.github.alexthe666.alexsmobs.AlexsMobs;
 import com.github.alexthe666.alexsmobs.block.AMBlockRegistry;
 import com.github.alexthe666.alexsmobs.config.AMConfig;
 import com.github.alexthe666.alexsmobs.entity.ai.*;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
+import com.github.alexthe666.alexsmobs.message.MessageMosquitoDismount;
+import com.github.alexthe666.alexsmobs.message.MessageMosquitoMountPlayer;
 import com.github.alexthe666.alexsmobs.misc.AMSoundRegistry;
 import com.github.alexthe666.alexsmobs.misc.AMTagRegistry;
 import com.github.alexthe666.citadel.animation.Animation;
@@ -57,6 +60,7 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
     private int sittingTime = 0;
     private int maxSitTime = 75;
     private int rideCooldown = 0;
+    private boolean sneakDismountArmed = false;
 
     public EntityCapuchinMonkey(World worldIn) {
         super(worldIn);
@@ -99,7 +103,8 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
     @Override
     protected void initEntityAI() {
         this.tasks.addTask(1, new EntityAISwimming(this));
-        this.tasks.addTask(2, new EntityAISit(this));
+        this.aiSit = new EntityAISit(this);
+        this.tasks.addTask(2, this.aiSit);
         this.tasks.addTask(3, new CapuchinAIMelee(this, 1.0D, true));
         this.tasks.addTask(3, new CapuchinAIRangedAttack(this, 1.0D, 20, 15.0F));
         this.tasks.addTask(4, new EntityAITempt(this, 1.1D, Items.AIR, true) {
@@ -299,14 +304,28 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
                     double extraZ = radius * MathHelper.cos(angle);
                     this.setPosition(mount.posX + extraX, Math.max(mount.posY + mount.height + 0.1, mount.posY), mount.posZ + extraZ);
                     attackDecision = true;
-                    if (!mount.isEntityAlive() || rideCooldown == 0 && mount.isSneaking()) {
-                        this.dismountRidingEntity();
-                        attackDecision = false;
+                    if (!mount.isEntityAlive()) {
+                        this.dismountFromPlayer(mount);
+                        sneakDismountArmed = false;
+                    } else if (!mount.isSneaking()) {
+                        sneakDismountArmed = true;
+                    } else if (sneakDismountArmed && rideCooldown <= 0) {
+                        this.dismountFromPlayer(mount);
+                        sneakDismountArmed = false;
                     }
                 }
             }
         } else {
             super.updateRidden();
+        }
+    }
+
+    private void dismountFromPlayer(Entity mount) {
+        this.dismountRidingEntity();
+        this.rideCooldown = 20;
+        this.attackDecision = false;
+        if (!this.world.isRemote && mount != null) {
+            AlexsMobs.sendMSGToAll(new MessageMosquitoDismount(this.getEntityId(), mount.getEntityId()));
         }
     }
 
@@ -332,6 +351,9 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
 
     public void setSitting(boolean sit) {
         this.dataManager.set(SITTING, sit);
+        if (this.aiSit != null) {
+            this.aiSit.setSitting(sit);
+        }
     }
 
     public boolean hasDartTarget() {
@@ -389,8 +411,23 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
         return isBanana(stack);
     }
 
+    public static boolean isInsectSnack(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return false;
+        }
+        Item item = stack.getItem();
+        return item == AMItemRegistry.MAGGOT
+                || item == AMItemRegistry.MOSQUITO_LARVA
+                || item == AMItemRegistry.LEAFCUTTER_ANT_PUPA
+                || AMTagRegistry.itemInTag(AMTagRegistry.INSECT_ITEMS, item)
+                || AMTagRegistry.itemInTag(AMTagRegistry.CAPUCHIN_MONKEY_BREEDABLES, item);
+    }
+
     public static boolean isCapuchinFood(ItemStack stack) {
-        return AMTagRegistry.itemInTag(AMTagRegistry.CAPUCHIN_MONKEY_BREEDABLES, stack.getItem())
+        if (stack.isEmpty()) {
+            return false;
+        }
+        return isInsectSnack(stack)
                 || AMTagRegistry.itemInTag(AMTagRegistry.CAPUCHIN_MONKEY_FOODSTUFFS, stack.getItem());
     }
 
@@ -478,6 +515,10 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
             return super.processInteract(player, hand);
         }
 
+        if (isBreedingItem(itemstack)) {
+            return super.processInteract(player, hand);
+        }
+
         if (!isTamed() && isBanana(itemstack)) {
             if (!player.capabilities.isCreativeMode) {
                 itemstack.shrink(1);
@@ -493,7 +534,7 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
             return true;
         }
 
-        if (isTamed() && !isBreedingItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
+        if (isTamed() && !itemstack.isEmpty() && !isBreedingItem(itemstack) && this.getHealth() < this.getMaxHealth()) {
             if (isBanana(itemstack) || isCapuchinFood(itemstack)) {
                 if (!player.capabilities.isCreativeMode) {
                     itemstack.shrink(1);
@@ -525,32 +566,31 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
             }
         }
 
-        boolean type = super.processInteract(player, hand);
-
-        if (!type && isTamed() && isPlayerOwner(player) && hand == EnumHand.MAIN_HAND && itemstack.isEmpty()) {
+        if (isTamed() && isOwner(player) && hand == EnumHand.MAIN_HAND && !isBreedingItem(itemstack) && !isBanana(itemstack) && !isCapuchinFood(itemstack)) {
             if (player.isSneaking() && player.getPassengers().isEmpty()) {
+                this.setSitting(false);
+                this.startRiding(player, true);
+                this.rideCooldown = 40;
+                this.sneakDismountArmed = false;
                 if (!this.world.isRemote) {
-                    this.startRiding(player, true);
-                    rideCooldown = 20;
+                    AlexsMobs.sendMSGToAll(new MessageMosquitoMountPlayer(this.getEntityId(), player.getEntityId()));
                 }
                 return true;
             }
             if (!player.isSneaking()) {
-                if (!this.world.isRemote) {
-                    this.setCommand(this.getCommand() + 1);
-                    if (this.getCommand() == 3) {
-                        this.setCommand(0);
-                    }
-                    player.sendStatusMessage(new TextComponentTranslation("entity.alexsmobs.all.command_" + this.getCommand(), this.getName()), true);
-                    boolean sit = this.getCommand() == 2;
-                    this.forcedSit = sit;
-                    this.setSitting(sit);
+                this.setCommand(this.getCommand() + 1);
+                if (this.getCommand() == 3) {
+                    this.setCommand(0);
                 }
+                player.sendStatusMessage(new TextComponentTranslation("entity.alexsmobs.all.command_" + this.getCommand(), this.getName()), true);
+                boolean sit = this.getCommand() == 2;
+                this.forcedSit = sit;
+                this.setSitting(sit);
                 return true;
             }
         }
 
-        return type;
+        return super.processInteract(player, hand);
     }
 
     @Override
@@ -570,7 +610,7 @@ public class EntityCapuchinMonkey extends EntityTameable implements IAnimatedEnt
 
     @Override
     public boolean isBreedingItem(ItemStack stack) {
-        return !stack.isEmpty() && isTamed() && AMTagRegistry.itemInTag(AMTagRegistry.CAPUCHIN_MONKEY_BREEDABLES, stack.getItem());
+        return isTamed() && isInsectSnack(stack);
     }
 
     @Override

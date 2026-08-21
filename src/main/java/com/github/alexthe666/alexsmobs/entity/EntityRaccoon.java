@@ -33,7 +33,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.pathfinding.PathNodeType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
@@ -89,7 +88,8 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
     public EntityRaccoon(World world) {
         super(world);
         this.setSize(0.6F, 0.8F);
-        this.setPathPriority(PathNodeType.WATER, 0.0F);
+        // 1.16 uses WATER_BORDER = 0 (prefer the shore). 1.12 has no WATER_BORDER;
+        // WATER = 0 made them path *into* the lake. Keep the vanilla land-mob water penalty.
     }
 
     @Override
@@ -214,6 +214,14 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
     @Override
     public boolean isBreedingItem(ItemStack stack) {
         return stack.getItem() == Items.BREAD;
+    }
+
+    /**
+     * 1.12 {@code EntityTameable} blocks wild breeding. 1.16 raccoons breed on bread without being tamed.
+     */
+    @Override
+    public boolean canMateWith(EntityAnimal otherAnimal) {
+        return otherAnimal != this && otherAnimal.getClass() == this.getClass() && this.isInLove() && otherAnimal.isInLove();
     }
 
     public static boolean isRaccoonFood(ItemStack stack) {
@@ -404,7 +412,8 @@ public class EntityRaccoon extends EntityTameable implements IAnimatedEntity, IF
         if (isWashing()) {
             BlockPos washingPos = getWashPos();
             if (washingPos != null) {
-                if (this.getDistanceSq(washingPos.getX() + 0.5D, washingPos.getY() + 0.5D, washingPos.getZ() + 0.5D) < 3) {
+                // Shore is one block beside (and sometimes one block above) the water tile.
+                if (this.getDistanceSq(washingPos.getX() + 0.5D, washingPos.getY() + 0.5D, washingPos.getZ() + 0.5D) < 8) {
                     for (int j = 0; (float) j < 4; ++j) {
                         double d2 = this.rand.nextDouble();
                         double d3 = this.rand.nextDouble();

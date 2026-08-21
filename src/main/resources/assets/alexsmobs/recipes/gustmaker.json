@@ -10,7 +10,8 @@
       "item": "alexsmobs:guster_eye"
     },
     "S": {
-      "item": "minecraft:smooth_sandstone"
+      "item": "minecraft:sandstone",
+      "data": 2
     },
     "R": {
       "item": "minecraft:redstone"

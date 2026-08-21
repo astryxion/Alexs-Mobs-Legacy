@@ -6,12 +6,16 @@ import com.github.alexthe666.alexsmobs.entity.*;
 import com.github.alexthe666.alexsmobs.item.AMItemRegistry;
 import com.github.alexthe666.alexsmobs.item.ItemTabIcon;
 import com.github.alexthe666.citadel.client.gui.GuiBasicBook;
+import com.github.alexthe666.citadel.client.gui.GuiShaderCompat;
 import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntityItemStackRenderer;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -182,15 +186,16 @@ public class AMItemstackRenderer extends TileEntityItemStackRenderer {
                     }
                 }
                 String index = ItemTabIcon.getCustomDisplayEntityString(itemStackIn);
-                if (this.renderedEntites.get(index) == null && displayEntry != null) {
-                    Entity entity = createEntity(displayEntry);
-                    if (entity instanceof EntityBlobfish) {
-                        ((EntityBlobfish) entity).setDepressurized(true);
+                    if (this.renderedEntites.get(index) == null && displayEntry != null) {
+                        Entity entity = createEntity(displayEntry);
+                        if (entity instanceof EntityBlobfish) {
+                            ((EntityBlobfish) entity).setDepressurized(true);
+                        }
+                        this.renderedEntites.put(index, entity);
+                        fakeEntity = entity;
+                    } else {
+                        fakeEntity = this.renderedEntites.get(index);
                     }
-                    fakeEntity = this.renderedEntites.put(index, entity);
-                } else {
-                    fakeEntity = this.renderedEntites.get(index);
-                }
             } else {
                 MobIconEntry mobIcon = MOB_ICONS.get(entityIndex);
                 displayEntry = mobIcon.entry;
@@ -202,7 +207,8 @@ public class AMItemstackRenderer extends TileEntityItemStackRenderer {
                         if (entity instanceof EntityBlobfish) {
                             ((EntityBlobfish) entity).setDepressurized(true);
                         }
-                        fakeEntity = this.renderedEntites.put(key, entity);
+                        this.renderedEntites.put(key, entity);
+                        fakeEntity = entity;
                     } else {
                         fakeEntity = this.renderedEntites.get(key);
                     }
@@ -248,14 +254,80 @@ public class AMItemstackRenderer extends TileEntityItemStackRenderer {
                 GlStateManager.translate(0.5F, 0.0F, 0.0F);
                 GlStateManager.rotate(180.0F, 1.0F, 0.0F, 0.0F);
                 GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
-                float mouseX = 0.0F;
-                float mouseY = 0.0F;
-                GuiBasicBook.drawEntityOnScreen(0, 0, scale, true, 0.0, -45.0, 0.0, mouseX, mouseY, fakeEntity);
+                renderTabIconEntity(scale, fakeEntity);
                 GlStateManager.popMatrix();
             }
             if (fakeEntity instanceof EntityLaviathan) {
                 RenderLaviathan.renderWithoutShaking = false;
             }
+        }
+    }
+
+    /**
+     * 1.16 tab-icon preview scales in item space. {@link GuiBasicBook#drawEntityOnScreen} uses inventory
+     * pixel coords (z=50, scale ~30) and shrinks the dictionary showcase to a speck.
+     */
+    private static void renderTabIconEntity(float scale, Entity entity) {
+        Minecraft mc = Minecraft.getMinecraft();
+        int tick = mc.player != null ? mc.player.ticksExisted : ticksExisted;
+        entity.ticksExisted = tick;
+        EntityLivingBase living = entity instanceof EntityLivingBase ? (EntityLivingBase) entity : null;
+        float prevYaw = entity.rotationYaw;
+        float prevPitch = entity.rotationPitch;
+        float prevOffset = 0.0F;
+        float prevHead = 0.0F;
+        if (living != null) {
+            prevOffset = living.renderYawOffset;
+            prevHead = living.rotationYawHead;
+            living.renderYawOffset = 0.0F;
+            living.rotationYawHead = 0.0F;
+            living.prevRenderYawOffset = 0.0F;
+            living.prevRotationYawHead = 0.0F;
+        }
+        entity.rotationYaw = 0.0F;
+        entity.rotationPitch = 0.0F;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.scale(scale, scale, scale);
+        GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+        GlStateManager.rotate(-45.0F, 0.0F, 1.0F, 0.0F);
+        RenderHelper.enableStandardItemLighting();
+        double prevX = entity.posX;
+        double prevY = entity.posY;
+        double prevZ = entity.posZ;
+        double prevPrevX = entity.prevPosX;
+        double prevPrevY = entity.prevPosY;
+        double prevPrevZ = entity.prevPosZ;
+        if (mc.player != null) {
+            entity.posX = entity.prevPosX = mc.player.posX;
+            entity.posY = entity.prevPosY = mc.player.posY;
+            entity.posZ = entity.prevPosZ = mc.player.posZ;
+        }
+        RenderManager renderManager = mc.getRenderManager();
+        float prevViewY = renderManager.playerViewY;
+        renderManager.playerViewY = 180.0F;
+        renderManager.setRenderShadow(false);
+        try {
+            GuiShaderCompat.beginGuiEntity();
+            renderManager.renderEntity(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, false);
+        } finally {
+            renderManager.setRenderShadow(true);
+            renderManager.playerViewY = prevViewY;
+            entity.posX = prevX;
+            entity.posY = prevY;
+            entity.posZ = prevZ;
+            entity.prevPosX = prevPrevX;
+            entity.prevPosY = prevPrevY;
+            entity.prevPosZ = prevPrevZ;
+            entity.rotationYaw = prevYaw;
+            entity.rotationPitch = prevPitch;
+            if (living != null) {
+                living.renderYawOffset = prevOffset;
+                living.rotationYawHead = prevHead;
+            }
+            GuiShaderCompat.endGuiEntity();
+            GlStateManager.popMatrix();
+            GuiBasicBook.restoreGuiLighting();
         }
     }
 }

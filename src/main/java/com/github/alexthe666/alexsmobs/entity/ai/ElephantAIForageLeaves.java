@@ -17,9 +17,13 @@ import javax.annotation.Nullable;
 import java.util.Random;
 
 /**
- * Forge 1.12.2 port of 1.16 {@code ElephantAIForageLeaves} / {@code MoveToBlockGoal}.
+ * Forge 1.12.2 port of 1.16 {@code ElephantAIForageLeaves} / {@code MoveToBlockGoal},
+ * with 1.20.1 path-recalc cooldown so A* is not invoked every tick.
  */
 public class ElephantAIForageLeaves extends EntityAIBase {
+
+    private static final int MAX_TIMEOUT = 1200;
+    private static final int MAX_FAILED_PATHS = 3;
 
     private final EntityElephant elephant;
     private final double movementSpeed;
@@ -29,6 +33,8 @@ public class ElephantAIForageLeaves extends EntityAIBase {
     private boolean isAboveDestinationBear;
     private int timeoutCounter;
     private int runDelay;
+    private int moveCooldown;
+    private int failedPathAttempts;
 
     public ElephantAIForageLeaves(EntityElephant elephant) {
         this.elephant = elephant;
@@ -58,6 +64,8 @@ public class ElephantAIForageLeaves extends EntityAIBase {
             if (shouldMoveTo(elephant.world, p)) {
                 destinationBlock = p;
                 timeoutCounter = 0;
+                failedPathAttempts = 0;
+                moveCooldown = 0;
                 return true;
             }
         }
@@ -66,7 +74,9 @@ public class ElephantAIForageLeaves extends EntityAIBase {
 
     @Override
     public boolean shouldContinueExecuting() {
-        return destinationBlock != null;
+        return destinationBlock != null
+                && timeoutCounter <= MAX_TIMEOUT
+                && shouldMoveTo(elephant.world, destinationBlock);
     }
 
     @Override
@@ -74,6 +84,8 @@ public class ElephantAIForageLeaves extends EntityAIBase {
         idleAtLeavesTime = 0;
         destinationBlock = null;
         isAboveDestinationBear = false;
+        failedPathAttempts = 0;
+        elephant.getNavigator().clearPath();
     }
 
     public double getTargetDistanceSq() {
@@ -81,7 +93,7 @@ public class ElephantAIForageLeaves extends EntityAIBase {
     }
 
     private boolean isWithinXZDist(BlockPos blockpos, Vec3d positionVec, double distance) {
-        return blockpos.distanceSq(positionVec.x, positionVec.y, positionVec.z) < distance * distance;
+        return blockpos.distanceSq(positionVec.x, blockpos.getY(), positionVec.z) < distance * distance;
     }
 
     protected boolean getIsAboveDestination() {
@@ -93,14 +105,29 @@ public class ElephantAIForageLeaves extends EntityAIBase {
         if (destinationBlock == null) {
             return;
         }
+        if (moveCooldown > 0) {
+            --moveCooldown;
+        }
         if (!isWithinXZDist(destinationBlock, new Vec3d(elephant.posX, elephant.posY, elephant.posZ), this.getTargetDistanceSq())) {
             this.isAboveDestinationBear = false;
             ++this.timeoutCounter;
-            elephant.getNavigator().tryMoveToXYZ(
-                    (double) ((float) destinationBlock.getX()) + 0.5D,
-                    destinationBlock.getY(),
-                    (double) ((float) destinationBlock.getZ()) + 0.5D,
-                    this.movementSpeed);
+            if (this.moveCooldown == 0) {
+                this.moveCooldown = 30 + elephant.getRNG().nextInt(50);
+                boolean foundPath = elephant.getNavigator().tryMoveToXYZ(
+                        (double) ((float) destinationBlock.getX()) + 0.5D,
+                        destinationBlock.getY(),
+                        (double) ((float) destinationBlock.getZ()) + 0.5D,
+                        this.movementSpeed);
+                if (!foundPath) {
+                    ++this.failedPathAttempts;
+                    if (this.failedPathAttempts >= MAX_FAILED_PATHS) {
+                        this.giveUp();
+                        return;
+                    }
+                } else {
+                    this.failedPathAttempts = 0;
+                }
+            }
         } else {
             this.isAboveDestinationBear = true;
             --this.timeoutCounter;
@@ -129,6 +156,11 @@ public class ElephantAIForageLeaves extends EntityAIBase {
                 ++this.idleAtLeavesTime;
             }
         }
+    }
+
+    private void giveUp() {
+        this.runDelay = 100 + elephant.getRNG().nextInt(200);
+        this.destinationBlock = null;
     }
 
     private void breakLeaves() {

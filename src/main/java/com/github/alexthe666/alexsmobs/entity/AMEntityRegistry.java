@@ -13,12 +13,15 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.google.common.base.Predicates;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
@@ -149,8 +152,8 @@ public class AMEntityRegistry {
     public static final EntityEntry CACHALOT_ECHO = reg(EntityCachalotEcho.class, "cachalot_echo");
     public static final EntityEntry LEAFCUTTER_ANT = reg(EntityLeafcutterAnt.class, "leafcutter_ant");
     public static final EntityEntry ENDERIOPHAGE = reg(EntityEnderiophage.class, "enderiophage", 80, 1, false);
-    public static final EntityEntry ENDERIOPHAGE_ROCKET = reg(EntityEnderiophageRocket.class, "enderiophage_rocket");
-    public static final EntityEntry BALD_EAGLE = reg(EntityBaldEagle.class, "bald_eagle", 224, 1, false);
+    public static final EntityEntry ENDERIOPHAGE_ROCKET = reg(EntityEnderiophageRocket.class, "enderiophage_rocket", 64, 10, true);
+    public static final EntityEntry BALD_EAGLE = reg(EntityBaldEagle.class, "bald_eagle", 224, 1, true);
     public static final EntityEntry TIGER = reg(EntityTiger.class, "tiger");
     public static final EntityEntry TARANTULA_HAWK = reg(EntityTarantulaHawk.class, "tarantula_hawk");
     public static final EntityEntry VOID_WORM = reg(EntityVoidWorm.class, "void_worm", 320, 1, true);
@@ -247,7 +250,7 @@ public class AMEntityRegistry {
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityElephant.class, EntityLiving.SpawnPlacementType.ON_GROUND);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntitySoulVulture.class, EnumHelper.addSpawnPlacementType("AMALEX_SVULTURE", SpawnPredicateLogic.soulVulture()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntitySnowLeopard.class, EnumHelper.addSpawnPlacementType("AMALEX_SNOW_LEOPARD", SpawnPredicateLogic.snowLeopard()));
-        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntitySpectre.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
+        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntitySpectre.class, EnumHelper.addSpawnPlacementType("AMALEX_SPECTRE", SpawnPredicateLogic.spectre()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityCrow.class, EnumHelper.addSpawnPlacementType("AMALEX_CROW", SpawnPredicateLogic.crow()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityAlligatorSnappingTurtle.class, EnumHelper.addSpawnPlacementType("AMALEX_ASTURTLE", SpawnPredicateLogic.alligatorSnappingTurtle()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityMungus.class, EnumHelper.addSpawnPlacementType("AMALEX_MUNGUS", SpawnPredicateLogic.mungus()));
@@ -263,7 +266,7 @@ public class AMEntityRegistry {
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityKangaroo.class, EnumHelper.addSpawnPlacementType("AMALEX_KANGAROO", SpawnPredicateLogic.kangaroo()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityCachalotWhale.class, AM_IN_WATER_CWHALE);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityLeafcutterAnt.class, EntityLiving.SpawnPlacementType.ON_GROUND);
-        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityEnderiophage.class, AM_NO_RESTRICTIONS_ALWAYS_TRUE);
+        net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityEnderiophage.class, EnumHelper.addSpawnPlacementType("AMALEX_ENDERIOPHAGE", SpawnPredicateLogic.enderiophage()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityBaldEagle.class, EnumHelper.addSpawnPlacementType("AMALEX_EAGLE", SpawnPredicateLogic.baldEagle()));
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityTiger.class, EntityLiving.SpawnPlacementType.ON_GROUND);
         net.minecraft.entity.EntitySpawnPlacementRegistry.setPlacementType(EntityTarantulaHawk.class, EnumHelper.addSpawnPlacementType("AMALEX_THAWK", SpawnPredicateLogic.tarantulaHawk()));
@@ -331,6 +334,169 @@ public class AMEntityRegistry {
         return rolls <= 0 || random.nextInt(rolls) == 0;
     }
 
+    /** EntityLiving ground spawn without {@link net.minecraft.entity.passive.EntityAnimal}'s grass requirement. */
+    public static boolean canLandSpawnWithoutGrass(EntityLiving entity) {
+        BlockPos down = new BlockPos(entity).down();
+        IBlockState state = entity.world.getBlockState(down);
+        return state.getBlock().canCreatureSpawn(state, entity.world, down, EntityLiving.SpawnPlacementType.ON_GROUND);
+    }
+
+    /**
+     * 1.16 registers flies/cockroaches/jerboas/rain frogs/cosmic cod as {@code AMBIENT}. 1.12 has no
+     * matching Java type, so they stay {@link net.minecraft.entity.passive.EntityAnimal} and never fill
+     * vanilla's {@link EnumCreatureType#AMBIENT} cap of 15.
+     */
+    public static boolean isAmbientCategoryMob(Entity entity) {
+        return entity instanceof EntityFly
+                || entity instanceof EntityCockroach
+                || entity instanceof EntityJerboa
+                || entity instanceof EntityRainFrog
+                || entity instanceof EntityCosmicCod;
+    }
+
+    /**
+     * CREATURE birds whose pack size is below the herd threshold ({@code max < 6}). Without this,
+     * 1.12 world-gen dumps a full group in every lucky chunk (blue jays 2–4, toucans 5).
+     * Crows are capped separately — they otherwise fill every forest/plains chunk.
+     */
+    public static boolean isFlockBird(Entity entity) {
+        return entity instanceof EntityHummingbird
+                || entity instanceof EntityBlueJay
+                || entity instanceof EntityToucan
+                || entity instanceof EntitySeagull;
+    }
+
+    /**
+     * 1.16 spectre / endergrade / enderiophage negate {@code minecraft:the_end} (central island).
+     * 1.12 has only {@code minecraft:sky}, so outer islands are anything ~1000+ from 0,0.
+     */
+    public static boolean isOuterEnd(World world, BlockPos pos) {
+        if (world == null || pos == null || world.provider.getDimension() != 1) {
+            return false;
+        }
+        double dx = pos.getX();
+        double dz = pos.getZ();
+        return dx * dx + dz * dz >= 1000.0D * 1000.0D;
+    }
+
+    /**
+     * 1.12 End spawn Y is random in the column, including void between islands.
+     * Require a full cube underfoot (end stone), not chorus / air.
+     */
+    public static boolean isSolidSpawnFloor(World world, BlockPos pos) {
+        if (world == null || pos == null) {
+            return false;
+        }
+        BlockPos down = pos.down();
+        if (down.getY() < 1) {
+            return false;
+        }
+        return world.getBlockState(down).isNormalCube();
+    }
+
+    public static boolean isInsideEndCity(World world, BlockPos pos) {
+        if (world == null || pos == null || world.provider.getDimension() != 1) {
+            return false;
+        }
+        try {
+            if (world.getChunkProvider() instanceof net.minecraft.world.gen.ChunkProviderServer) {
+                net.minecraft.world.gen.ChunkProviderServer chunks =
+                        (net.minecraft.world.gen.ChunkProviderServer) world.getChunkProvider();
+                return chunks.chunkGenerator.isInsideStructure(world, "EndCity", pos);
+            }
+        } catch (Exception e) {
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * 1.12 world-gen ignores {@link EntityLiving#getMaxSpawnedInChunk()}. Large groups (bison 6–10)
+     * therefore dump a full herd in every lucky chunk. Cap one herd in a local area; do not use a
+     * tiny radius or every AM mob (that emptied deserts of roadrunners).
+     * <p>
+     * Flies are {@code AMBIENT} so they do not steal savanna CREATURE slots, but 1.12 never counts
+     * them toward vanilla's bat cap of 15. A local pack cap plus a lower loaded cap keeps them
+     * from filling the screen. Flock birds use a wider radius so jungle hummingbirds leave room
+     * for gorillas / tigers / toucans. The End creature list is almost empty, so spectres /
+     * enderiophages / endergrades also need explicit caps.
+     */
+    public static boolean shouldBlockNaturalSpawnDensity(World world, EntityLiving entity) {
+        if (world == null || entity == null || world.isRemote) {
+            return false;
+        }
+        if (entity.getClass().getName().indexOf("com.github.alexthe666.alexsmobs.entity.") < 0) {
+            return false;
+        }
+        if (entity instanceof EntityFly) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 48.0D, entity.posY - 16.0D, entity.posZ - 48.0D,
+                    entity.posX + 48.0D, entity.posY + 16.0D, entity.posZ + 48.0D);
+            if (world.getEntitiesWithinAABB(EntityFly.class, local).size() >= 3) {
+                return true;
+            }
+            return world.countEntities(EntityFly.class) >= 8;
+        }
+        if (entity instanceof EntityCrow) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 64.0D, entity.posY - 16.0D, entity.posZ - 64.0D,
+                    entity.posX + 64.0D, entity.posY + 16.0D, entity.posZ + 64.0D);
+            return world.getEntitiesWithinAABB(EntityCrow.class, local).size() >= 4;
+        }
+        if (entity instanceof EntityCosmicCod) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 48.0D, entity.posY - 32.0D, entity.posZ - 48.0D,
+                    entity.posX + 48.0D, entity.posY + 32.0D, entity.posZ + 48.0D);
+            if (world.getEntitiesWithinAABB(EntityCosmicCod.class, local).size() >= 8) {
+                return true;
+            }
+            return world.countEntities(EntityCosmicCod.class) >= 10;
+        }
+        if (entity instanceof EntitySpectre) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 64.0D, entity.posY - 32.0D, entity.posZ - 64.0D,
+                    entity.posX + 64.0D, entity.posY + 32.0D, entity.posZ + 64.0D);
+            if (world.getEntitiesWithinAABB(EntitySpectre.class, local).size() >= 3) {
+                return true;
+            }
+            return world.countEntities(EntitySpectre.class) >= 6;
+        }
+        if (entity instanceof EntityEnderiophage) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 48.0D, entity.posY - 24.0D, entity.posZ - 48.0D,
+                    entity.posX + 48.0D, entity.posY + 24.0D, entity.posZ + 48.0D);
+            if (world.getEntitiesWithinAABB(EntityEnderiophage.class, local).size() >= 2) {
+                return true;
+            }
+            return world.countEntities(EntityEnderiophage.class) >= 6;
+        }
+        if (entity instanceof EntityEndergrade) {
+            AxisAlignedBB local = new AxisAlignedBB(
+                    entity.posX - 48.0D, entity.posY - 16.0D, entity.posZ - 48.0D,
+                    entity.posX + 48.0D, entity.posY + 16.0D, entity.posZ + 48.0D);
+            if (world.getEntitiesWithinAABB(EntityEndergrade.class, local).size() >= 6) {
+                return true;
+            }
+            return world.countEntities(EntityEndergrade.class) >= 12;
+        }
+        if (isAmbientCategoryMob(entity)) {
+            return world.countEntities(entity.getClass()) >= EnumCreatureType.AMBIENT.getMaxNumberOfCreature();
+        }
+        boolean flockBird = isFlockBird(entity);
+        int maxInArea = entity.getMaxSpawnedInChunk();
+        if (!flockBird && maxInArea < 6) {
+            return false;
+        }
+        if (maxInArea < 1) {
+            maxInArea = 4;
+        }
+        double range = flockBird ? 16.0D * maxInArea : 10.0D * maxInArea;
+        AxisAlignedBB box = new AxisAlignedBB(
+                entity.posX - range, entity.posY - 16.0D, entity.posZ - range,
+                entity.posX + range, entity.posY + 16.0D, entity.posZ + range);
+        return world.getEntitiesWithinAABB(entity.getClass(), box).size() >= maxInArea;
+    }
+
     /** Water-column spawns registered via {@link #inWater} — blocked from natural spawn on superflat worlds. */
     private static final Set<Class<? extends Entity>> AQUATIC_WATER_SPAWN = new HashSet<>();
 
@@ -350,7 +516,8 @@ public class AMEntityRegistry {
                 EntityCombJelly.class,
                 EntityDevilsHolePupfish.class,
                 EntityCatfish.class,
-                EntityTerrapin.class);
+                EntityTerrapin.class,
+                EntityStradpole.class);
     }
 
     public static boolean isSuperflatWorld(World world) {
@@ -459,10 +626,7 @@ public class AMEntityRegistry {
                 if (!EntityLiving.SpawnPlacementType.ON_GROUND.canSpawnAt(w, pos)) {
                     return false;
                 }
-                Block down = w.getBlockState(pos.down()).getBlock();
-                boolean sandOrDirt = down == Blocks.SAND || down == Blocks.DIRT || down == Blocks.GRASS;
-                return pos.getY() > 63 && w.getLight(pos) > 8
-                        && w.getLightFor(EnumSkyBlock.BLOCK, pos) == 0 && sandOrDirt;
+                return EntityFly.canFlySpawnAt(w, pos, w.rand, false);
             };
         }
 
@@ -531,7 +695,22 @@ public class AMEntityRegistry {
         private static BiPredicate<IBlockAccess, BlockPos> endergrade() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                return w != null && !w.getBlockState(pos.down()).getBlock().isAir(w.getBlockState(pos.down()), w, pos.down());
+                return w != null && isOuterEnd(w, pos)
+                        && !w.getBlockState(pos.down()).getBlock().isAir(w.getBlockState(pos.down()), w, pos.down());
+            };
+        }
+
+        private static BiPredicate<IBlockAccess, BlockPos> spectre() {
+            return (wa, pos) -> {
+                World w = castWorld(wa);
+                return w != null && isOuterEnd(w, pos) && isSolidSpawnFloor(w, pos);
+            };
+        }
+
+        private static BiPredicate<IBlockAccess, BlockPos> enderiophage() {
+            return (wa, pos) -> {
+                World w = castWorld(wa);
+                return w != null && isOuterEnd(w, pos) && isSolidSpawnFloor(w, pos);
             };
         }
 
@@ -604,7 +783,13 @@ public class AMEntityRegistry {
         }
 
         private static BiPredicate<IBlockAccess, BlockPos> mimicube() {
-            return (wa, pos) -> EntityLiving.SpawnPlacementType.ON_GROUND.canSpawnAt(castWorld(wa), pos);
+            return (wa, pos) -> {
+                World w = castWorld(wa);
+                if (w == null || !EntityLiving.SpawnPlacementType.ON_GROUND.canSpawnAt(w, pos)) {
+                    return false;
+                }
+                return !AMConfig.mimicubeSpawnInEndCity || isInsideEndCity(w, pos);
+            };
         }
 
         private static BiPredicate<IBlockAccess, BlockPos> blobfish() {
@@ -842,7 +1027,7 @@ public class AMEntityRegistry {
                 }
                 Block block = w.getBlockState(pos.down()).getBlock();
                 boolean validGround = block == Blocks.STONE || block == Blocks.DIRT || block == Blocks.GRASS
-                        || block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
+                        || block == Blocks.GRAVEL || block == Blocks.SNOW || block == Blocks.SNOW_LAYER;
                 return validGround && w.getLight(pos) > 8;
             };
         }
@@ -900,20 +1085,14 @@ public class AMEntityRegistry {
         private static BiPredicate<IBlockAccess, BlockPos> triops() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                if (w == null || !EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)) {
-                    return false;
-                }
-                return com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes.triops(w.getBiome(pos));
+                return w != null && EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos);
             };
         }
 
         private static BiPredicate<IBlockAccess, BlockPos> terrapin() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                if (w == null || !EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)) {
-                    return false;
-                }
-                return com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes.terrapin(w.getBiome(pos));
+                return w != null && EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos);
             };
         }
 
@@ -927,10 +1106,7 @@ public class AMEntityRegistry {
         private static BiPredicate<IBlockAccess, BlockPos> combJelly() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                if (w == null || !EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)) {
-                    return false;
-                }
-                return com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes.combJelly(w.getBiome(pos))
+                return w != null && EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)
                         && EntityCombJelly.canCombJellySpawn(w, pos, w.rand);
             };
         }
@@ -938,10 +1114,7 @@ public class AMEntityRegistry {
         private static BiPredicate<IBlockAccess, BlockPos> flyingFish() {
             return (wa, pos) -> {
                 World w = castWorld(wa);
-                if (w == null || !EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos)) {
-                    return false;
-                }
-                return com.github.alexthe666.alexsmobs.config.AMNativeSpawnBiomes.flyingFish(w.getBiome(pos));
+                return w != null && EntityLiving.SpawnPlacementType.IN_WATER.canSpawnAt(w, pos);
             };
         }
 

@@ -339,7 +339,7 @@ public class EntityMantisShrimp extends EntityTameable implements ISemiAquatic, 
         if (super.processInteract(player, hand)) {
             return true;
         }
-        if (!isTamed() && item == Items.FISH) {
+        if (!isTamed() && (item == Items.FISH || item == AMItemRegistry.LOBSTER_TAIL || item == AMItemRegistry.COOKED_LOBSTER_TAIL)) {
             consumeItemFromStack(player, itemstack);
             this.playSound(SoundEvents.ENTITY_GENERIC_EAT, this.getSoundVolume(), this.getSoundPitch());
             fishFeedings++;
