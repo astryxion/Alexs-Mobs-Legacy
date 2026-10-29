@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.github.alexthe666.citadel.mixin",
+  "package": "com.github.alexthe668.citadel.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "citadel.refmap.json",
   "mixins": [

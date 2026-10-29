@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "alexsmobs:spawn_egg_crocodile"
+      "item": "minecraft:spawn_egg",
+      "nbt": "{EntityTag:{id:\"alexsmobs:crocodile\"}}"
     },
     "title": {
       "translate": "advancements.alexsmobs.breed_crocodile.title"

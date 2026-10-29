@@ -2120,5 +2120,33 @@
       {"name": "alexsmobs:giant_squid_tentacle_4"}
     ],
     "subtitle": "alexsmobs.sound.subtitle.giant_squid_tentacle"
+  },
+  "turtle_egg_break": {
+    "category": "block",
+    "sounds": [
+      {"name": "alexsmobs:turtle/egg_break1"},
+      {"name": "alexsmobs:turtle/egg_break2"}
+    ],
+    "subtitle": "subtitles.entity.turtle.egg_break"
+  },
+  "turtle_egg_crack": {
+    "category": "block",
+    "sounds": [
+      {"name": "alexsmobs:turtle/egg_crack1"},
+      {"name": "alexsmobs:turtle/egg_crack2"},
+      {"name": "alexsmobs:turtle/egg_crack3"},
+      {"name": "alexsmobs:turtle/egg_crack4"},
+      {"name": "alexsmobs:turtle/egg_crack5"}
+    ],
+    "subtitle": "subtitles.entity.turtle.egg_crack"
+  },
+  "turtle_egg_hatch": {
+    "category": "block",
+    "sounds": [
+      {"name": "alexsmobs:turtle/egg_hatch1"},
+      {"name": "alexsmobs:turtle/egg_hatch2"},
+      {"name": "alexsmobs:turtle/egg_hatch3"}
+    ],
+    "subtitle": "subtitles.entity.turtle.egg_hatch"
   }
 }

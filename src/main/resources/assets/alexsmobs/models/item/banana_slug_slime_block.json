@@ -1,5 +1,5 @@
 {
-  "parent": "alexsmobs:block/banana_slug_slime_block",
+  "parent": "alexsmobs:block/banana_slug_slime_block_inventory",
   "display": {
     "gui": {
       "rotation": [30, 225, 0],

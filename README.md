@@ -6,7 +6,7 @@ New, original, engaging, and aesthetic mobs for Minecraft.
 
 **Author:** Astryxion
 
-**Credits:** Astryxion, AlexThe666
+**Credits:** Astryxion, AlexThe668
 
 ## License
 

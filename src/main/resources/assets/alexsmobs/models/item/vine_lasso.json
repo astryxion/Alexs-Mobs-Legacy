@@ -6,6 +6,12 @@
         "in_hand": 1
       },
       "model": "alexsmobs:item/vine_lasso_hand"
+    },
+    {
+      "predicate": {
+        "using": 1
+      },
+      "model": "alexsmobs:item/vine_lasso_using"
     }
   ]
 }

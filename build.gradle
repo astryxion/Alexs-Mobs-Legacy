@@ -13,8 +13,8 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.6.0'
-group = 'com.github.alexthe666'
+version = '1.12.2-1.7.0'
+group = 'com.github.alexthe668'
 archivesBaseName = 'alexsmobs'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -47,6 +47,8 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            // Default forceExit calls System.exit in the Gradle process when the game closes, so every run looks failed.
+            forceExit = false
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -55,10 +57,11 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // HEI/JEI needs widened TextureMap access in FG3 dev (see AMLoadingPlugin)
-            property 'fml.coreMods.load', 'com.github.alexthe666.alexsmobs.asm.AMLoadingPlugin'
+            property 'fml.coreMods.load', 'com.github.alexthe668.alexsmobs.asm.AMLoadingPlugin'
         }
 
         server {
+            forceExit = false
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -109,16 +112,21 @@ tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEac
     dependsOn ':citadel:build'
 }
 
+// A plain "runClient" runs that task in every project. Citadel's copy would open a second game after this one closes.
+project(':citadel').tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+    enabled = false
+}
+
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
             "Specification-Title": "alexsmobs",
-            "Specification-Vendor": "alexthe666",
+            "Specification-Vendor": "alexthe668",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"alexthe666",
+            "Implementation-Vendor" :"alexthe668",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

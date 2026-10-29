@@ -1,0 +1,208 @@
+{
+  "variants": {
+    "eggs=1,hatch=0": [
+      {
+        "model": "alexsmobs:caiman_egg"
+      },
+      {
+        "model": "alexsmobs:caiman_egg",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:caiman_egg",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:caiman_egg",
+        "y": 270
+      }
+    ],
+    "eggs=1,hatch=1": [
+      {
+        "model": "alexsmobs:slightly_cracked_caiman_egg"
+      },
+      {
+        "model": "alexsmobs:slightly_cracked_caiman_egg",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:slightly_cracked_caiman_egg",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:slightly_cracked_caiman_egg",
+        "y": 270
+      }
+    ],
+    "eggs=1,hatch=2": [
+      {
+        "model": "alexsmobs:very_cracked_caiman_egg"
+      },
+      {
+        "model": "alexsmobs:very_cracked_caiman_egg",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:very_cracked_caiman_egg",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:very_cracked_caiman_egg",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=0": [
+      {
+        "model": "alexsmobs:two_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:two_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:two_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:two_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=1": [
+      {
+        "model": "alexsmobs:two_slightly_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:two_slightly_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:two_slightly_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:two_slightly_cracked_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=2,hatch=2": [
+      {
+        "model": "alexsmobs:two_very_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:two_very_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:two_very_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:two_very_cracked_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=0": [
+      {
+        "model": "alexsmobs:three_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:three_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:three_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:three_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=1": [
+      {
+        "model": "alexsmobs:three_slightly_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:three_slightly_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:three_slightly_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:three_slightly_cracked_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=3,hatch=2": [
+      {
+        "model": "alexsmobs:three_very_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:three_very_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:three_very_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:three_very_cracked_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=0": [
+      {
+        "model": "alexsmobs:four_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:four_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:four_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:four_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=1": [
+      {
+        "model": "alexsmobs:four_slightly_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:four_slightly_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:four_slightly_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:four_slightly_cracked_caiman_eggs",
+        "y": 270
+      }
+    ],
+    "eggs=4,hatch=2": [
+      {
+        "model": "alexsmobs:four_very_cracked_caiman_eggs"
+      },
+      {
+        "model": "alexsmobs:four_very_cracked_caiman_eggs",
+        "y": 90
+      },
+      {
+        "model": "alexsmobs:four_very_cracked_caiman_eggs",
+        "y": 180
+      },
+      {
+        "model": "alexsmobs:four_very_cracked_caiman_eggs",
+        "y": 270
+      }
+    ]
+  }
+}

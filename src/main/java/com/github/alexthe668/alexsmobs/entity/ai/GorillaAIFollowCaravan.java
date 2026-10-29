@@ -1,0 +1,147 @@
+package com.github.alexthe668.alexsmobs.entity.ai;
+
+import com.github.alexthe668.alexsmobs.AlexsMobs;
+import com.github.alexthe668.alexsmobs.entity.EntityGorilla;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.util.math.Vec3d;
+
+import java.util.List;
+
+/**
+ * Forge 1.12.2 port of 1.16 {@code GorillaAIFollowCaravan}.
+ */
+public class GorillaAIFollowCaravan extends EntityAIBase {
+
+    public final EntityGorilla gorilla;
+    private double speedModifier;
+    private int distCheckCounter;
+    private int pathCooldown;
+
+    public GorillaAIFollowCaravan(EntityGorilla llamaIn, double speedModifierIn) {
+        this.gorilla = llamaIn;
+        this.speedModifier = speedModifierIn;
+        this.setMutexBits(1);
+    }
+
+    @Override
+    public boolean shouldExecute() {
+        if (!this.gorilla.isSilverback() && !this.gorilla.inCaravan() && !gorilla.isSitting()) {
+            double dist = 15D;
+            List<EntityGorilla> list = gorilla.world.getEntitiesWithinAABB(EntityGorilla.class, gorilla.getEntityBoundingBox().grow(dist, dist / 2, dist));
+            EntityGorilla head = null;
+            double d0 = Double.MAX_VALUE;
+
+            for (Entity entity : list) {
+                EntityGorilla gorilla1 = (EntityGorilla) entity;
+                if (gorilla1.inCaravan() && !gorilla1.hasCaravanTrail()) {
+                    double d1 = this.gorilla.getDistanceSq(gorilla1);
+                    if (d1 <= d0) {
+                        d0 = d1;
+                        head = gorilla1;
+                    }
+                }
+            }
+
+            if (head == null) {
+                for (Entity entity1 : list) {
+                    EntityGorilla llamaentity2 = (EntityGorilla) entity1;
+                    if (llamaentity2.isSilverback() && !llamaentity2.hasCaravanTrail()) {
+                        double d2 = this.gorilla.getDistanceSq(llamaentity2);
+                        if (d2 <= d0) {
+                            d0 = d2;
+                            head = llamaentity2;
+                        }
+                    }
+                }
+            }
+
+            if (head == null) {
+                return false;
+            } else if (d0 < 2.0D) {
+                return false;
+            } else if (!head.isSilverback() && !this.firstIsSilverback(head, 1)) {
+                return false;
+            } else {
+                this.gorilla.joinCaravan(head);
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean shouldContinueExecuting() {
+        if (gorilla.isSitting()) {
+            return false;
+        }
+        if (this.gorilla.inCaravan() && this.gorilla.getCaravanHead() != null && this.gorilla.getCaravanHead().isEntityAlive() && this.firstIsSilverback(this.gorilla, 0)) {
+            double d0 = this.gorilla.getDistanceSq(this.gorilla.getCaravanHead());
+            if (d0 > 676.0D) {
+                if (this.speedModifier <= 1.5D) {
+                    this.speedModifier *= 1.2D;
+                    this.distCheckCounter = 40;
+                    return true;
+                }
+
+                if (this.distCheckCounter == 0) {
+                    return false;
+                }
+            }
+
+            if (this.distCheckCounter > 0) {
+                --this.distCheckCounter;
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void resetTask() {
+        this.gorilla.leaveCaravan();
+        this.speedModifier = 1.5D;
+    }
+
+    @Override
+    public void updateTask() {
+        if (this.gorilla.inCaravan() && !this.gorilla.isSitting()) {
+            EntityGorilla llamaentity = this.gorilla.getCaravanHead();
+            if (llamaentity != null) {
+                double d0 = this.gorilla.getDistance(llamaentity);
+                Vec3d vector3d = (new Vec3d(llamaentity.posX - this.gorilla.posX, llamaentity.posY - this.gorilla.posY, llamaentity.posZ - this.gorilla.posZ)).normalize().scale(Math.max(d0 - 2.0D, 0.0D));
+                if (this.pathCooldown > 0) {
+                    --this.pathCooldown;
+                }
+                if (gorilla.getNavigator().noPath() && this.pathCooldown <= 0) {
+                    try {
+                        boolean foundPath = this.gorilla.getNavigator().tryMoveToXYZ(this.gorilla.posX + vector3d.x, this.gorilla.posY + vector3d.y, this.gorilla.posZ + vector3d.z, this.speedModifier);
+                        this.pathCooldown = foundPath ? 10 : 40;
+                    } catch (NullPointerException e) {
+                        AlexsMobs.LOGGER.warn("gorilla encountered issue following caravan head");
+                        this.pathCooldown = 40;
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean firstIsSilverback(EntityGorilla llama, int depth) {
+        if (depth > 8) {
+            return false;
+        } else if (llama.inCaravan()) {
+            if (llama.getCaravanHead().isSilverback()) {
+                return true;
+            } else {
+                EntityGorilla llamaentity = llama.getCaravanHead();
+                ++depth;
+                return this.firstIsSilverback(llamaentity, depth);
+            }
+        } else {
+            return false;
+        }
+    }
+}

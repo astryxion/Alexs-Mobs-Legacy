@@ -8,8 +8,8 @@
   "elements": [
     {
       "name": "thing",
-      "from": [8, 0, 3],
-      "to": [8, 15, 12],
+      "from": [7.9, 0, 3],
+      "to": [8.1, 15, 12],
       "rotation": {"angle": 0, "axis": "y", "origin": [8, 0, 7]},
       "faces": {
         "north": {"uv": [2.25, 6.5, 2.25, 10.25], "texture": "#0"},
@@ -22,8 +22,8 @@
     },
     {
       "name": "lasso",
-      "from": [1, 15, -4],
-      "to": [15, 15, 12],
+      "from": [1, 14.9, -4],
+      "to": [15, 15.1, 12],
       "rotation": {"angle": 0, "axis": "y", "origin": [8, 15, 11]},
       "faces": {
         "north": {"uv": [4, 4, 7.5, 4], "texture": "#0"},

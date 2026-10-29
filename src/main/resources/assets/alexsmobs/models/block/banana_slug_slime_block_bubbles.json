@@ -1,0 +1,46 @@
+{
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "alexsmobs:blocks/banana_slug_slime_block",
+    "bubble": "alexsmobs:blocks/banana_slug_slime_block"
+  },
+  "elements": [
+    {
+      "from": [8, 5, 9],
+      "to": [14, 11, 15],
+      "faces": {
+        "north": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "east": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "south": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "west": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "up": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "down": {"uv": [0, 0, 6, 6], "texture": "#bubble"}
+      }
+    },
+    {
+      "from": [4, 1, 2],
+      "to": [10, 7, 8],
+      "faces": {
+        "north": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "east": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "south": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "west": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "up": {"uv": [0, 0, 6, 6], "texture": "#bubble"},
+        "down": {"uv": [0, 0, 6, 6], "texture": "#bubble"}
+      }
+    },
+    {
+      "from": [2, 10, 2],
+      "to": [7, 15, 7],
+      "faces": {
+        "north": {"uv": [0, 0, 5, 5], "texture": "#bubble"},
+        "east": {"uv": [0, 0, 5, 5], "texture": "#bubble"},
+        "south": {"uv": [0, 0, 5, 5], "texture": "#bubble"},
+        "west": {"uv": [0, 0, 5, 5], "texture": "#bubble"},
+        "up": {"uv": [0, 0, 5, 5], "texture": "#bubble"},
+        "down": {"uv": [0, 0, 5, 5], "texture": "#bubble"}
+      }
+    }
+  ]
+}
